@@ -1,5 +1,41 @@
+# dependências
+/node_modules
+/.pnp
+.pnp.*
+
+# testes
+/coverage
+/playwright-report
+/test-results
+
+# next.js
+/.next/
+/out/
+/build
+*.tsbuildinfo
+next-env.d.ts
+
+# ambiente
 .env
 .env.*
 !.env.example
-node_modules/
-.next/
+
+# uploads locais (dev)
+/public/uploads
+
+# sistema / editores
+.DS_Store
+Thumbs.db
+.idea
+.vscode/*
+!.vscode/extensions.json
+*.pem
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# vercel
+.vercel

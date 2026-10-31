@@ -6,28 +6,29 @@ Extraído pela API REST do Figma em 2026-10-31. O tema é **escuro apenas**.
 
 ## Cores
 
-| Token | Hex | Uso |
-|---|---|---|
-| `brand/magenta-700` | `#9C0D65` | Pressionado, gradiente |
-| `brand/magenta-500` | `#E51C98` | Ações primárias, destaques |
-| `brand/magenta-400` | `#F0479F` | Hover, gráficos |
-| `brand/pink-300` | `#F5A7D7` | Labels, ícones ativos, preços |
-| `brand/pink-100` | `#FCE4F2` | Texto sobre magenta |
-| `bg/base` | `#0E0A0C` | Fundo da aplicação |
-| `bg/surface` | `#171114` | Cards |
-| `bg/surface-2` | `#211820` | Inputs, listas |
-| `bg/elevated` | `#2A1F27` | Modais, menus |
-| `border/subtle` | `#33252E` | Divisores |
-| `border/strong` | `#4A3843` | Bordas de input |
-| `text/primary` | `#F8EFF4` | Títulos e texto |
-| `text/secondary` | `#BBA7B2` | Texto de apoio |
-| `text/muted` | `#7F6C77` | Placeholders |
-| `feedback/success` | `#3DD598` | Confirmado, receita |
-| `feedback/warning` | `#F5B544` | Pendente |
-| `feedback/error` | `#FF5C7A` | Cancelado, despesa |
-| `feedback/info` | `#8C9BFF` | Informativo |
+| Token               | Hex       | Uso                           |
+| ------------------- | --------- | ----------------------------- |
+| `brand/magenta-700` | `#9C0D65` | Pressionado, gradiente        |
+| `brand/magenta-500` | `#E51C98` | Ações primárias, destaques    |
+| `brand/magenta-400` | `#F0479F` | Hover, gráficos               |
+| `brand/pink-300`    | `#F5A7D7` | Labels, ícones ativos, preços |
+| `brand/pink-100`    | `#FCE4F2` | Texto sobre magenta           |
+| `bg/base`           | `#0E0A0C` | Fundo da aplicação            |
+| `bg/surface`        | `#171114` | Cards                         |
+| `bg/surface-2`      | `#211820` | Inputs, listas                |
+| `bg/elevated`       | `#2A1F27` | Modais, menus                 |
+| `border/subtle`     | `#33252E` | Divisores                     |
+| `border/strong`     | `#4A3843` | Bordas de input               |
+| `text/primary`      | `#F8EFF4` | Títulos e texto               |
+| `text/secondary`    | `#BBA7B2` | Texto de apoio                |
+| `text/muted`        | `#7F6C77` | Placeholders                  |
+| `feedback/success`  | `#3DD598` | Confirmado, receita           |
+| `feedback/warning`  | `#F5B544` | Pendente                      |
+| `feedback/error`    | `#FF5C7A` | Cancelado, despesa            |
+| `feedback/info`     | `#8C9BFF` | Informativo                   |
 
 Gradientes vistos nas telas:
+
 - Botão primário: horizontal `#F0479F → #E51C98` com glow (sombra magenta difusa).
 - Fundo de hero/cabeçalho: radial magenta escuro (`#9C0D65` a ~30%) sobre `bg/base`, saindo do canto superior.
 - Cards de foto placeholder: gradientes entre `#9C0D65`, `#E51C98`, `#F5A7D7` e `bg/surface`.
@@ -36,30 +37,30 @@ Gradientes vistos nas telas:
 
 Famílias: **Montserrat** (Light 300, Regular 400) para marca e títulos display; **DM Sans** (400, 500, 600, 700) para interface.
 
-| Estilo | Fonte | Tamanho / altura | Tracking | Exemplo |
-|---|---|---|---|---|
-| Display/XL | Montserrat Light | 56 / 64 | 6% | LETÍCIA FAGUNDES (hero desktop) |
-| Display/L | Montserrat Light | 34 / 41 | 4% | PORTFÓLIO, MEUS HORÁRIOS, ESCOLHA O SERVIÇO |
-| Display/Label | Montserrat Regular, caixa alta | 12 / 17 | 30% | PASSO 1 DE 3, TRABALHOS RECENTES |
-| Heading/H1 | DM Sans Bold | 28 / 34 | -2% | Agende seu horário |
-| Heading/H2 | DM Sans SemiBold | 22 / 28 | -1% | Escolha seu serviço |
-| Heading/H3 | DM Sans SemiBold | 17 / 22 | 0 | Alongamento em gel |
-| KPI | DM Sans Bold | 32 / 35 | -2% | R$ 4.820 |
-| Body/L | DM Sans Regular | 16 / 24 | 0 | parágrafos |
-| Body/M | DM Sans Regular | 14 / 21 | 0 | texto padrão |
-| Body/M Medium | DM Sans Medium | 14 / 21 | 0 | rótulos de item |
-| Caption | DM Sans Medium, caixa alta | 11 / 15 | 8% | Hoje · 14:30, rótulos de campo |
-| Button | DM Sans SemiBold | 15 / 15 | 1% | Confirmar agendamento |
+| Estilo        | Fonte                          | Tamanho / altura | Tracking | Exemplo                                     |
+| ------------- | ------------------------------ | ---------------- | -------- | ------------------------------------------- |
+| Display/XL    | Montserrat Light               | 56 / 64          | 6%       | LETÍCIA FAGUNDES (hero desktop)             |
+| Display/L     | Montserrat Light               | 34 / 41          | 4%       | PORTFÓLIO, MEUS HORÁRIOS, ESCOLHA O SERVIÇO |
+| Display/Label | Montserrat Regular, caixa alta | 12 / 17          | 30%      | PASSO 1 DE 3, TRABALHOS RECENTES            |
+| Heading/H1    | DM Sans Bold                   | 28 / 34          | -2%      | Agende seu horário                          |
+| Heading/H2    | DM Sans SemiBold               | 22 / 28          | -1%      | Escolha seu serviço                         |
+| Heading/H3    | DM Sans SemiBold               | 17 / 22          | 0        | Alongamento em gel                          |
+| KPI           | DM Sans Bold                   | 32 / 35          | -2%      | R$ 4.820                                    |
+| Body/L        | DM Sans Regular                | 16 / 24          | 0        | parágrafos                                  |
+| Body/M        | DM Sans Regular                | 14 / 21          | 0        | texto padrão                                |
+| Body/M Medium | DM Sans Medium                 | 14 / 21          | 0        | rótulos de item                             |
+| Caption       | DM Sans Medium, caixa alta     | 11 / 15          | 8%       | Hoje · 14:30, rótulos de campo              |
+| Button        | DM Sans SemiBold               | 15 / 15          | 1%       | Confirmar agendamento                       |
 
 ## Raios e formas
 
-| Raio | Uso |
-|---|---|
-| 999 | Botões primários, chips/filtros, badges, toggles |
-| 24 | Sheets inferiores, cards de hero |
-| 14 | Cards de conteúdo, inputs grandes |
-| 12 | Cards pequenos, itens de lista, slots de horário |
-| 5 | Barras de progresso, tags |
+| Raio | Uso                                              |
+| ---- | ------------------------------------------------ |
+| 999  | Botões primários, chips/filtros, badges, toggles |
+| 24   | Sheets inferiores, cards de hero                 |
+| 14   | Cards de conteúdo, inputs grandes                |
+| 12   | Cards pequenos, itens de lista, slots de horário |
+| 5    | Barras de progresso, tags                        |
 
 Ícones: traço 1,5 px, estilo linear fino (lucide-react atende). Conjunto citado: calendar, clock, home, image, user, users, chart, wallet, sparkles.
 
