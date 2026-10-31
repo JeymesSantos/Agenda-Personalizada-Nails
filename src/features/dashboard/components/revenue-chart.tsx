@@ -27,7 +27,11 @@ export function RevenueChart({ data }: { data: Point[] }) {
 
   return (
     <div className="h-64 w-full">
-      <ResponsiveContainer width="100%" height="100%">
+      <ResponsiveContainer
+        width="100%"
+        height="100%"
+        initialDimension={{ width: 520, height: 256 }}
+      >
         <BarChart
           data={rows}
           barGap={6}

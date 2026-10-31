@@ -40,7 +40,7 @@ export default async function ClientePage({ params }: PageProps<"/admin/clientes
     <li>
       <Link
         href={`/admin/agenda?visao=dia&data=${a.startsAt.toISOString().slice(0, 10)}&agendamento=${a.id}`}
-        className="bg-surface-2 hover:bg-elevated flex items-center gap-4 rounded-sm p-3.5 transition-colors"
+        className="bg-surface-2 hover:bg-elevated flex flex-wrap items-center gap-x-4 gap-y-2 rounded-sm p-3.5 transition-colors"
       >
         <div className="flex w-16 shrink-0 flex-col">
           <span className="type-body-medium">{fmtShortDate(a.startsAt, tz)}</span>
@@ -52,7 +52,7 @@ export default async function ClientePage({ params }: PageProps<"/admin/clientes
             {fmtRange(a.startsAt, a.serviceEndsAt, tz)} · {formatCents(a.priceCents)}
           </span>
         </div>
-        <StatusBadge status={a.status} />
+        <StatusBadge status={a.status} className="ml-auto" />
       </Link>
     </li>
   )
