@@ -302,3 +302,16 @@ Validação feita: lint, typecheck e build verdes; capturas de `/dev/tokens` e `
 | B9 `feat(bio)`          | Editar página pública com pré-visualização.                                                                                                                                                                                               |
 
 Decisões e aprendizados: Radix Tabs ativa no `mousedown` (automação precisa disparar esse evento); `PageHeader` aceita nó React como título; `useMediaQuery` via `useSyncExternalStore` para alternar painel lateral/sheet sem `setState` em efeito; hooks de lint do React 19 proíbem componentes criados dentro do render e `setState` em efeitos. O banco foi re-semeado ao fim da fase (`pnpm db:seed`).
+
+### Fase C — concluída em 2026-10-31 (7 commits)
+
+| Commit                               | Observações                                                                                                                                                                                |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| C1 `feat(public)`                    | Grupo `(public)` com layout (header desktop, barra inferior, rodapé). Bio M1/D1 com "Próximos horários livres" reais (serviço mais curto, 14 dias) e destaques do portfólio.               |
+| C2 `feat(public)`                    | Portfólio M2 em mosaico com filtros por álbum e "Quero esse" (?foto=).                                                                                                                     |
+| C3 `feat(booking)`                   | Catálogo com busca e chips, usado em `/servicos` e no passo 1 `/agendar`.                                                                                                                  |
+| C4 `feat(booking)`                   | Passo 2 M4/D2: calendário mensal por `monthAvailability`, slots por período (antecedência mínima 30 min), barra fixa no celular e resumo no desktop.                                       |
+| C5 `feat(booking)` + `test(booking)` | Passo 3 M5 (sem cadastro / conta), `createPublicBookingAction` → `bookAppointment`; comprovante M6 com `.ics`. Teste de integração de concorrência (um vence, outro recebe `UNAVAILABLE`). |
+| C6 `feat(client)`                    | Meus horários M7 por conta ou token, remarcar/trocar serviço reaproveitando o passo 2, cancelar em sheet M8; prazo `cancelMinHours` aplicado no servidor.                                  |
+
+Decisões: agendamentos feitos pela cliente nascem `CONFIRMED` (a profissional pode mudar no painel); o token de gerenciamento (`?t=`) identifica a cliente sem cadastro em todas as telas da área da cliente; dados de visitante lembrados no `localStorage` via refs (sem `setState` em efeito). O banco foi re-semeado ao fim da fase.
