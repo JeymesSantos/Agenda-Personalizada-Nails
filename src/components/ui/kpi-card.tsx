@@ -39,13 +39,13 @@ function KpiCard({
             {icon}
           </span>
         ) : null}
-        <span className="text-body text-secondary-txt">{label}</span>
+        <span className="type-body text-secondary-txt">{label}</span>
       </div>
-      <p className="text-kpi text-[28px] leading-8 sm:text-[32px] sm:leading-9">{value}</p>
+      <p className="type-kpi text-[28px] leading-8 sm:text-[32px] sm:leading-9">{value}</p>
       {delta ? (
         <p
           className={cn(
-            "text-body-medium flex items-center gap-1.5",
+            "type-body-medium flex items-center gap-1.5",
             deltaTone === "success" && "text-success",
             deltaTone === "error" && "text-error",
             deltaTone === "neutral" && "text-secondary-txt",
@@ -59,7 +59,7 @@ function KpiCard({
           {delta}
         </p>
       ) : hint ? (
-        <p className="text-body text-secondary-txt">{hint}</p>
+        <p className="type-body text-secondary-txt">{hint}</p>
       ) : null}
     </div>
   )

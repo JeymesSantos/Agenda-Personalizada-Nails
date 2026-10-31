@@ -105,7 +105,7 @@ function DialogTitle({ className, ...props }: React.ComponentProps<typeof Dialog
   return (
     <DialogPrimitive.Title
       data-slot="dialog-title"
-      className={cn("text-h2", className)}
+      className={cn("type-h2", className)}
       {...props}
     />
   )
@@ -118,7 +118,7 @@ function DialogDescription({
   return (
     <DialogPrimitive.Description
       data-slot="dialog-description"
-      className={cn("text-body text-secondary-txt", className)}
+      className={cn("type-body text-secondary-txt", className)}
       {...props}
     />
   )

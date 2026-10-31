@@ -52,7 +52,7 @@ function Sidebar({
           <span className="display-label text-foreground text-[11px] tracking-[0.2em]">
             {businessName}
           </span>
-          <span className="text-body text-secondary-txt">Painel da profissional</span>
+          <span className="type-body text-secondary-txt">Painel da profissional</span>
         </div>
       </div>
 
@@ -65,7 +65,7 @@ function Sidebar({
               href={item.href}
               aria-current={active ? "page" : undefined}
               data-active={active || undefined}
-              className="text-body-medium text-secondary-txt data-active:bg-magenta-500 hover:bg-surface-2 hover:text-foreground data-active:hover:bg-magenta-500 flex h-12 items-center gap-3 rounded-sm px-4 transition-colors data-active:text-pink-100 [&_svg]:size-5 [&_svg]:stroke-[1.5]"
+              className="type-body-medium text-secondary-txt data-active:bg-magenta-500 hover:bg-surface-2 hover:text-foreground data-active:hover:bg-magenta-500 flex h-12 items-center gap-3 rounded-sm px-4 transition-colors data-active:text-pink-100 [&_svg]:size-5 [&_svg]:stroke-[1.5]"
             >
               {item.icon}
               {item.label}
@@ -77,7 +77,7 @@ function Sidebar({
       <div className="flex flex-col gap-2 px-4 pt-6 pb-8">
         <Link
           href={publicHref}
-          className="text-body-medium border-strong text-foreground hover:bg-surface-2 flex h-12 items-center gap-2.5 rounded-sm border px-3 transition-colors [&_svg]:size-5 [&_svg]:stroke-[1.5] [&_svg]:text-pink-300"
+          className="type-body-medium border-strong text-foreground hover:bg-surface-2 flex h-12 items-center gap-2.5 rounded-sm border px-3 transition-colors [&_svg]:size-5 [&_svg]:stroke-[1.5] [&_svg]:text-pink-300"
         >
           <SparklesIcon aria-hidden />
           Ver minha página pública
@@ -85,7 +85,7 @@ function Sidebar({
         <button
           type="button"
           onClick={onSignOut}
-          className="text-body-medium text-muted-txt hover:bg-surface-2 hover:text-foreground flex h-12 items-center gap-3 rounded-sm px-4 transition-colors [&_svg]:size-5 [&_svg]:stroke-[1.5]"
+          className="type-body-medium text-muted-txt hover:bg-surface-2 hover:text-foreground flex h-12 items-center gap-3 rounded-sm px-4 transition-colors [&_svg]:size-5 [&_svg]:stroke-[1.5]"
         >
           <LogOutIcon aria-hidden />
           Sair

@@ -49,7 +49,7 @@ function BottomNav({
                 className="text-muted-txt hover:text-foreground relative flex flex-1 flex-col items-center justify-center gap-1.5 transition-colors data-active:text-pink-300 [&_svg]:size-[22px] [&_svg]:stroke-[1.5]"
               >
                 {item.icon}
-                <span className="text-caption tracking-[0.04em] whitespace-nowrap">
+                <span className="type-caption tracking-[0.04em] whitespace-nowrap">
                   {item.label}
                 </span>
                 {active ? (

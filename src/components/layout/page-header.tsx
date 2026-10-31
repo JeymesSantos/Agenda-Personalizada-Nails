@@ -34,9 +34,9 @@ function PageHeader({
         {leading}
         <div className="flex flex-col gap-1">
           {eyebrow ? <p className="display-label text-pink-300">{eyebrow}</p> : null}
-          <h1 className={variant === "display" ? "display-l" : "text-h1"}>{title}</h1>
+          <h1 className={variant === "display" ? "display-l" : "type-h1"}>{title}</h1>
           {description ? (
-            <p className="text-body-l text-secondary-txt mt-1 max-w-prose">{description}</p>
+            <p className="type-body-l text-secondary-txt mt-1 max-w-prose">{description}</p>
           ) : null}
         </div>
       </div>

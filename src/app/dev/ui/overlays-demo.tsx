@@ -50,8 +50,8 @@ function SheetOption({
         {icon}
       </span>
       <span className="flex flex-1 flex-col">
-        <span className={danger ? "text-body-medium text-error" : "text-body-medium"}>{title}</span>
-        <span className="text-body text-secondary-txt">{description}</span>
+        <span className={danger ? "type-body-medium text-error" : "type-body-medium"}>{title}</span>
+        <span className="type-body text-secondary-txt">{description}</span>
       </span>
       <ChevronRightIcon className="text-muted-txt size-5" aria-hidden />
     </button>

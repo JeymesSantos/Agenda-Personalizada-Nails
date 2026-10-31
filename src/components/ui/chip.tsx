@@ -18,7 +18,7 @@ function Chip({
       data-active={active || undefined}
       aria-pressed={active}
       className={cn(
-        "text-body-medium border-strong text-secondary-txt hover:text-foreground focus-visible:ring-ring/50 inline-flex h-10 shrink-0 items-center gap-2 rounded-full border px-4 whitespace-nowrap transition-colors outline-none focus-visible:ring-3 disabled:pointer-events-none disabled:opacity-50",
+        "type-body-medium border-strong text-secondary-txt hover:text-foreground focus-visible:ring-ring/50 inline-flex h-10 shrink-0 items-center gap-2 rounded-full border px-4 whitespace-nowrap transition-colors outline-none focus-visible:ring-3 disabled:pointer-events-none disabled:opacity-50",
         "data-active:border-magenta-500 data-active:bg-magenta-500/10 data-active:text-pink-300",
         className,
       )}

@@ -56,7 +56,7 @@ function PublicHeader({
               href={item.href}
               aria-current={active ? "page" : undefined}
               className={cn(
-                "text-body-l hover:text-foreground transition-colors",
+                "type-body-l hover:text-foreground transition-colors",
                 active ? "text-pink-300" : "text-secondary-txt",
               )}
             >

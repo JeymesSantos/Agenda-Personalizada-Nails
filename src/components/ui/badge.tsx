@@ -9,7 +9,7 @@ import { Slot } from "radix-ui"
  * Também usados para tags FIXA / VARIÁVEL nas despesas e etiquetas "CAPA".
  */
 const badgeVariants = cva(
-  "group/badge text-caption inline-flex h-6 w-fit shrink-0 items-center justify-center gap-1.5 rounded-full border border-transparent px-2.5 whitespace-nowrap transition-colors [&>svg]:pointer-events-none [&>svg]:size-3",
+  "group/badge type-caption inline-flex h-6 w-fit shrink-0 items-center justify-center gap-1.5 rounded-full border border-transparent px-2.5 whitespace-nowrap transition-colors [&>svg]:pointer-events-none [&>svg]:size-3",
   {
     variants: {
       variant: {

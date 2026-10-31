@@ -37,14 +37,14 @@ function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
 }
 
 function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
-  return <div data-slot="card-title" className={cn("text-h3", className)} {...props} />
+  return <div data-slot="card-title" className={cn("type-h3", className)} {...props} />
 }
 
 function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="card-description"
-      className={cn("text-body text-secondary-txt", className)}
+      className={cn("type-body text-secondary-txt", className)}
       {...props}
     />
   )

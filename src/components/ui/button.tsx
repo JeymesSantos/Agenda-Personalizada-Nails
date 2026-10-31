@@ -13,7 +13,7 @@ import { Slot } from "radix-ui"
  * - link: texto magenta sublinhado no hover (Ver agenda, Ver tudo)
  */
 const buttonVariants = cva(
-  "group/button text-button inline-flex shrink-0 items-center justify-center gap-2 rounded-full border border-transparent whitespace-nowrap transition-all outline-none select-none focus-visible:ring-3 focus-visible:ring-ring/50 active:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-[18px]",
+  "group/button type-button inline-flex shrink-0 items-center justify-center gap-2 rounded-full border border-transparent whitespace-nowrap transition-all outline-none select-none focus-visible:ring-3 focus-visible:ring-ring/50 active:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-[18px]",
   {
     variants: {
       variant: {

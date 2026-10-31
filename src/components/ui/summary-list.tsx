@@ -16,7 +16,7 @@ function SummaryList({
       data-slot="summary"
       className={cn("bg-surface border-subtle rounded-md border p-5", className)}
     >
-      {title ? <p className="text-caption text-secondary-txt mb-4">{title}</p> : null}
+      {title ? <p className="type-caption text-secondary-txt mb-4">{title}</p> : null}
       <dl className="flex flex-col gap-3.5" {...props} />
     </div>
   )
@@ -40,14 +40,14 @@ function SummaryRow({
       className={cn("flex items-center justify-between gap-4", className)}
       {...props}
     >
-      <dt className="text-body text-secondary-txt flex items-center gap-2.5 [&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:text-pink-300">
+      <dt className="type-body text-secondary-txt flex items-center gap-2.5 [&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:text-pink-300">
         {icon}
         {label}
       </dt>
       <dd
         className={cn(
-          "text-body-medium text-foreground text-right",
-          highlight && "text-h3 text-pink-300",
+          "type-body-medium text-foreground text-right",
+          highlight && "type-h3 text-pink-300",
         )}
       >
         {children}

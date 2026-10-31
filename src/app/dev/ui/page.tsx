@@ -48,7 +48,7 @@ export const metadata = { title: "Kit de componentes" }
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="flex flex-col gap-5">
-      <h2 className="text-h2 border-subtle border-b pb-3">{title}</h2>
+      <h2 className="type-h2 border-subtle border-b pb-3">{title}</h2>
       {children}
     </section>
   )
@@ -175,8 +175,8 @@ export default function UiKitPage() {
           </div>
           <label className="bg-surface border-subtle flex items-center justify-between gap-4 rounded-md border p-4 sm:col-span-2">
             <span className="flex flex-col">
-              <span className="text-body-medium">Salvar meus dados para remarcar com 1 toque</span>
-              <span className="text-body text-secondary-txt">Guardamos nome e WhatsApp</span>
+              <span className="type-body-medium">Salvar meus dados para remarcar com 1 toque</span>
+              <span className="type-body text-secondary-txt">Guardamos nome e WhatsApp</span>
             </span>
             <Switch defaultChecked />
           </label>
@@ -207,21 +207,21 @@ export default function UiKitPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="flex items-center justify-between">
-              <span className="text-body text-secondary-txt flex items-center gap-2">
+              <span className="type-body text-secondary-txt flex items-center gap-2">
                 <ClockIcon className="size-4" /> 2h00 · +15 min
               </span>
-              <span className="text-h2 text-pink-300">R$ 180</span>
+              <span className="type-h2 text-pink-300">R$ 180</span>
             </CardContent>
           </Card>
           <Card size="sm">
             <CardContent className="flex items-start gap-4">
               <div className="bg-surface-2 border-magenta-500/40 flex size-14 shrink-0 flex-col items-center justify-center rounded-sm border">
-                <span className="text-caption text-pink-300">Nov</span>
-                <span className="text-h2">05</span>
+                <span className="type-caption text-pink-300">Nov</span>
+                <span className="type-h2">05</span>
               </div>
               <div className="flex flex-1 flex-col gap-1.5">
-                <p className="text-h3">Alongamento em gel</p>
-                <p className="text-body text-secondary-txt">Quinta · 14:15 – 16:15</p>
+                <p className="type-h3">Alongamento em gel</p>
+                <p className="type-body text-secondary-txt">Quinta · 14:15 – 16:15</p>
                 <StatusBadge status="CONFIRMED" />
               </div>
             </CardContent>
@@ -265,12 +265,12 @@ export default function UiKitPage() {
       <Section title="Horários e calendário">
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <div className="flex flex-col gap-4">
-            <p className="text-caption text-secondary-txt">Manhã</p>
+            <p className="type-caption text-secondary-txt">Manhã</p>
             <div className="flex flex-wrap gap-3">
               <SlotButton unavailable>09:00</SlotButton>
               <SlotButton>10:15</SlotButton>
             </div>
-            <p className="text-caption text-secondary-txt">Tarde</p>
+            <p className="type-caption text-secondary-txt">Tarde</p>
             <div className="flex flex-wrap gap-3">
               <SlotButton>13:45</SlotButton>
               <SlotButton selected>14:15</SlotButton>
@@ -302,7 +302,7 @@ export default function UiKitPage() {
         <Stepper steps={["Serviço", "Data e horário", "Seus dados"]} current={1} />
         <div className="flex items-center gap-4">
           <Avatar className="size-12">
-            <AvatarFallback className="bg-surface-2 text-body-medium text-pink-300">
+            <AvatarFallback className="bg-surface-2 type-body-medium text-pink-300">
               MS
             </AvatarFallback>
           </Avatar>
@@ -343,7 +343,7 @@ export default function UiKitPage() {
         </div>
         <div className="border-subtle hidden h-[720px] overflow-hidden rounded-md border lg:flex">
           <Sidebar items={sidebarItems} businessName="Letícia Fagundes" activeHref="/admin" />
-          <div className="text-body text-secondary-txt flex flex-1 items-center justify-center">
+          <div className="type-body text-secondary-txt flex flex-1 items-center justify-center">
             Conteúdo do painel
           </div>
         </div>

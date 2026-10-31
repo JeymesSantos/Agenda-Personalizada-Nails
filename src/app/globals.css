@@ -236,7 +236,7 @@
   text-transform: uppercase;
 }
 
-@utility text-h1 {
+@utility type-h1 {
   font-family: var(--font-sans);
   font-weight: 700;
   font-size: 28px;
@@ -244,7 +244,7 @@
   letter-spacing: -0.02em;
 }
 
-@utility text-h2 {
+@utility type-h2 {
   font-family: var(--font-sans);
   font-weight: 600;
   font-size: 22px;
@@ -252,14 +252,14 @@
   letter-spacing: -0.01em;
 }
 
-@utility text-h3 {
+@utility type-h3 {
   font-family: var(--font-sans);
   font-weight: 600;
   font-size: 17px;
   line-height: 22px;
 }
 
-@utility text-kpi {
+@utility type-kpi {
   font-family: var(--font-sans);
   font-weight: 700;
   font-size: 32px;
@@ -267,28 +267,28 @@
   letter-spacing: -0.02em;
 }
 
-@utility text-body-l {
+@utility type-body-l {
   font-family: var(--font-sans);
   font-weight: 400;
   font-size: 16px;
   line-height: 24px;
 }
 
-@utility text-body {
+@utility type-body {
   font-family: var(--font-sans);
   font-weight: 400;
   font-size: 14px;
   line-height: 21px;
 }
 
-@utility text-body-medium {
+@utility type-body-medium {
   font-family: var(--font-sans);
   font-weight: 500;
   font-size: 14px;
   line-height: 21px;
 }
 
-@utility text-caption {
+@utility type-caption {
   font-family: var(--font-sans);
   font-weight: 500;
   font-size: 11px;
@@ -297,7 +297,7 @@
   text-transform: uppercase;
 }
 
-@utility text-button {
+@utility type-button {
   font-family: var(--font-sans);
   font-weight: 600;
   font-size: 15px;

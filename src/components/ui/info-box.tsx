@@ -11,7 +11,7 @@ import { BellIcon, ClockIcon, CheckIcon, TriangleAlertIcon, RepeatIcon } from "l
  * magenta: "Impacto na agenda"
  */
 const infoBoxVariants = cva(
-  "text-body flex items-start gap-3 rounded-md border p-4 [&_svg]:mt-0.5 [&_svg]:size-4 [&_svg]:shrink-0",
+  "type-body flex items-start gap-3 rounded-md border p-4 [&_svg]:mt-0.5 [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       tone: {

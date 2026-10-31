@@ -22,7 +22,7 @@ function Stepper({
               <span
                 data-state={state}
                 className={cn(
-                  "text-body-medium flex size-7 items-center justify-center rounded-full border text-[13px]",
+                  "type-body-medium flex size-7 items-center justify-center rounded-full border text-[13px]",
                   state === "done" && "bg-success/15 border-success/40 text-success",
                   state === "current" && "bg-magenta-500 border-magenta-500 text-pink-100",
                   state === "todo" && "border-strong text-muted-txt",
@@ -32,7 +32,7 @@ function Stepper({
               </span>
               <span
                 className={cn(
-                  "text-body-medium",
+                  "type-body-medium",
                   state === "current" ? "text-foreground" : "text-muted-txt",
                   state === "done" && "text-secondary-txt",
                 )}

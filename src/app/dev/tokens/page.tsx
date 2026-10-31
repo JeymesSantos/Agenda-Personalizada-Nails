@@ -60,50 +60,50 @@ const typeScale: { name: string; className: string; sample: string; spec: string
   },
   {
     name: "Heading/H1",
-    className: "text-h1",
+    className: "type-h1",
     sample: "Agende seu horário",
     spec: "DM Sans Bold 28",
   },
   {
     name: "Heading/H2",
-    className: "text-h2",
+    className: "type-h2",
     sample: "Escolha seu serviço",
     spec: "DM Sans SemiBold 22",
   },
   {
     name: "Heading/H3",
-    className: "text-h3",
+    className: "type-h3",
     sample: "Horários disponíveis",
     spec: "DM Sans SemiBold 17",
   },
-  { name: "KPI", className: "text-kpi", sample: "R$ 4.820", spec: "DM Sans Bold 32" },
+  { name: "KPI", className: "type-kpi", sample: "R$ 4.820", spec: "DM Sans Bold 32" },
   {
     name: "Body/L",
-    className: "text-body-l",
+    className: "type-body-l",
     sample: "Seu horário foi confirmado. Você receberá um lembrete no WhatsApp.",
     spec: "DM Sans Regular 16",
   },
   {
     name: "Body/M",
-    className: "text-body",
+    className: "type-body",
     sample: "Duração 1h30 · intervalo 15 min",
     spec: "DM Sans Regular 14",
   },
   {
     name: "Body/M Medium",
-    className: "text-body-medium",
+    className: "type-body-medium",
     sample: "Alongamento em gel",
     spec: "DM Sans Medium 14",
   },
   {
     name: "Caption",
-    className: "text-caption",
+    className: "type-caption",
     sample: "Hoje · 14:30",
     spec: "DM Sans Medium 11 · caps",
   },
   {
     name: "Button",
-    className: "text-button",
+    className: "type-button",
     sample: "Confirmar agendamento",
     spec: "DM Sans SemiBold 15",
   },
@@ -125,13 +125,13 @@ export default function TokensPage() {
       <header className="bg-gradient-hero -mx-4 mb-10 px-4 pt-10 pb-8">
         <p className="display-label text-pink-300">Identidade visual · Agenda online</p>
         <h1 className="display-xl mt-3">Letícia Fagundes</h1>
-        <p className="text-body-l text-secondary mt-3 max-w-xl">
+        <p className="type-body-l text-secondary mt-3 max-w-xl">
           Página de referência dos tokens aplicados. Compare com o brand board do Figma.
         </p>
       </header>
 
       <section className="mb-12">
-        <h2 className="text-h2 mb-5">01 · Marca</h2>
+        <h2 className="type-h2 mb-5">01 · Marca</h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <figure className="bg-surface border-subtle rounded-md border p-6">
             <Image
@@ -141,7 +141,7 @@ export default function TokensPage() {
               height={160}
               className="mx-auto"
             />
-            <figcaption className="text-caption text-muted mt-4 text-center">
+            <figcaption className="type-caption text-muted mt-4 text-center">
               Principal · fundos escuros
             </figcaption>
           </figure>
@@ -153,7 +153,7 @@ export default function TokensPage() {
               height={160}
               className="mx-auto"
             />
-            <figcaption className="text-caption mt-4 text-center text-pink-100">
+            <figcaption className="type-caption mt-4 text-center text-pink-100">
               Negativa · fundo magenta
             </figcaption>
           </figure>
@@ -165,7 +165,7 @@ export default function TokensPage() {
               height={120}
               className="mx-auto"
             />
-            <figcaption className="text-caption text-muted mt-4 text-center">
+            <figcaption className="type-caption text-muted mt-4 text-center">
               Ícone PWA · avatar
             </figcaption>
           </figure>
@@ -173,11 +173,11 @@ export default function TokensPage() {
       </section>
 
       <section className="mb-12">
-        <h2 className="text-h2 mb-5">02 · Cor</h2>
+        <h2 className="type-h2 mb-5">02 · Cor</h2>
         <div className="space-y-8">
           {colorGroups.map((group) => (
             <div key={group.title}>
-              <h3 className="text-caption text-secondary mb-3">{group.title}</h3>
+              <h3 className="type-caption text-secondary mb-3">{group.title}</h3>
               <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
                 {group.colors.map((c) => (
                   <li
@@ -186,8 +186,8 @@ export default function TokensPage() {
                   >
                     <div className="h-16" style={{ background: `var(${c.token})` }} />
                     <div className="p-3">
-                      <p className="text-body-medium">{c.name}</p>
-                      <p className="text-caption text-muted mt-1 tracking-normal normal-case">
+                      <p className="type-body-medium">{c.name}</p>
+                      <p className="type-caption text-muted mt-1 tracking-normal normal-case">
                         {c.use}
                       </p>
                     </div>
@@ -198,26 +198,26 @@ export default function TokensPage() {
           ))}
         </div>
         <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <div className="bg-gradient-primary glow-primary text-button flex h-14 items-center justify-center rounded-full text-pink-100">
+          <div className="bg-gradient-primary glow-primary type-button flex h-14 items-center justify-center rounded-full text-pink-100">
             Gradiente primário + glow
           </div>
-          <div className="bg-gradient-photo text-caption flex h-14 items-center justify-center rounded-md text-pink-100">
+          <div className="bg-gradient-photo type-caption flex h-14 items-center justify-center rounded-md text-pink-100">
             Gradiente de foto
           </div>
-          <div className="bg-gradient-hero bg-surface text-caption text-secondary flex h-14 items-center justify-center rounded-md">
+          <div className="bg-gradient-hero bg-surface type-caption text-secondary flex h-14 items-center justify-center rounded-md">
             Gradiente de hero
           </div>
         </div>
       </section>
 
       <section className="mb-12">
-        <h2 className="text-h2 mb-5">03 · Tipo</h2>
+        <h2 className="type-h2 mb-5">03 · Tipo</h2>
         <ul className="divide-subtle divide-y">
           {typeScale.map((t) => (
             <li key={t.name} className="grid grid-cols-1 gap-2 py-5 sm:grid-cols-[180px_1fr]">
               <div>
-                <p className="text-body-medium">{t.name}</p>
-                <p className="text-caption text-muted mt-1 tracking-normal normal-case">{t.spec}</p>
+                <p className="type-body-medium">{t.name}</p>
+                <p className="type-caption text-muted mt-1 tracking-normal normal-case">{t.spec}</p>
               </div>
               <p className={t.className}>{t.sample}</p>
             </li>
@@ -226,7 +226,7 @@ export default function TokensPage() {
       </section>
 
       <section className="mb-12">
-        <h2 className="text-h2 mb-5">04 · Raios</h2>
+        <h2 className="type-h2 mb-5">04 · Raios</h2>
         <ul className="grid grid-cols-2 gap-3 sm:grid-cols-5">
           {radii.map((r) => (
             <li key={r.name} className="text-center">
@@ -234,10 +234,10 @@ export default function TokensPage() {
                 className="bg-surface-2 border-strong mx-auto h-20 w-full border"
                 style={{ borderRadius: r.value }}
               />
-              <p className="text-body-medium mt-2">
+              <p className="type-body-medium mt-2">
                 {r.name} · {r.value}
               </p>
-              <p className="text-caption text-muted mt-1 tracking-normal normal-case">{r.use}</p>
+              <p className="type-caption text-muted mt-1 tracking-normal normal-case">{r.use}</p>
             </li>
           ))}
         </ul>

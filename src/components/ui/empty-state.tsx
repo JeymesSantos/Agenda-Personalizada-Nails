@@ -27,8 +27,8 @@ function EmptyState({
       <span className="bg-surface-2 flex size-12 items-center justify-center rounded-full text-pink-300 [&_svg]:size-5">
         {icon ?? <SparklesIcon aria-hidden />}
       </span>
-      <p className="text-h3">{title}</p>
-      {description ? <p className="text-body text-secondary-txt max-w-xs">{description}</p> : null}
+      <p className="type-h3">{title}</p>
+      {description ? <p className="type-body text-secondary-txt max-w-xs">{description}</p> : null}
       {action ? <div className="mt-2">{action}</div> : null}
     </div>
   )
