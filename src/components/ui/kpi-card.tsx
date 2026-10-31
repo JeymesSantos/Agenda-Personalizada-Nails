@@ -35,7 +35,7 @@ function KpiCard({
     >
       <div className="flex items-center gap-3">
         {icon ? (
-          <span className="bg-gradient-primary flex size-9 shrink-0 items-center justify-center rounded-sm text-pink-100 [&_svg]:size-[18px]">
+          <span className="bg-gradient-primary hidden size-9 shrink-0 items-center justify-center rounded-sm text-pink-100 sm:flex [&_svg]:size-[18px]">
             {icon}
           </span>
         ) : null}

@@ -116,3 +116,12 @@ export async function signOutAction(role: "ADMIN" | "CLIENT") {
   await signOut({ redirect: false })
   redirect(role === "ADMIN" ? "/admin/entrar" : "/")
 }
+
+/* Versões sem argumento para passar como prop a componentes de cliente. */
+export async function signOutAdminAction() {
+  await signOutAction("ADMIN")
+}
+
+export async function signOutClientAction() {
+  await signOutAction("CLIENT")
+}

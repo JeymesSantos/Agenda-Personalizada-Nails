@@ -5,12 +5,11 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "cn"
 
-export type BottomNavItem = {
-  href: string
+import { isNavItemActive, type NavMatch } from "./nav-match"
+
+export type BottomNavItem = NavMatch & {
   label: string
   icon: React.ReactNode
-  /* marca ativo também em subrotas (ex.: /agendar/...) */
-  match?: (pathname: string) => boolean
 }
 
 /*
@@ -39,7 +38,7 @@ function BottomNav({
     >
       <ul className="flex h-[72px] items-stretch">
         {items.map((item) => {
-          const active = item.match ? item.match(current) : current === item.href
+          const active = isNavItemActive(item, current)
           return (
             <li key={item.href} className="flex flex-1">
               <Link

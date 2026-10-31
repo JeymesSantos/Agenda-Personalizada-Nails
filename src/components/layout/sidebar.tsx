@@ -7,11 +7,11 @@ import { usePathname } from "next/navigation"
 import { cn } from "cn"
 import { LogOutIcon, SparklesIcon } from "lucide-react"
 
-export type SidebarItem = {
-  href: string
+import { isNavItemActive, type NavMatch } from "./nav-match"
+
+export type SidebarItem = NavMatch & {
   label: string
   icon: React.ReactNode
-  match?: (pathname: string) => boolean
 }
 
 /*
@@ -31,7 +31,7 @@ function Sidebar({
   items: SidebarItem[]
   businessName: string
   publicHref?: string
-  onSignOut?: () => void
+  onSignOut?: () => void | Promise<void>
   activeHref?: string
 }) {
   const pathname = usePathname()
@@ -58,7 +58,7 @@ function Sidebar({
 
       <nav aria-label="Painel" className="flex flex-1 flex-col gap-1 px-4">
         {items.map((item) => {
-          const active = item.match ? item.match(current) : current === item.href
+          const active = isNavItemActive(item, current)
           return (
             <Link
               key={item.href}
@@ -84,7 +84,7 @@ function Sidebar({
         </Link>
         <button
           type="button"
-          onClick={onSignOut}
+          onClick={() => void onSignOut?.()}
           className="type-body-medium text-muted-txt hover:bg-surface-2 hover:text-foreground flex h-12 items-center gap-3 rounded-sm px-4 transition-colors [&_svg]:size-5 [&_svg]:stroke-[1.5]"
         >
           <LogOutIcon aria-hidden />
