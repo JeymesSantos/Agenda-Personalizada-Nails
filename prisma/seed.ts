@@ -466,12 +466,14 @@ async function main() {
     ["Curso de nail art", "Cursos", 18, 30000],
     ["Descartáveis e higiene", "Materiais e descartáveis", 22, 18000],
   ] as const
+  /* fixas: a raiz recorrente fica no mês anterior; o mês atual recebe a cópia (parentId) */
+  const roots = new Map<string, string>()
   for (const [y, m] of [
     [prevYear, prevMonth],
     [year, month],
   ]) {
     for (const [description, category, day, amountCents] of fixed) {
-      await prisma.expense.create({
+      const created = await prisma.expense.create({
         data: {
           businessId: business.id,
           description,
@@ -480,8 +482,10 @@ async function main() {
           amountCents,
           type: "FIXED",
           recurrence: "MONTHLY",
+          parentId: roots.get(description) ?? null,
         },
       })
+      if (!roots.has(description)) roots.set(description, created.id)
     }
     for (const [description, category, day, amountCents] of variable) {
       await prisma.expense.create({
