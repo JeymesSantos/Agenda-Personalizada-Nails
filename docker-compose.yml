@@ -1,0 +1,21 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: minhaagenda-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: minhaagenda
+      POSTGRES_PASSWORD: minhaagenda
+      POSTGRES_DB: minhaagenda
+    ports:
+      - "5432:5432"
+    volumes:
+      - minhaagenda-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U minhaagenda -d minhaagenda"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  minhaagenda-pgdata:

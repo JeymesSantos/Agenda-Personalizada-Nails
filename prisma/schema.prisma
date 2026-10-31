@@ -1,0 +1,300 @@
+// Modelo de dados do MinhaAgenda — ver docs/PLANO.md, seção 4.
+// Datas/horas em UTC no banco; o fuso do estúdio (America/Sao_Paulo) é aplicado na aplicação.
+// Valores monetários em centavos (Int) para evitar erro de ponto flutuante.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  CLIENT
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  DONE
+  CANCELLED
+  NO_SHOW
+}
+
+enum AppointmentOrigin {
+  CLIENT
+  ADMIN
+}
+
+enum ExceptionType {
+  BLOCK
+  RELEASE
+}
+
+enum ExpenseType {
+  FIXED
+  VARIABLE
+}
+
+enum Recurrence {
+  NONE
+  MONTHLY
+}
+
+enum ReminderChannel {
+  EMAIL
+  WHATSAPP
+}
+
+enum ReminderKind {
+  CONFIRMATION
+  BEFORE_24H
+  BEFORE_2H
+}
+
+enum ReminderStatus {
+  SCHEDULED
+  SENT
+  FAILED
+  CANCELLED
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String?  @unique
+  whatsapp     String?  @unique
+  passwordHash String?
+  role         Role     @default(CLIENT)
+  avatarUrl    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  ownedBusiness Business?     @relation("BusinessOwner")
+  appointments  Appointment[] @relation("AppointmentClient")
+  notes         ClientNote[]
+
+  @@index([role])
+}
+
+model Business {
+  id                String   @id @default(cuid())
+  ownerId           String   @unique
+  name              String
+  slug              String   @unique
+  tagline           String?
+  description       String?
+  logoUrl           String?
+  photoUrl          String?
+  instagram         String?
+  whatsapp          String?
+  addressLine       String?
+  neighborhood      String?
+  hoursSummary      String?
+  statsAppointments String?
+  statsRating       String?
+  codePrefix        String   @default("LF")
+  cancelMinHours    Int      @default(24)
+  slotStepMinutes   Int      @default(15)
+  timezone          String   @default("America/Sao_Paulo")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  owner        User                @relation("BusinessOwner", fields: [ownerId], references: [id])
+  categories   ServiceCategory[]
+  services     Service[]
+  workingHours WorkingHours[]
+  exceptions   ScheduleException[]
+  appointments Appointment[]
+  clientNotes  ClientNote[]
+  albums       Album[]
+  photos       Photo[]
+  expenses     Expense[]
+}
+
+model ServiceCategory {
+  id         String @id @default(cuid())
+  businessId String
+  name       String
+  order      Int    @default(0)
+
+  business Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  services Service[]
+
+  @@unique([businessId, name])
+  @@index([businessId, order])
+}
+
+model Service {
+  id          String   @id @default(cuid())
+  businessId  String
+  categoryId  String?
+  title       String
+  description String?
+  durationMin Int
+  bufferMin   Int      @default(0)
+  priceCents  Int
+  priceFrom   Boolean  @default(false)
+  visible     Boolean  @default(true)
+  order       Int      @default(0)
+  photoUrls   String[] @default([])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  business     Business         @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  category     ServiceCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  appointments Appointment[]
+  photos       Photo[]
+
+  @@index([businessId, visible, order])
+}
+
+/// Horário de funcionamento por dia da semana (0 = domingo … 6 = sábado).
+/// Horas como minutos desde a meia-noite local (ex.: 09:00 = 540).
+model WorkingHours {
+  id            String  @id @default(cuid())
+  businessId    String
+  weekday       Int
+  enabled       Boolean @default(true)
+  startMin      Int
+  endMin        Int
+  breakStartMin Int?
+  breakEndMin   Int?
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@unique([businessId, weekday])
+}
+
+/// Bloqueios (BLOCK) e liberações (RELEASE) por período. `allDay` marca o dia inteiro.
+model ScheduleException {
+  id         String        @id @default(cuid())
+  businessId String
+  type       ExceptionType
+  startsAt   DateTime
+  endsAt     DateTime
+  allDay     Boolean       @default(false)
+  reason     String?
+  createdAt  DateTime      @default(now())
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId, startsAt, endsAt])
+}
+
+model Appointment {
+  id            String            @id @default(cuid())
+  businessId    String
+  clientId      String
+  serviceId     String
+  code          String            @unique
+  startsAt      DateTime
+  /// Fim do atendimento com a cliente (sem reorganização).
+  serviceEndsAt DateTime
+  /// Fim do bloqueio na agenda (atendimento + reorganização).
+  endsAt        DateTime
+  status        AppointmentStatus @default(PENDING)
+  origin        AppointmentOrigin @default(CLIENT)
+  note          String?
+  priceCents    Int
+  manageToken   String            @unique @default(cuid())
+  cancelledAt   DateTime?
+  cancelledBy   Role?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  business  Business   @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  client    User       @relation("AppointmentClient", fields: [clientId], references: [id])
+  service   Service    @relation(fields: [serviceId], references: [id])
+  reminders Reminder[]
+
+  @@index([businessId, startsAt])
+  @@index([businessId, status])
+  @@index([clientId, startsAt])
+}
+
+model ClientNote {
+  id         String   @id @default(cuid())
+  businessId String
+  clientId   String
+  text       String
+  createdAt  DateTime @default(now())
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  client   User     @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([businessId, clientId, createdAt])
+}
+
+model Album {
+  id         String @id @default(cuid())
+  businessId String
+  name       String
+  order      Int    @default(0)
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  photos   Photo[]
+
+  @@unique([businessId, name])
+}
+
+model Photo {
+  id            String   @id @default(cuid())
+  businessId    String
+  albumId       String?
+  serviceId     String?
+  url           String
+  caption       String?
+  isCover       Boolean  @default(false)
+  featuredOnBio Boolean  @default(false)
+  wantThis      Boolean  @default(true)
+  order         Int      @default(0)
+  createdAt     DateTime @default(now())
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  album    Album?   @relation(fields: [albumId], references: [id], onDelete: SetNull)
+  service  Service? @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+
+  @@index([businessId, albumId, order])
+  @@index([businessId, featuredOnBio])
+}
+
+model Expense {
+  id          String      @id @default(cuid())
+  businessId  String
+  description String
+  category    String
+  date        DateTime
+  amountCents Int
+  type        ExpenseType @default(VARIABLE)
+  recurrence  Recurrence  @default(NONE)
+  receiptUrl  String?
+  /// Lançamento gerado a partir de uma despesa recorrente.
+  parentId    String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId, date])
+}
+
+model Reminder {
+  id            String          @id @default(cuid())
+  appointmentId String
+  channel       ReminderChannel
+  kind          ReminderKind
+  sendAt        DateTime
+  sentAt        DateTime?
+  status        ReminderStatus  @default(SCHEDULED)
+  error         String?
+  createdAt     DateTime        @default(now())
+
+  appointment Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+
+  @@unique([appointmentId, channel, kind])
+  @@index([status, sendAt])
+}

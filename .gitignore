@@ -40,3 +40,6 @@ yarn-error.log*
 # vercel
 .vercel
 /.playwright-mcp
+
+# cliente prisma gerado (pnpm db:generate)
+/src/generated
