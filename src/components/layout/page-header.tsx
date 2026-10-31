@@ -16,7 +16,7 @@ function PageHeader({
   leading,
   actions,
   ...props
-}: React.ComponentProps<"header"> & {
+}: Omit<React.ComponentProps<"header">, "title"> & {
   eyebrow?: string
   title: React.ReactNode
   description?: React.ReactNode

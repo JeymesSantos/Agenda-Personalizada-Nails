@@ -33,17 +33,20 @@ export type ServiceOption = {
   visible: boolean
 }
 
-type ClientHit = { id: string; name: string; whatsapp: string | null; registered: boolean }
+export type ClientHit = { id: string; name: string; whatsapp: string | null; registered: boolean }
 
 /* "+ Novo agendamento" (A2): cliente existente ou nova, serviço, data/horário, observação. */
 export function NewAppointmentDialog({
   services,
   todayYmd,
   defaultOpen = false,
+  initialClient = null,
 }: {
   services: ServiceOption[]
   todayYmd: string
   defaultOpen?: boolean
+  /** Cliente pré-selecionada (atalho "Agendar" na ficha da cliente). */
+  initialClient?: ClientHit | null
 }) {
   const router = useRouter()
   const pathname = usePathname()
@@ -52,7 +55,7 @@ export function NewAppointmentDialog({
   const [clientMode, setClientMode] = useState<"existing" | "new">("existing")
   const [query, setQuery] = useState("")
   const [hits, setHits] = useState<ClientHit[]>([])
-  const [client, setClient] = useState<ClientHit | null>(null)
+  const [client, setClient] = useState<ClientHit | null>(initialClient)
   const [serviceId, setServiceId] = useState(
     services.find((s) => s.visible)?.id ?? services[0]?.id ?? "",
   )

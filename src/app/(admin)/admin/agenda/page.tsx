@@ -40,6 +40,13 @@ export default async function AgendaPage({ searchParams }: PageProps<"/admin/age
     listVisibleServices(business.id),
     selectedId ? getAppointmentDetail(business.id, selectedId) : Promise.resolve(null),
   ])
+  const preClient =
+    typeof sp.cliente === "string"
+      ? await prisma.user.findFirst({
+          where: { id: sp.cliente, role: "CLIENT" },
+          select: { id: true, name: true, whatsapp: true, passwordHash: true },
+        })
+      : null
 
   const step = view === "dia" ? 1 : view === "semana" ? 7 : 0
   const prev = view === "mes" ? addMonths(anchor, -1) : addDays(anchor, -step)
@@ -62,6 +69,16 @@ export default async function AgendaPage({ searchParams }: PageProps<"/admin/age
               services={services}
               todayYmd={todayYmd}
               defaultOpen={sp.novo === "1"}
+              initialClient={
+                preClient
+                  ? {
+                      id: preClient.id,
+                      name: preClient.name,
+                      whatsapp: preClient.whatsapp,
+                      registered: Boolean(preClient.passwordHash),
+                    }
+                  : null
+              }
             />
           </>
         }
