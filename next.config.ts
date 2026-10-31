@@ -7,6 +7,11 @@ const nextConfig: NextConfig = {
    * as páginas são renderizadas por requisição, como no Next 15.
    */
   cacheComponents: false,
+  images: {
+    /* placeholders do seed e logos são SVG; CSP restritiva por segurança */
+    dangerouslyAllowSVG: true,
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+  },
   turbopack: {
     rules: {
       "*.css": {
