@@ -199,8 +199,8 @@ export default async function HomePage() {
       </section>
 
       {/* ---------- DESKTOP (D1) ---------- */}
-      <section className="bg-gradient-hero hidden px-20 pt-16 pb-20 lg:block">
-        <div className="mx-auto grid max-w-[1280px] grid-cols-[1fr_520px] items-center gap-16">
+      <section className="bg-gradient-hero hidden px-10 pt-16 pb-20 lg:block xl:px-20">
+        <div className="mx-auto grid max-w-[1280px] grid-cols-[minmax(0,1fr)_minmax(0,460px)] items-center gap-10 xl:grid-cols-[minmax(0,1fr)_520px] xl:gap-16">
           <div className="flex flex-col gap-6">
             <p className="display-label text-pink-300">Nail designer · Agenda online</p>
             <h1 className="display-xl">{b.name}</h1>
@@ -248,7 +248,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="hidden px-20 pb-20 lg:block">
+      <section className="hidden px-10 pb-20 lg:block xl:px-20">
         <div className="mx-auto flex max-w-[1280px] flex-col gap-8">
           <div className="flex items-end justify-between">
             <div>

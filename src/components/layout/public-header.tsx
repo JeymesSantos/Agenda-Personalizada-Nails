@@ -36,7 +36,7 @@ function PublicHeader({
     <header
       data-slot="public-header"
       className={cn(
-        "border-subtle hidden h-[140px] items-center border-b px-20 lg:flex",
+        "border-subtle hidden h-[140px] items-center border-b px-10 lg:flex xl:px-20",
         className,
       )}
       {...props}

@@ -16,7 +16,7 @@ export default async function PublicLayout({ children }: LayoutProps<"/">) {
     <div className="flex min-h-dvh flex-col">
       <PublicHeader items={clientHeaderItems} businessName={b.name} ctaHref="/agendar" />
       <div className="flex flex-1 flex-col pb-24 lg:pb-0">{children}</div>
-      <footer className="border-subtle type-body text-secondary-txt hidden items-center justify-between border-t px-20 py-8 lg:flex">
+      <footer className="border-subtle type-body text-secondary-txt hidden items-center justify-between border-t px-10 py-8 lg:flex xl:px-20">
         <p>{[b.addressLine, b.neighborhood, b.hoursSummary].filter(Boolean).join(" · ")}</p>
         <div className="flex items-center gap-8">
           {b.instagram ? (
