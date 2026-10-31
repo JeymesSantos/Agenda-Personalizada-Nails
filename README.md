@@ -6,7 +6,7 @@ Aplicativo mobile de agenda personalizada para profissionais de nails (manicure 
 
 O design do projeto está no Figma:
 
-- **Arquivo Figma:** [MinhaAgenda — Fluxo de Páginas e Identidade Visual](https://www.figma.com/design/gjuUT2O6E8HX1fC2F7INb3/MinhaAgenda-%E2%80%94-Fluxo-de-P%C3%A1ginas---Identidade-Visual)
+- **Arquivo Figma:** [MinhaAgenda — Fluxo de Páginas e Identidade Visual](https://www.figma.com/design/iTZZOI3KZwIkgRNLdkFLlh/MinhaAgenda-%E2%80%94-Fluxo-de-P%C3%A1ginas---Identidade-Visual--c%C3%B3pia-)
 
 Páginas do arquivo:
 
