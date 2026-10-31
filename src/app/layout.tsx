@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next"
 import { DM_Sans, Montserrat } from "next/font/google"
+import { Toaster } from "@/components/ui/sonner"
+import { cn } from "@/lib/utils"
 import "./globals.css"
 
 const dmSans = DM_Sans({
@@ -30,8 +32,11 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="pt-BR" className={`${dmSans.variable} ${montserrat.variable} h-full`}>
-      <body className="flex min-h-full flex-col">{children}</body>
+    <html lang="pt-BR" className={cn("dark h-full", dmSans.variable, montserrat.variable)}>
+      <body className="flex min-h-full flex-col">
+        {children}
+        <Toaster />
+      </body>
     </html>
   )
 }

@@ -1,8 +1,13 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
 
 /*
  * Tokens de design — fonte: Figma, página "01 · Identidade Visual".
- * Ver docs/design-tokens.md. Tema escuro único.
+ * Ver docs/design-tokens.md. Tema escuro único: o <html> leva a classe "dark"
+ * e as variáveis semânticas do shadcn apontam para os tokens da marca.
  */
 :root {
   /* marca */
@@ -35,6 +40,11 @@
     var(--brand-magenta-400) 0%,
     var(--brand-magenta-500) 100%
   );
+  --gradient-primary-pressed: linear-gradient(
+    90deg,
+    var(--brand-magenta-500) 0%,
+    var(--brand-magenta-700) 100%
+  );
   --gradient-hero: radial-gradient(
     120% 70% at 50% 0%,
     rgba(156, 13, 101, 0.55) 0%,
@@ -56,10 +66,44 @@
   --radius-md: 14px;
   --radius-lg: 24px;
   --radius-full: 999px;
+
+  /* variáveis semânticas do shadcn/ui → tokens da marca */
+  --radius: 14px;
+  --background: var(--bg-base);
+  --foreground: var(--text-primary);
+  --card: var(--bg-surface);
+  --card-foreground: var(--text-primary);
+  --popover: var(--bg-elevated);
+  --popover-foreground: var(--text-primary);
+  --primary: var(--brand-magenta-500);
+  --primary-foreground: var(--brand-pink-100);
+  --secondary: var(--bg-surface-2);
+  --secondary-foreground: var(--text-primary);
+  --muted: var(--bg-surface-2);
+  --muted-foreground: var(--text-secondary);
+  --accent: var(--bg-elevated);
+  --accent-foreground: var(--text-primary);
+  --destructive: var(--feedback-error);
+  --border: var(--border-subtle);
+  --input: var(--border-strong);
+  --ring: var(--brand-magenta-400);
+  --chart-1: var(--brand-magenta-500);
+  --chart-2: var(--brand-pink-300);
+  --chart-3: var(--feedback-info);
+  --chart-4: var(--feedback-success);
+  --chart-5: var(--feedback-warning);
+  --sidebar: var(--bg-surface);
+  --sidebar-foreground: var(--text-secondary);
+  --sidebar-primary: var(--brand-magenta-500);
+  --sidebar-primary-foreground: var(--brand-pink-100);
+  --sidebar-accent: var(--bg-surface-2);
+  --sidebar-accent-foreground: var(--text-primary);
+  --sidebar-border: var(--border-subtle);
+  --sidebar-ring: var(--brand-magenta-400);
 }
 
 @theme inline {
-  /* cores: use como bg-base, text-primary, border-subtle, bg-magenta-500 etc. */
+  /* cores da marca: bg-magenta-500, text-pink-300, border-strong, bg-surface-2... */
   --color-magenta-700: var(--brand-magenta-700);
   --color-magenta-500: var(--brand-magenta-500);
   --color-magenta-400: var(--brand-magenta-400);
@@ -73,23 +117,61 @@
   --color-subtle: var(--border-subtle);
   --color-strong: var(--border-strong);
 
-  --color-primary: var(--text-primary);
-  --color-secondary: var(--text-secondary);
-  --color-muted: var(--text-muted);
+  --color-txt: var(--text-primary);
+  --color-secondary-txt: var(--text-secondary);
+  --color-muted-txt: var(--text-muted);
   --color-success: var(--feedback-success);
   --color-warning: var(--feedback-warning);
   --color-error: var(--feedback-error);
   --color-info: var(--feedback-info);
 
+  /* cores semânticas do shadcn/ui */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
   /* fontes (variáveis injetadas por next/font em layout.tsx) */
   --font-sans: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-montserrat), ui-sans-serif, system-ui, sans-serif;
 
-  /* raios */
+  /* raios: rounded-xs 5, rounded-sm 12, rounded-md 14, rounded-lg 24, rounded-full */
   --radius-xs: var(--radius-xs);
   --radius-sm: var(--radius-sm);
   --radius-md: var(--radius-md);
   --radius-lg: var(--radius-lg);
+  --radius-xl: 28px;
+  --radius-2xl: 32px;
+  --radius-3xl: 40px;
+  --radius-4xl: 44px;
   --radius-full: var(--radius-full);
 
   /* sombras */
@@ -103,14 +185,21 @@
     -webkit-tap-highlight-color: transparent;
   }
 
+  * {
+    @apply border-border outline-ring/50;
+  }
+
   body {
-    background: var(--bg-base);
-    color: var(--text-primary);
-    font-family: var(--font-sans);
+    @apply bg-background text-foreground font-sans;
     font-size: 14px;
     line-height: 21px;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
   }
 
   ::selection {
@@ -221,6 +310,10 @@
   background-image: var(--gradient-primary);
 }
 
+@utility bg-gradient-primary-pressed {
+  background-image: var(--gradient-primary-pressed);
+}
+
 @utility bg-gradient-hero {
   background-image: var(--gradient-hero);
 }
@@ -231,4 +324,13 @@
 
 @utility glow-primary {
   box-shadow: var(--glow-primary);
+}
+
+@utility shadow-card {
+  box-shadow: var(--shadow-card);
+}
+
+/* Área segura do iOS para barras fixas */
+@utility pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }

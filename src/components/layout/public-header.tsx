@@ -1,0 +1,75 @@
+"use client"
+
+import * as React from "react"
+import Image from "next/image"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
+import { cn } from "cn"
+import { Button } from "@/components/ui/button"
+
+export type PublicNavItem = { href: string; label: string }
+
+/*
+ * Cabeçalho desktop da área pública (Figma D1/D2): logo + nome em caps,
+ * links centrais (ativo em pink-300) e botão "Agendar horário" à direita.
+ * No mobile só aparece a BottomNav, então o header fica oculto abaixo de lg.
+ */
+function PublicHeader({
+  items,
+  businessName,
+  ctaHref = "/agendar",
+  ctaLabel = "Agendar horário",
+  className,
+  activeHref,
+  ...props
+}: React.ComponentProps<"header"> & {
+  items: PublicNavItem[]
+  businessName: string
+  ctaHref?: string
+  ctaLabel?: string
+  activeHref?: string
+}) {
+  const pathname = usePathname()
+  const current = activeHref ?? pathname
+
+  return (
+    <header
+      data-slot="public-header"
+      className={cn(
+        "border-subtle hidden h-[140px] items-center border-b px-20 lg:flex",
+        className,
+      )}
+      {...props}
+    >
+      <Link href="/" className="flex items-center gap-4">
+        <Image src="/brand/logo-magenta.svg" alt="" width={40} height={40} className="size-10" />
+        <span className="display-label text-foreground text-[13px] tracking-[0.25em]">
+          {businessName}
+        </span>
+      </Link>
+      <nav aria-label="Páginas" className="ml-auto flex items-center gap-8">
+        {items.map((item) => {
+          const active = current === item.href
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              aria-current={active ? "page" : undefined}
+              className={cn(
+                "text-body-l hover:text-foreground transition-colors",
+                active ? "text-pink-300" : "text-secondary-txt",
+              )}
+            >
+              {item.label}
+            </Link>
+          )
+        })}
+        <Button asChild className="ml-2">
+          <Link href={ctaHref}>{ctaLabel}</Link>
+        </Button>
+      </nav>
+    </header>
+  )
+}
+
+export { PublicHeader }
