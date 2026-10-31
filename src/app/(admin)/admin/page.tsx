@@ -55,7 +55,7 @@ export default async function DashboardPage({ searchParams }: PageProps<"/admin"
   const minutesToNext = next ? minutesBetween(now, next.startsAt) : null
 
   return (
-    <main className="mx-auto flex w-full max-w-[1120px] flex-col gap-6 px-5 py-6 lg:px-10 lg:py-8">
+    <main className="flex w-full flex-col gap-6 px-5 py-6 lg:px-10 lg:py-8">
       {/* Cabeçalho mobile (AM1): logo, data, saudação, sino */}
       <header className="flex items-center justify-between lg:hidden">
         <div className="flex items-center gap-3">

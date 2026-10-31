@@ -34,7 +34,7 @@ export default async function PortfolioPage({ searchParams }: PageProps<"/admin/
   ]
 
   return (
-    <main className="mx-auto flex w-full max-w-[1280px] flex-col gap-6 px-5 py-6 lg:px-10 lg:py-8">
+    <main className="flex w-full flex-col gap-6 px-5 py-6 lg:px-10 lg:py-8">
       <PageHeader
         eyebrow={`Portfólio · ${total} foto${total === 1 ? "" : "s"}`}
         variant="heading"

@@ -41,7 +41,7 @@ export default async function DisponibilidadePage({
   const today = fmt(tz(now, business.timezone), "yyyy-MM-dd", business.timezone)
 
   return (
-    <main className="mx-auto flex w-full max-w-[1120px] flex-col gap-6 px-5 py-6 lg:px-10 lg:py-8">
+    <main className="flex w-full flex-col gap-6 px-5 py-6 lg:px-10 lg:py-8">
       <PageHeader
         eyebrow="Agenda · Disponibilidade"
         variant="heading"

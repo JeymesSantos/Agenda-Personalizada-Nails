@@ -55,7 +55,7 @@ export default async function AgendaPage({ searchParams }: PageProps<"/admin/age
   const nowMin = minutesFromDayStart(now, localDayStart(now, timezone))
 
   return (
-    <main className="mx-auto flex w-full max-w-[1280px] flex-col gap-6 px-5 py-6 lg:px-10 lg:py-8">
+    <main className="flex w-full flex-col gap-6 px-5 py-6 lg:px-10 lg:py-8">
       <PageHeader
         eyebrow={`Agenda · ${view === "dia" ? "Dia" : view === "semana" ? "Semana" : "Mês"}`}
         variant="heading"
