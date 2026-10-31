@@ -43,3 +43,6 @@ yarn-error.log*
 
 # cliente prisma gerado (pnpm db:generate)
 /src/generated
+
+# scripts locais de apoio
+/.scratch
