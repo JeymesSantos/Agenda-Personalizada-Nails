@@ -1,26 +1,234 @@
 @import "tailwindcss";
 
+/*
+ * Tokens de design — fonte: Figma, página "01 · Identidade Visual".
+ * Ver docs/design-tokens.md. Tema escuro único.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* marca */
+  --brand-magenta-700: #9c0d65;
+  --brand-magenta-500: #e51c98;
+  --brand-magenta-400: #f0479f;
+  --brand-pink-300: #f5a7d7;
+  --brand-pink-100: #fce4f2;
+
+  /* superfícies e bordas */
+  --bg-base: #0e0a0c;
+  --bg-surface: #171114;
+  --bg-surface-2: #211820;
+  --bg-elevated: #2a1f27;
+  --border-subtle: #33252e;
+  --border-strong: #4a3843;
+
+  /* texto e feedback */
+  --text-primary: #f8eff4;
+  --text-secondary: #bba7b2;
+  --text-muted: #7f6c77;
+  --feedback-success: #3dd598;
+  --feedback-warning: #f5b544;
+  --feedback-error: #ff5c7a;
+  --feedback-info: #8c9bff;
+
+  /* gradientes e efeitos */
+  --gradient-primary: linear-gradient(
+    90deg,
+    var(--brand-magenta-400) 0%,
+    var(--brand-magenta-500) 100%
+  );
+  --gradient-hero: radial-gradient(
+    120% 70% at 50% 0%,
+    rgba(156, 13, 101, 0.55) 0%,
+    rgba(156, 13, 101, 0.18) 45%,
+    transparent 75%
+  );
+  --gradient-photo: linear-gradient(
+    135deg,
+    var(--brand-magenta-700) 0%,
+    var(--brand-magenta-500) 55%,
+    var(--brand-pink-300) 100%
+  );
+  --glow-primary: 0 8px 28px rgba(229, 28, 152, 0.45);
+  --shadow-card: 0 12px 32px rgba(0, 0, 0, 0.35);
+
+  /* raios */
+  --radius-xs: 5px;
+  --radius-sm: 12px;
+  --radius-md: 14px;
+  --radius-lg: 24px;
+  --radius-full: 999px;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* cores: use como bg-base, text-primary, border-subtle, bg-magenta-500 etc. */
+  --color-magenta-700: var(--brand-magenta-700);
+  --color-magenta-500: var(--brand-magenta-500);
+  --color-magenta-400: var(--brand-magenta-400);
+  --color-pink-300: var(--brand-pink-300);
+  --color-pink-100: var(--brand-pink-100);
+
+  --color-base: var(--bg-base);
+  --color-surface: var(--bg-surface);
+  --color-surface-2: var(--bg-surface-2);
+  --color-elevated: var(--bg-elevated);
+  --color-subtle: var(--border-subtle);
+  --color-strong: var(--border-strong);
+
+  --color-primary: var(--text-primary);
+  --color-secondary: var(--text-secondary);
+  --color-muted: var(--text-muted);
+  --color-success: var(--feedback-success);
+  --color-warning: var(--feedback-warning);
+  --color-error: var(--feedback-error);
+  --color-info: var(--feedback-info);
+
+  /* fontes (variáveis injetadas por next/font em layout.tsx) */
+  --font-sans: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-montserrat), ui-sans-serif, system-ui, sans-serif;
+
+  /* raios */
+  --radius-xs: var(--radius-xs);
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-full: var(--radius-full);
+
+  /* sombras */
+  --shadow-glow: var(--glow-primary);
+  --shadow-card: var(--shadow-card);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  html {
+    color-scheme: dark;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    background: var(--bg-base);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 21px;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background: var(--brand-magenta-500);
+    color: var(--brand-pink-100);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Escala tipográfica do Figma */
+@utility display-xl {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: 56px;
+  line-height: 64px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+@utility display-l {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: 34px;
+  line-height: 41px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+@utility display-label {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 17px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+
+@utility text-h1 {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 28px;
+  line-height: 34px;
+  letter-spacing: -0.02em;
+}
+
+@utility text-h2 {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 22px;
+  line-height: 28px;
+  letter-spacing: -0.01em;
+}
+
+@utility text-h3 {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 17px;
+  line-height: 22px;
+}
+
+@utility text-kpi {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 32px;
+  line-height: 35px;
+  letter-spacing: -0.02em;
+}
+
+@utility text-body-l {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+}
+
+@utility text-body {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 21px;
+}
+
+@utility text-body-medium {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 21px;
+}
+
+@utility text-caption {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 11px;
+  line-height: 15px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+@utility text-button {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 15px;
+  letter-spacing: 0.01em;
+}
+
+/* Gradientes e efeitos */
+@utility bg-gradient-primary {
+  background-image: var(--gradient-primary);
+}
+
+@utility bg-gradient-hero {
+  background-image: var(--gradient-hero);
+}
+
+@utility bg-gradient-photo {
+  background-image: var(--gradient-photo);
+}
+
+@utility glow-primary {
+  box-shadow: var(--glow-primary);
 }
