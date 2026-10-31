@@ -272,3 +272,17 @@ Total: 25 commits. Cada fase cabe numa sessão de trabalho; o usuário valida vi
 - **Provedor de WhatsApp** para lembretes automáticos (Meta Cloud API, Z-API, Twilio) ou começar só com e-mail + link `wa.me` manual. Decidir até D1.
 - **Banco em produção:** Neon (sugerido) ou Supabase.
 - **Domínio** da página pública (afeta o link na bio e os ícones PWA).
+
+## 9. Registro de execução
+
+### Fase A — concluída em 2026-10-31 (6 commits)
+
+| Commit                    | Observações                                                                                                                                                                                                                                                                                                                          |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| A1 `chore: scaffold`      | O gerador instalou **Next.js 16.4** (não 15): middleware virou `proxy.ts`, tipos `PageProps`/`LayoutProps` são gerados por `next typegen` (o script `typecheck` já roda isso).                                                                                                                                                       |
+| A2 `feat(design)`         | Tokens em `globals.css` (`:root` + `@theme`), fontes via `next/font`, logos em `public/brand/`, página `/dev/tokens`.                                                                                                                                                                                                                |
+| A3 `feat(ui)` + `fix(ui)` | shadcn/ui agora escolhe a biblioteca base (`-b radix -p nova`). Utilitários tipográficos usam prefixo **`type-*`** (`type-h1`, `type-body`, `type-caption`…) porque o tailwind-merge do `cn()` descarta `text-*` desconhecidos quando há outra classe `text-<cor>`. Página `/dev/ui`.                                                |
+| A4 `feat(db)`             | **Prisma 7** com `prisma.config.ts`, adapter `pg` e cliente gerado em `src/generated` (ignorado no git, gerado no `postinstall`). `pnpm db:reset` é bloqueado pelo Prisma quando invocado por um agente de IA; o usuário roda manualmente ou usa `pnpm db:seed` (idempotente). pnpm 11 exige `allowBuilds` em `pnpm-workspace.yaml`. |
+| A5 `feat(auth)`           | Auth.js v5 beta (`next-auth@5.0.0-beta.32`). **Cache Components desligado** em `next.config.ts` (telas dependem de sessão e dados em tempo real). Credenciais do seed: admin `leticia@minhaagenda.app` / `leticia123`; cliente `mariana@example.com` / `cliente123`.                                                                 |
+
+Validação feita: lint, typecheck e build verdes; capturas de `/dev/tokens` e `/dev/ui` comparadas com o brand board; fluxos de login admin, login cliente, cadastro, sair, acesso cruzado e link com token testados no navegador.
