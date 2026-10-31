@@ -114,9 +114,12 @@ export function fmtTime(date: Date, timezone = DEFAULT_TZ): string {
   return fmt(date, "HH:mm", timezone)
 }
 
-/** "Qui, 5/11" */
+const WEEKDAY_SHORT = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"]
+
+/** "Qui, 5/11" (date-fns pt-BR não tem a forma "Sáb", por isso a tabela própria) */
 export function fmtShortDate(date: Date, timezone = DEFAULT_TZ): string {
-  return capitalize(fmt(date, "EEE, d/M", timezone).replace(".", ""))
+  const z = tz(date, timezone)
+  return `${WEEKDAY_SHORT[z.getDay()]}, ${z.getDate()}/${z.getMonth() + 1}`
 }
 
 /** "Quinta, 5 de novembro" */

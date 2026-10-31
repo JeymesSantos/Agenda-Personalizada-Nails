@@ -25,10 +25,7 @@ export function ClientContactForm({
   }, {})
 
   return (
-    <form
-      action={formAction}
-      className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_1fr_auto] sm:items-end"
-    >
+    <form action={formAction} className="flex flex-col gap-4">
       <div className="flex flex-col gap-2">
         <Label htmlFor="name">Nome</Label>
         <Input id="name" name="name" defaultValue={name} className="h-12" required />
@@ -43,7 +40,7 @@ export function ClientContactForm({
           className="h-12"
         />
       </div>
-      <Button type="submit" variant="soft" disabled={pending} className="h-12">
+      <Button type="submit" variant="soft" disabled={pending} className="h-12 w-full">
         {pending ? "Salvando…" : "Salvar contato"}
       </Button>
     </form>
