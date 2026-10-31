@@ -8,6 +8,12 @@ O design do projeto está no Figma:
 
 - **Arquivo Figma:** [MinhaAgenda — Fluxo de Páginas e Identidade Visual](https://www.figma.com/design/gjuUT2O6E8HX1fC2F7INb3/MinhaAgenda-%E2%80%94-Fluxo-de-P%C3%A1ginas---Identidade-Visual)
 
+Páginas do arquivo:
+
+1. **01 · Identidade Visual** — cores, tipografia e elementos da marca
+2. **02 · Fluxo de Páginas** — mapa de navegação entre as telas
+3. **03 · Telas (Cliente & Admin)** — telas do app para cliente e para administração
+
 ## Status
 
 Projeto em fase de design. O código ainda não foi iniciado.
