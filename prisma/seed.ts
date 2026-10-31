@@ -57,8 +57,10 @@ async function main() {
 
   console.log("→ profissional e estúdio")
   const passwordHash = await bcrypt.hash("leticia123", 10)
+  /* ids fixos: re-semear não invalida sessões abertas nem links salvos */
   const owner = await prisma.user.create({
     data: {
+      id: "usr_leticia",
       name: "Letícia Fagundes",
       email: "leticia@minhaagenda.app",
       whatsapp: "11987654321",
@@ -69,6 +71,7 @@ async function main() {
 
   const business = await prisma.business.create({
     data: {
+      id: "biz_leticia",
       ownerId: owner.id,
       name: "Letícia Fagundes",
       slug: "leticia",
@@ -274,6 +277,7 @@ async function main() {
     clientsData.map((c) =>
       prisma.user.create({
         data: {
+          id: c.email ? `usr_${c.email.split("@")[0]}` : undefined,
           name: c.name,
           email: c.email,
           whatsapp: c.whatsapp,
