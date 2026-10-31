@@ -55,7 +55,7 @@ export default async function DisponibilidadePage({
         }
       />
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_380px]">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1fr_380px]">
         <Card>
           <CardHeader>
             <CardTitle>Horário de funcionamento</CardTitle>

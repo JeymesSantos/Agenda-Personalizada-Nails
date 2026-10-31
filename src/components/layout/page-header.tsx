@@ -27,20 +27,27 @@ function PageHeader({
   return (
     <header
       data-slot="page-header"
-      className={cn("flex items-start justify-between gap-4", className)}
+      className={cn("flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between", className)}
       {...props}
     >
-      <div className="flex items-start gap-3">
+      <div className="flex min-w-0 items-start gap-3">
         {leading}
-        <div className="flex flex-col gap-1">
+        <div className="flex min-w-0 flex-col gap-1">
           {eyebrow ? <p className="display-label text-pink-300">{eyebrow}</p> : null}
-          <h1 className={variant === "display" ? "display-l" : "type-h1"}>{title}</h1>
+          <h1 className={cn("break-words", variant === "display" ? "display-l" : "type-h1")}>
+            {title}
+          </h1>
           {description ? (
             <p className="type-body-l text-secondary-txt mt-1 max-w-prose">{description}</p>
           ) : null}
         </div>
       </div>
-      {actions ? <div className="flex shrink-0 items-center gap-3">{actions}</div> : null}
+      {/* no celular as ações descem para a própria linha e quebram quando precisam */}
+      {actions ? (
+        <div className="flex flex-wrap items-center gap-3 sm:shrink-0 sm:justify-end">
+          {actions}
+        </div>
+      ) : null}
     </header>
   )
 }

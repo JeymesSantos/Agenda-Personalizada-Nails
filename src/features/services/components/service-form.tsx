@@ -180,7 +180,7 @@ export function ServiceForm({
   return (
     <form
       action={formAction}
-      className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px]"
+      className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_360px]"
       noValidate
     >
       <input type="hidden" name="categoryId" value={values.categoryId} />
@@ -380,7 +380,7 @@ export function ServiceForm({
           </label>
         </Section>
 
-        <div className="flex flex-wrap items-center justify-between gap-3 lg:hidden">
+        <div className="flex flex-wrap items-center justify-between gap-3 xl:hidden">
           <Button asChild variant="secondary">
             <Link href={cancelHref}>Cancelar</Link>
           </Button>
@@ -390,7 +390,7 @@ export function ServiceForm({
         </div>
       </div>
 
-      <aside className="flex flex-col gap-4 lg:sticky lg:top-8 lg:self-start">
+      <aside className="flex flex-col gap-4 xl:sticky xl:top-8 xl:self-start">
         <p className="type-caption text-secondary-txt">Pré-visualização no app da cliente</p>
         <ServiceCard
           service={{
@@ -418,7 +418,7 @@ export function ServiceForm({
             ? ` No seu horário atual cabem até ${perDay} atendimento${perDay > 1 ? "s" : ""} por dia.`
             : ""}
         </InfoBox>
-        <div className="hidden flex-col gap-3 lg:flex">
+        <div className="hidden flex-col gap-3 xl:flex">
           <Button type="submit" disabled={pending} size="lg">
             {pending ? "Salvando…" : "Salvar serviço"}
           </Button>

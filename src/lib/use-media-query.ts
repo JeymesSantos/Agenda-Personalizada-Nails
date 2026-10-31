@@ -16,3 +16,4 @@ export function useMediaQuery(query: string, fallback = false): boolean {
 }
 
 export const DESKTOP_QUERY = "(min-width: 1024px)"
+export const XL_QUERY = "(min-width: 1280px)"

@@ -132,7 +132,7 @@ export default async function ClientePage({ params }: PageProps<"/admin/clientes
         />
       </section>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_380px]">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1fr_380px]">
         <div className="flex flex-col gap-4">
           <Card>
             <CardHeader>

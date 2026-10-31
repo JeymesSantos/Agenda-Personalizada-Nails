@@ -84,7 +84,7 @@ export default async function PortfolioPage({ searchParams }: PageProps<"/admin/
           />
         </div>
         {selected ? (
-          <aside className="bg-surface border-subtle hidden w-[340px] shrink-0 self-start rounded-md border p-5 lg:block">
+          <aside className="bg-surface border-subtle hidden w-[340px] shrink-0 self-start rounded-md border p-5 xl:block">
             <PhotoPanel
               photo={{
                 id: selected.id,
@@ -103,7 +103,7 @@ export default async function PortfolioPage({ searchParams }: PageProps<"/admin/
         ) : null}
       </div>
       {selected ? (
-        <div className="bg-surface border-subtle rounded-md border p-5 lg:hidden">
+        <div className="bg-surface border-subtle rounded-md border p-5 xl:hidden">
           <PhotoPanel
             photo={{
               id: selected.id,

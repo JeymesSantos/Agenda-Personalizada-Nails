@@ -154,7 +154,7 @@ export function BioForm({ initial, baseUrl }: { initial: BioValues; baseUrl: str
   return (
     <form
       action={formAction}
-      className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_390px]"
+      className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_390px]"
       noValidate
     >
       <input type="hidden" name="logoUrl" value={v.logoUrl} />
@@ -315,14 +315,14 @@ export function BioForm({ initial, baseUrl }: { initial: BioValues; baseUrl: str
           </Field>
         </Section>
 
-        <div className="flex justify-end lg:hidden">
+        <div className="flex justify-end xl:hidden">
           <Button type="submit" disabled={pending}>
             {pending ? "Salvando…" : "Salvar página"}
           </Button>
         </div>
       </div>
 
-      <aside className="flex flex-col gap-4 lg:sticky lg:top-8 lg:self-start">
+      <aside className="flex flex-col gap-4 xl:sticky xl:top-8 xl:self-start">
         <p className="type-caption text-secondary-txt">Pré-visualização da bio</p>
         <div className="bg-gradient-hero bg-base border-subtle flex flex-col items-center gap-3 rounded-lg border px-5 pt-8 pb-6 text-center">
           <div className="bg-surface-2 relative size-20 overflow-hidden rounded-full">
@@ -387,7 +387,7 @@ export function BioForm({ initial, baseUrl }: { initial: BioValues; baseUrl: str
             </p>
           ) : null}
         </div>
-        <div className="hidden flex-col gap-3 lg:flex">
+        <div className="hidden flex-col gap-3 xl:flex">
           <Button type="submit" size="lg" disabled={pending}>
             {pending ? "Salvando…" : "Salvar página"}
           </Button>

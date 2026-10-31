@@ -105,7 +105,7 @@ export default async function DespesasPage({ searchParams }: PageProps<"/admin/d
         />
       </section>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_340px]">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1fr_340px]">
         <Card className="py-0">
           <CardContent className="px-0">
             {data.expenses.length === 0 ? (
@@ -115,78 +115,80 @@ export default async function DespesasPage({ searchParams }: PageProps<"/admin/d
                 className="m-5"
               />
             ) : (
-              <table className="w-full">
-                <thead>
-                  <tr className="type-caption text-muted-txt border-subtle border-b">
-                    <th className="px-5 py-4 text-left font-medium">Descrição</th>
-                    <th className="hidden px-3 py-4 text-left font-medium sm:table-cell">
-                      Categoria
-                    </th>
-                    <th className="px-3 py-4 text-left font-medium">Data</th>
-                    <th className="hidden px-3 py-4 text-left font-medium md:table-cell">
-                      Recorrência
-                    </th>
-                    <th className="px-3 py-4 text-right font-medium">Valor</th>
-                    <th className="w-20 px-3 py-4" />
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.expenses.map((e) => (
-                    <tr key={e.id} className="border-subtle border-b last:border-b-0">
-                      <td className="type-body-medium px-5 py-4">
-                        {e.description}
-                        <span className="type-body text-secondary-txt block sm:hidden">
-                          {e.category}
-                        </span>
-                      </td>
-                      <td className="hidden px-3 py-4 sm:table-cell">
-                        <Badge variant={e.type === "FIXED" ? "info" : "magenta"}>
-                          {e.type === "FIXED" ? "Fixa" : "Variável"}
-                        </Badge>
-                        <span className="type-body text-secondary-txt ml-2 hidden lg:inline">
-                          {e.category}
-                        </span>
-                      </td>
-                      <td className="type-body text-secondary-txt px-3 py-4 whitespace-nowrap">
-                        {fmt(e.date, "dd/MM", timezone)}
-                      </td>
-                      <td className="type-body text-secondary-txt hidden px-3 py-4 md:table-cell">
-                        {e.recurrence === "MONTHLY" ? "Mensal" : "—"}
-                      </td>
-                      <td className="type-body-medium text-error px-3 py-4 text-right whitespace-nowrap">
-                        − {formatCents(e.amountCents)}
-                      </td>
-                      <td className="px-3 py-2">
-                        <ExpenseRowActions
-                          categories={data.categories}
-                          todayYmd={todayYmd}
-                          expense={{
-                            id: e.id,
-                            description: e.description,
-                            amountCents: e.amountCents,
-                            dateYmd: fmt(e.date, "yyyy-MM-dd", timezone),
-                            category: e.category,
-                            type: e.type,
-                            recurring: e.recurrence === "MONTHLY",
-                            receiptUrl: e.receiptUrl,
-                          }}
-                        />
-                      </td>
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[640px]">
+                  <thead>
+                    <tr className="type-caption text-muted-txt border-subtle border-b">
+                      <th className="px-5 py-4 text-left font-medium">Descrição</th>
+                      <th className="hidden px-3 py-4 text-left font-medium sm:table-cell">
+                        Categoria
+                      </th>
+                      <th className="px-3 py-4 text-left font-medium">Data</th>
+                      <th className="hidden px-3 py-4 text-left font-medium md:table-cell">
+                        Recorrência
+                      </th>
+                      <th className="px-3 py-4 text-right font-medium">Valor</th>
+                      <th className="w-20 px-3 py-4" />
                     </tr>
-                  ))}
-                </tbody>
-                <tfoot>
-                  <tr className="border-subtle border-t">
-                    <td colSpan={4} className="type-body-medium px-5 py-4">
-                      Total do mês
-                    </td>
-                    <td className="type-h3 text-error px-3 py-4 text-right whitespace-nowrap">
-                      − {formatCents(summary.expensesCents)}
-                    </td>
-                    <td />
-                  </tr>
-                </tfoot>
-              </table>
+                  </thead>
+                  <tbody>
+                    {data.expenses.map((e) => (
+                      <tr key={e.id} className="border-subtle border-b last:border-b-0">
+                        <td className="type-body-medium px-5 py-4">
+                          {e.description}
+                          <span className="type-body text-secondary-txt block sm:hidden">
+                            {e.category}
+                          </span>
+                        </td>
+                        <td className="hidden px-3 py-4 sm:table-cell">
+                          <Badge variant={e.type === "FIXED" ? "info" : "magenta"}>
+                            {e.type === "FIXED" ? "Fixa" : "Variável"}
+                          </Badge>
+                          <span className="type-body text-secondary-txt ml-2 hidden lg:inline">
+                            {e.category}
+                          </span>
+                        </td>
+                        <td className="type-body text-secondary-txt px-3 py-4 whitespace-nowrap">
+                          {fmt(e.date, "dd/MM", timezone)}
+                        </td>
+                        <td className="type-body text-secondary-txt hidden px-3 py-4 md:table-cell">
+                          {e.recurrence === "MONTHLY" ? "Mensal" : "—"}
+                        </td>
+                        <td className="type-body-medium text-error px-3 py-4 text-right whitespace-nowrap">
+                          − {formatCents(e.amountCents)}
+                        </td>
+                        <td className="px-3 py-2">
+                          <ExpenseRowActions
+                            categories={data.categories}
+                            todayYmd={todayYmd}
+                            expense={{
+                              id: e.id,
+                              description: e.description,
+                              amountCents: e.amountCents,
+                              dateYmd: fmt(e.date, "yyyy-MM-dd", timezone),
+                              category: e.category,
+                              type: e.type,
+                              recurring: e.recurrence === "MONTHLY",
+                              receiptUrl: e.receiptUrl,
+                            }}
+                          />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tfoot>
+                    <tr className="border-subtle border-t">
+                      <td colSpan={4} className="type-body-medium px-5 py-4">
+                        Total do mês
+                      </td>
+                      <td className="type-h3 text-error px-3 py-4 text-right whitespace-nowrap">
+                        − {formatCents(summary.expensesCents)}
+                      </td>
+                      <td />
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
             )}
           </CardContent>
         </Card>

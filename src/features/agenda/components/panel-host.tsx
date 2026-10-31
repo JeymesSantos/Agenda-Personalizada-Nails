@@ -3,7 +3,7 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 
 import { Sheet, SheetBody, SheetContent, SheetTitle } from "@/components/ui/sheet"
-import { DESKTOP_QUERY, useMediaQuery } from "@/lib/use-media-query"
+import { XL_QUERY, useMediaQuery } from "@/lib/use-media-query"
 
 /*
  * Onde o painel de detalhe aparece: coluna à direita no desktop (A2),
@@ -13,7 +13,7 @@ export function PanelHost({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const pathname = usePathname()
   const params = useSearchParams()
-  const isDesktop = useMediaQuery(DESKTOP_QUERY, true)
+  const isDesktop = useMediaQuery(XL_QUERY, true)
 
   const close = () => {
     const sp = new URLSearchParams(params.toString())
