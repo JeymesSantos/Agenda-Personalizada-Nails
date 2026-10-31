@@ -15,7 +15,7 @@ export default async function BioPage() {
   const proto = h.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https")
 
   return (
-    <main className="flex w-full flex-col gap-6 px-5 py-6 lg:px-10 lg:py-8">
+    <main className="mx-auto flex w-full max-w-[1200px] flex-col gap-6 px-5 py-6 lg:px-10 lg:py-8">
       <PageHeader
         eyebrow="Bio & links"
         variant="heading"

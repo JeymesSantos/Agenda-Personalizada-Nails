@@ -17,7 +17,7 @@ export default async function NovoServicoPage() {
   const action = saveServiceAction.bind(null, null)
 
   return (
-    <main className="flex w-full flex-col gap-6 px-5 py-6 lg:px-10 lg:py-8">
+    <main className="mx-auto flex w-full max-w-[1200px] flex-col gap-6 px-5 py-6 lg:px-10 lg:py-8">
       <PageHeader eyebrow="Serviços · Novo" variant="heading" title="Cadastrar serviço" />
       <ServiceForm
         action={action}

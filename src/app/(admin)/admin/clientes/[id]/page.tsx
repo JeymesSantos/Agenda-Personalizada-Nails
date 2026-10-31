@@ -58,7 +58,7 @@ export default async function ClientePage({ params }: PageProps<"/admin/clientes
   )
 
   return (
-    <main className="flex w-full flex-col gap-6 px-5 py-6 lg:px-10 lg:py-8">
+    <main className="mx-auto flex w-full max-w-[1200px] flex-col gap-6 px-5 py-6 lg:px-10 lg:py-8">
       <PageHeader
         eyebrow="Clientes"
         variant="heading"

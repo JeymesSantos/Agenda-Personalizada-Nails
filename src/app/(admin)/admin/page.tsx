@@ -55,7 +55,7 @@ export default async function DashboardPage({ searchParams }: PageProps<"/admin"
   const minutesToNext = next ? minutesBetween(now, next.startsAt) : null
 
   return (
-    <main className="flex w-full flex-col gap-6 px-5 py-6 lg:px-10 lg:py-8">
+    <main className="mx-auto flex w-full max-w-[1200px] flex-col gap-6 px-5 py-6 lg:px-10 lg:py-8">
       {/* Cabeçalho mobile (AM1): logo, data, saudação, sino */}
       <header className="flex items-center justify-between lg:hidden">
         <div className="flex items-center gap-3">
@@ -98,7 +98,7 @@ export default async function DashboardPage({ searchParams }: PageProps<"/admin"
       </div>
 
       {/* KPIs */}
-      <section className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
+      <section className="grid grid-cols-2 gap-3 lg:gap-4 xl:grid-cols-4">
         <KpiCard
           icon={<WalletIcon />}
           label={kind === "dia" ? "Faturamento hoje" : "Faturamento"}
@@ -206,7 +206,7 @@ export default async function DashboardPage({ searchParams }: PageProps<"/admin"
       </section>
 
       {/* Desktop: gráfico + ocupação */}
-      <section className="hidden grid-cols-[1fr_320px] gap-4 lg:grid">
+      <section className="hidden grid-cols-1 gap-4 lg:grid xl:grid-cols-[1fr_320px]">
         <Card>
           <CardHeader>
             <CardTitle>
@@ -230,7 +230,7 @@ export default async function DashboardPage({ searchParams }: PageProps<"/admin"
           <CardHeader>
             <CardTitle>Ocupação da agenda</CardTitle>
           </CardHeader>
-          <CardContent className="flex flex-col items-center gap-5 pb-2">
+          <CardContent className="flex flex-col items-center gap-5 pb-2 lg:flex-row lg:justify-center lg:gap-10 xl:flex-col xl:gap-5">
             <OccupancyRing pct={data.occupancy.pct} />
             <p className="type-body text-secondary-txt text-center">
               {Math.round(data.occupancy.bookedMin / 60)} de{" "}
@@ -242,7 +242,7 @@ export default async function DashboardPage({ searchParams }: PageProps<"/admin"
       </section>
 
       {/* Agenda de hoje + serviços mais vendidos */}
-      <section className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_320px]">
+      <section className="grid grid-cols-1 gap-4 xl:grid-cols-[1fr_320px]">
         <Card>
           <CardHeader>
             <CardTitle>Agenda de hoje</CardTitle>
@@ -256,7 +256,7 @@ export default async function DashboardPage({ searchParams }: PageProps<"/admin"
             <AgendaList items={data.today} timezone={tz} />
           </CardContent>
         </Card>
-        <Card className="hidden lg:flex">
+        <Card className="hidden xl:flex">
           <CardHeader>
             <CardTitle>Serviços mais vendidos</CardTitle>
           </CardHeader>
