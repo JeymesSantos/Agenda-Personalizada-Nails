@@ -47,7 +47,7 @@ export function RescheduleSlots({
           return (
             <div key={g} className="flex flex-col gap-2.5">
               <p className="type-caption text-secondary-txt">{g}</p>
-              <div className="grid grid-cols-3 gap-2.5 sm:flex sm:flex-wrap">
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(96px,1fr))] gap-2.5">
                 {list.map((s) => (
                   <SlotButton
                     key={s.iso}

@@ -390,7 +390,7 @@ export function ServiceForm({
         </div>
       </div>
 
-      <aside className="flex flex-col gap-4 xl:sticky xl:top-8 xl:self-start">
+      <aside className="flex w-full max-w-[360px] flex-col gap-4 xl:sticky xl:top-8 xl:max-w-none xl:self-start">
         <p className="type-caption text-secondary-txt">Pré-visualização no app da cliente</p>
         <ServiceCard
           service={{

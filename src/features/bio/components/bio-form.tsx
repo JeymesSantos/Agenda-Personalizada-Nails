@@ -322,7 +322,7 @@ export function BioForm({ initial, baseUrl }: { initial: BioValues; baseUrl: str
         </div>
       </div>
 
-      <aside className="flex flex-col gap-4 xl:sticky xl:top-8 xl:self-start">
+      <aside className="flex w-full max-w-[360px] flex-col gap-4 xl:sticky xl:top-8 xl:max-w-none xl:self-start">
         <p className="type-caption text-secondary-txt">Pré-visualização da bio</p>
         <div className="bg-gradient-hero bg-base border-subtle flex flex-col items-center gap-3 rounded-lg border px-5 pt-8 pb-6 text-center">
           <div className="bg-surface-2 relative size-20 overflow-hidden rounded-full">

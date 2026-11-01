@@ -65,8 +65,11 @@ profissionais por estúdio, app nativo (PWA cobre).
 | Testes    | Vitest (motor de horários, regras de cancelamento, finanças) + Playwright (fluxo ponta a ponta)                                     | A lógica de disponibilidade é o que mais quebra                                           |
 | CI/Deploy | GitHub Actions + Vercel                                                                                                             | Preview por PR, produção no `main`                                                        |
 
-Tema escuro único (o Figma não tem tema claro). Breakpoints: mobile 390, desktop ≥ 1024
-(admin usa sidebar; cliente usa header com menu).
+Tema escuro único (o Figma não tem tema claro). Faixas de largura: até 1023 px layout mobile
+(barra inferior, telas M1–M8/AM1–AM2); de 1024 a 1279 px desktop compacto (cliente com header
+e rodapé, admin com sidebar e conteúdo em coluna única, detalhe da agenda em sheet lateral);
+a partir de 1280 px desktop completo (layouts em duas colunas do painel, painel lateral da
+agenda e prévias fixas ao lado dos formulários). O desktop do Figma foi desenhado em 1440.
 
 ## 4. Modelo de dados (Prisma)
 

@@ -7,7 +7,7 @@ import { formatMinutes } from "@/lib/scheduling"
 import type { AgendaBlock, AgendaDay } from "../queries"
 
 const HOUR_PX = 56
-const MIN_COL_PX = 148
+const MIN_COL_PX = 84
 
 /*
  * Grade da agenda (A2 semana / AM2 dia): coluna de horas, uma coluna por dia,
@@ -52,7 +52,7 @@ export function AgendaGrid({
       <div
         className="grid pb-3"
         style={{
-          gridTemplateColumns: `64px repeat(${days.length}, minmax(${days.length === 1 ? 240 : MIN_COL_PX}px, 1fr))`,
+          gridTemplateColumns: `56px repeat(${days.length}, minmax(${days.length === 1 ? 240 : MIN_COL_PX}px, 1fr))`,
         }}
       >
         {/* cabeçalho */}
@@ -76,7 +76,7 @@ export function AgendaGrid({
             <div
               key={m}
               className="type-caption text-muted-txt absolute -translate-y-1/2 pr-3 text-right tracking-normal normal-case"
-              style={{ top: top(m), left: 0, width: 64 }}
+              style={{ top: top(m), left: 0, width: 56 }}
             >
               {formatMinutes(m)}
             </div>

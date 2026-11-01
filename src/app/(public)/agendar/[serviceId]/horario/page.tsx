@@ -96,7 +96,7 @@ export default async function HorarioPage({
   )
 
   return (
-    <main className="mx-auto flex w-full max-w-[1120px] flex-col gap-6 px-5 pt-6 pb-40 lg:px-10 lg:pt-12 lg:pb-16">
+    <main className="mx-auto flex w-full max-w-[1280px] flex-col gap-6 px-5 pt-6 pb-40 lg:px-10 lg:pt-12 lg:pb-16">
       <Stepper
         steps={["Serviço", "Data e horário", "Seus dados"]}
         current={1}
@@ -137,7 +137,7 @@ export default async function HorarioPage({
         <h1 className="type-h1 mt-2">Escolha o dia e o horário</h1>
       </header>
 
-      <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[400px_1fr] lg:items-start">
+      <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[336px_minmax(0,1fr)_280px] lg:items-start xl:grid-cols-[400px_minmax(0,1fr)_340px]">
         {calendar}
         <SlotSelector
           serviceId={service.id}

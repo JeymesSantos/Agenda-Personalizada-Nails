@@ -256,7 +256,7 @@ export default async function DashboardPage({ searchParams }: PageProps<"/admin"
             <AgendaList items={data.today} timezone={tz} />
           </CardContent>
         </Card>
-        <Card className="hidden xl:flex">
+        <Card className="hidden lg:flex">
           <CardHeader>
             <CardTitle>Serviços mais vendidos</CardTitle>
           </CardHeader>

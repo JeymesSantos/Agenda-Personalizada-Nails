@@ -67,7 +67,7 @@ export function SlotSelector({
           return (
             <div key={g} className="flex flex-col gap-2.5">
               <p className="type-caption text-secondary-txt">{g}</p>
-              <div className="grid grid-cols-3 gap-2.5 sm:flex sm:flex-wrap">
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(96px,1fr))] gap-2.5">
                 {list.map((s) => (
                   <SlotButton
                     key={s.iso}
@@ -108,7 +108,7 @@ export function SlotSelector({
       </div>
 
       {/* ---- desktop (D2): coluna de horários + cartão de resumo ---- */}
-      <div className="hidden gap-4 lg:grid lg:grid-cols-[1fr_360px]">
+      <div className="hidden lg:contents">
         <div className="bg-surface border-subtle flex flex-col gap-4 rounded-md border p-6">
           <h2 className="type-h3">{dayLabel}</h2>
           {slotList}
