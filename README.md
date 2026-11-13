@@ -41,7 +41,7 @@ Documentos de apoio:
 | Auth       | Auth.js v5 (Credentials + bcrypt); admin por e-mail/senha; cliente com conta ou link com token |
 | Validação  | Zod nos formulários e nas Server Actions                                                       |
 | Datas      | date-fns + @date-fns/tz, fuso configurado por estúdio                                          |
-| Arquivos   | `public/uploads` em desenvolvimento (Vercel Blob previsto para produção)                       |
+| Arquivos   | `public/uploads` em desenvolvimento; Vercel Blob em produção (`BLOB_READ_WRITE_TOKEN`)         |
 | Testes     | Vitest (unidade e integração)                                                                  |
 | Formatação | ESLint + Prettier (plugin Tailwind)                                                            |
 
@@ -101,6 +101,7 @@ com token de gerenciamento (`/meus-horarios?t=<token>`), o mesmo que vai na conf
 | `AUTH_SECRET`                   | Segredo do Auth.js (obrigatório).                                                    |
 | `AUTH_URL`                      | URL pública da aplicação (`http://localhost:3000` em dev).                           |
 | `TZ`                            | Fuso do processo Node; o fuso do estúdio também fica gravado em `Business.timezone`. |
+| `BLOB_READ_WRITE_TOKEN`         | Token do Vercel Blob. Sem ele os uploads vão para `public/uploads` (dev).            |
 | `FIGMA_TOKEN`, `FIGMA_FILE_KEY` | Opcionais, só para scripts de extração do design.                                    |
 
 ## Scripts
@@ -169,7 +170,8 @@ O `src/proxy.ts` protege `/admin/**` (exige ADMIN) e `/meus-horarios/**` (exige 
 | `/admin/clientes`        | —             | Lista com busca                                                                                                                                                          |
 | `/admin/clientes/[id]`   | —             | Ficha: KPIs, histórico, anotações, contato                                                                                                                               |
 | `/admin/bio`             | —             | Editar página pública com prévia ao vivo                                                                                                                                 |
-| `/admin/mais`            | —             | Item "Mais" da barra inferior no celular (portfólio, clientes, bio, sair)                                                                                                |
+| `/admin/fundos`          | —             | Fotos e vídeos de fundo: biblioteca (upload) e qual mídia aparece em cada tela, com véu por tela                                                                         |
+| `/admin/mais`            | —             | Item "Mais" da barra inferior no celular (portfólio, clientes, bio, fundos, sair)                                                                                        |
 
 ### Desenvolvimento
 
@@ -177,6 +179,23 @@ O `src/proxy.ts` protege `/admin/**` (exige ADMIN) e `/meus-horarios/**` (exige 
 | ------------- | ------------------------------------------------------ |
 | `/dev/tokens` | Paleta, escala tipográfica e gradientes do brand board |
 | `/dev/ui`     | Galeria do kit de componentes                          |
+
+## Fundos das telas (fotos e vídeos)
+
+Atrás de todas as telas (área da cliente, login e painel) passa um slideshow de fotos e vídeos,
+gerenciado em `/admin/fundos`:
+
+- **Biblioteca**: cada mídia é enviada uma vez (`BackgroundMedia`). Fotos JPG/PNG/WebP até 5 MB;
+  vídeos MP4/WebM até 50 MB, com pôster opcional (mostrado enquanto carrega e quando o vídeo não
+  toca). O upload passa por `POST /api/uploads/background`, fora das Server Actions (limite de 1 MB);
+  em produção o arquivo vai do navegador direto para o Vercel Blob.
+- **Telas**: cada tela do enum `BackgroundPage` pode ter sua própria sequência
+  (`BackgroundAssignment`) e véu (`BackgroundPageSetting`: leve, médio, denso). Tela sem mídia
+  própria herda o `*_DEFAULT` da área. A rota é mapeada para a tela em
+  `src/features/backgrounds/pages.ts`.
+- **Exibição**: `BackgroundSlideshow` (cliente) resolve a tela pela rota, troca foto a cada 7 s e
+  vídeo ao terminar (teto de 20 s), mudo e em loop quando é a única mídia. Com "reduzir movimento"
+  ou economia de dados mostra só a primeira mídia parada.
 
 ## Responsividade
 
@@ -197,19 +216,21 @@ em `src/lib/use-media-query.ts`. O desktop do Figma foi desenhado em 1440 px.
 prisma/              schema, migrations e seed (dados do Figma)
 docs/                PLANO.md e design-tokens.md
 public/brand/        logo "LF" em SVG
+public/hero*/        fotos de fundo iniciais (o seed as registra como padrão de cada área)
 public/uploads/      arquivos enviados em desenvolvimento (ignorado pelo git)
 src/app/
   (public)/          layout com header/rodapé/barra inferior e as páginas da cliente
   (auth)/            entrar, cadastro, admin/entrar
   (admin)/admin/     layout com sidebar/barra inferior e as páginas do painel
-  api/               Auth.js e logout
+  api/               Auth.js, logout e upload das mídias de fundo
   dev/               tokens e galeria de UI
   globals.css        variáveis de design, @theme do Tailwind, utilitários tipográficos
 src/components/
   ui/                kit shadcn ajustado ao design (Button, Card, Sheet, Calendar, SlotButton…)
-  layout/            BottomNav, Sidebar, PublicHeader, PageHeader
+  layout/            BottomNav, Sidebar, PublicHeader, PageHeader, BackgroundSlideshow
 src/features/<área>/ queries.ts (leitura), actions.ts (Server Actions), schemas.ts (Zod), components/
   booking/core.ts    slotsForDay, monthAvailability, bookAppointment (transação serializável)
+  backgrounds/       mídias de fundo: pages.ts (telas e rota → tela), queries, actions, upload
 src/lib/
   scheduling/        motor puro de horários (slots, intervalos) + testes
   finance/           receita, lucro, ocupação, ticket médio + testes
@@ -239,7 +260,8 @@ pnpm test
 ## Deploy (previsto na Fase D)
 
 Vercel + Neon (Postgres) + Vercel Blob (fotos) + Resend (e-mail) + Vercel Cron para lembretes.
-Variáveis mínimas em produção: `DATABASE_URL`, `AUTH_SECRET`, `AUTH_URL`. Rode
+Variáveis mínimas em produção: `DATABASE_URL`, `AUTH_SECRET`, `AUTH_URL` e `BLOB_READ_WRITE_TOKEN`
+(sem ele os uploads tentam gravar no disco, que não persiste na Vercel). Rode
 `pnpm db:deploy` no build e `pnpm db:seed` uma vez se quiser os dados de exemplo.
 
 ## Problemas comuns

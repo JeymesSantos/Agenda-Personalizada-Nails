@@ -3,6 +3,7 @@ import {
   BarChart3Icon,
   CalendarIcon,
   ImageIcon,
+  ImagesIcon,
   MenuIcon,
   ReceiptIcon,
   SparklesIcon,
@@ -47,6 +48,12 @@ export const adminSidebarItems: SidebarItem[] = [
     matchPrefixes: ["/admin/clientes"],
   },
   { href: "/admin/bio", label: "Bio & links", icon: <AtSignIcon />, matchPrefixes: ["/admin/bio"] },
+  {
+    href: "/admin/fundos",
+    label: "Fundos",
+    icon: <ImagesIcon />,
+    matchPrefixes: ["/admin/fundos"],
+  },
 ]
 
 /* Barra inferior (mobile), 5 itens como na tela AM1. */
@@ -74,6 +81,12 @@ export const adminBottomNavItems: BottomNavItem[] = [
     href: "/admin/mais",
     label: "Mais",
     icon: <MenuIcon />,
-    matchPrefixes: ["/admin/mais", "/admin/portfolio", "/admin/clientes", "/admin/bio"],
+    matchPrefixes: [
+      "/admin/mais",
+      "/admin/portfolio",
+      "/admin/clientes",
+      "/admin/bio",
+      "/admin/fundos",
+    ],
   },
 ]
