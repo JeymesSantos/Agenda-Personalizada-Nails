@@ -176,35 +176,42 @@ function PageCard({
             >
               <MediaThumb media={m} sizes="120px" />
               {!inherits ? (
-                <div className="absolute inset-x-0 bottom-0 flex items-center justify-between bg-black/55 p-1">
-                  <button
+                <>
+                  <Button
                     type="button"
-                    aria-label={`Mover ${m.name} para trás`}
-                    className="text-foreground disabled:opacity-30"
-                    onClick={() => move(i, -1)}
-                    disabled={i === 0 || pending}
-                  >
-                    <ChevronLeftIcon className="size-4" />
-                  </button>
-                  <button
-                    type="button"
+                    variant="danger"
+                    size="icon-xs"
                     aria-label={`Remover ${m.name} de ${row.label}`}
-                    className="text-foreground"
+                    className="absolute top-1 right-1 size-7 rounded-full"
                     onClick={() => save(ids.filter((x) => x !== id))}
                     disabled={pending}
                   >
-                    <XIcon className="size-4" />
-                  </button>
-                  <button
-                    type="button"
-                    aria-label={`Mover ${m.name} para frente`}
-                    className="text-foreground disabled:opacity-30"
-                    onClick={() => move(i, 1)}
-                    disabled={i === ids.length - 1 || pending}
-                  >
-                    <ChevronRightIcon className="size-4" />
-                  </button>
-                </div>
+                    <XIcon className="size-3.5" />
+                  </Button>
+                  {ids.length > 1 ? (
+                    <div className="absolute inset-x-0 bottom-0 flex items-center justify-between bg-black/55 px-1 py-0.5">
+                      <button
+                        type="button"
+                        aria-label={`Mover ${m.name} para trás`}
+                        className="text-foreground rounded-xs p-0.5 hover:bg-white/15 disabled:opacity-30"
+                        onClick={() => move(i, -1)}
+                        disabled={i === 0 || pending}
+                      >
+                        <ChevronLeftIcon className="size-4" />
+                      </button>
+                      <span className="type-caption text-secondary-txt">{i + 1}</span>
+                      <button
+                        type="button"
+                        aria-label={`Mover ${m.name} para frente`}
+                        className="text-foreground rounded-xs p-0.5 hover:bg-white/15 disabled:opacity-30"
+                        onClick={() => move(i, 1)}
+                        disabled={i === ids.length - 1 || pending}
+                      >
+                        <ChevronRightIcon className="size-4" />
+                      </button>
+                    </div>
+                  ) : null}
+                </>
               ) : null}
             </div>
           )
