@@ -478,7 +478,7 @@ async function main() {
           url: `/placeholders/nail-${(photoIndex % 6) + 1}.svg`,
           caption: i === 0 && name === "Nail art" ? "Francesinha rosé com glitter" : null,
           isCover: i === 0 && name === "Alongamento",
-          featuredOnBio: photoIndex < 3,
+          featuredOnBio: photoIndex < 8, // a grade da bio roda por todos os destaques
           wantThis: true,
           order: photoIndex,
         },

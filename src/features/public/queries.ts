@@ -33,17 +33,22 @@ export async function getPublicService(businessId: string, id: string) {
   })
 }
 
-export async function listFeaturedPhotos(businessId: string, take = 4) {
+/*
+ * Fotos dos destaques da bio: até `max` marcadas como destaque; se houver
+ * menos de `min`, completa com as primeiras do portfólio para a grade não
+ * ficar vazia. A grade mostra `min` quadros e roda pelas demais.
+ */
+export async function listFeaturedPhotos(businessId: string, min = 4, max = 12) {
   const featured = await prisma.photo.findMany({
     where: { businessId, featuredOnBio: true },
     orderBy: [{ isCover: "desc" }, { order: "asc" }],
-    take,
+    take: max,
   })
-  if (featured.length >= take) return featured
+  if (featured.length >= min) return featured
   const more = await prisma.photo.findMany({
     where: { businessId, id: { notIn: featured.map((p) => p.id) } },
     orderBy: [{ isCover: "desc" }, { order: "asc" }],
-    take: take - featured.length,
+    take: min - featured.length,
   })
   return [...featured, ...more]
 }
