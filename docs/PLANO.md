@@ -332,12 +332,15 @@ explícita do usuário. Manter requisitos, operação e limitações documentado
 | ---------------------------------------------- | -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
 | Passo 1 — vínculo de contas e acesso por token | Implementado; aguarda validação do usuário   | Branch `fix/homologacao-01-vinculo-contas`, commit `4e0c790`; 53 testes unitários/de integração e 4 cenários de navegador aprovados       |
 | Alterações anteriores de interface e despesas  | Incluídas em commit separado na mesma branch | Commit `e3e217b`: proporção dos fundos, valores com centavos e cobertura de interface                                                     |
-| Bloqueio de deploy na Vercel Hobby             | Causa confirmada; ajuste diário autorizado   | O cron de 15 minutos foi rejeitado antes do build. A configuração passa a `0 9 * * *`                                                     |
+| Bloqueio de deploy por cron na Vercel Hobby    | Resolvido no commit `7347ca3`                | O cron diário `0 9 * * *` foi aceito; a Vercel iniciou a instalação das dependências no novo preview                                      |
+| Novo bloqueio do preview                       | Pendente de configuração do ambiente         | O `postinstall` (`prisma generate`) falhou com `PrismaConfigEnvError`: `DATABASE_URL` não definida no ambiente de Preview                 |
 | Horário e alcance do cron                      | Diário, 09:00 UTC / 06:00 em São Paulo       | No Hobby pode executar dentro dessa hora. O disparo automático ocorre somente em produção, não em preview                                 |
 | Lembretes pontuais de 24 h e 2 h               | Pendente para uso real                       | A execução diária não garante esses horários; detalhes e requisitos em [README](../README.md#frequência-do-cron-e-limites-da-homologação) |
 | Uploads no ambiente publicado                  | Pendente                                     | O teste de produção local retorna 404 para arquivo recém-enviado sem Blob; validar o armazenamento publicado                              |
 | Demais passos da homologação                   | Aguardam validação do passo 1                | Configuração do ambiente, infraestrutura, dados fictícios, publicação validada e teste com a profissional                                 |
 
 O ajuste de cron é uma correção pontual autorizada nesta branch. Não representa a conclusão
-dos passos de infraestrutura ou a liberação para clientes reais. O status do deployment deve
-ser conferido após enviar a alteração ao `origin`.
+dos passos de infraestrutura ou a liberação para clientes reais. O preview do commit `7347ca3`
+foi conferido: superou a validação do cron, mas parou na instalação por falta de `DATABASE_URL`.
+A configuração do banco e das variáveis de Preview depende da autorização para o próximo
+passo. [Deployment inspecionado](https://vercel.com/jeymersontigre-5805/agenda-personalizada-nails/4R3TymaPktAw2uVmXp97oUStv9Wf).
