@@ -24,12 +24,12 @@ Documentos de apoio:
 
 ## Status
 
-| Fase                                             | Situação                                                                     |
-| ------------------------------------------------ | ---------------------------------------------------------------------------- |
-| A — Fundação (Next, tokens, kit de UI, DB, auth) | Concluída                                                                    |
-| B — Motor de horários e painel da profissional   | Concluída                                                                    |
-| C — Jornada da cliente                           | Concluída                                                                    |
-| D — Lembretes, PWA, e2e, CI, deploy              | Em andamento: D1 lembretes, D2 PWA e D3 e2e concluídos; falta GitHub Actions |
+| Fase                                             | Situação                                                                           |
+| ------------------------------------------------ | ---------------------------------------------------------------------------------- |
+| A — Fundação (Next, tokens, kit de UI, DB, auth) | Concluída                                                                          |
+| B — Motor de horários e painel da profissional   | Concluída                                                                          |
+| C — Jornada da cliente                           | Concluída                                                                          |
+| D — Lembretes, PWA, e2e, CI, deploy              | Em andamento: D1 lembretes, D2 PWA, D3 e2e e D4 CI concluídos; falta o deploy (D5) |
 
 ## Stack
 
@@ -315,6 +315,14 @@ agendamento pelo link com token. Cada passo também confere o banco.
   (`reuseExistingServer`). Falhas deixam trace, screenshot e contexto em `test-results/`.
 - O acesso ao banco nos testes usa `pg` direto, porque o cliente Prisma gerado é ESM e o runner
   do Playwright não o carrega.
+
+## CI (GitHub Actions)
+
+`.github/workflows/ci.yml` roda em pull requests e em push na `main`: instala com pnpm (cache),
+`lint`, `format:check`, `typecheck`, migra e semeia um Postgres de service container, `test`
+(unitários + integração) e `test:e2e` (Playwright faz build e sobe a app na porta 3100 contra o
+banco de teste). Em falha do e2e, o relatório e os traces sobem como artefato `playwright-report`.
+Execuções em sequência no mesmo branch cancelam a anterior.
 
 ## Deploy (previsto na Fase D)
 
