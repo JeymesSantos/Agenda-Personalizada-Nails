@@ -243,7 +243,7 @@ function cap(s: string) {
 export async function getAppointmentDetail(businessId: string, id: string) {
   const a = await prisma.appointment.findFirst({
     where: { id, businessId },
-    include: { client: true, service: true },
+    include: { client: true, service: true, reminders: { orderBy: { sendAt: "asc" } } },
   })
   if (!a) return null
   const visits = await prisma.appointment.count({

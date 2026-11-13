@@ -24,12 +24,12 @@ Documentos de apoio:
 
 ## Status
 
-| Fase                                             | Situação                                                                           |
-| ------------------------------------------------ | ---------------------------------------------------------------------------------- |
-| A — Fundação (Next, tokens, kit de UI, DB, auth) | Concluída                                                                          |
-| B — Motor de horários e painel da profissional   | Concluída                                                                          |
-| C — Jornada da cliente                           | Concluída                                                                          |
-| D — Lembretes, PWA, e2e, CI, deploy              | Pendente (lembretes WhatsApp/e-mail, manifest PWA, Playwright e2e, GitHub Actions) |
+| Fase                                             | Situação                                                                         |
+| ------------------------------------------------ | -------------------------------------------------------------------------------- |
+| A — Fundação (Next, tokens, kit de UI, DB, auth) | Concluída                                                                        |
+| B — Motor de horários e painel da profissional   | Concluída                                                                        |
+| C — Jornada da cliente                           | Concluída                                                                        |
+| D — Lembretes, PWA, e2e, CI, deploy              | Em andamento: D1 lembretes concluído; faltam PWA, Playwright e2e, GitHub Actions |
 
 ## Stack
 
@@ -102,6 +102,8 @@ com token de gerenciamento (`/meus-horarios?t=<token>`), o mesmo que vai na conf
 | `AUTH_URL`                      | URL pública da aplicação (`http://localhost:3000` em dev).                           |
 | `TZ`                            | Fuso do processo Node; o fuso do estúdio também fica gravado em `Business.timezone`. |
 | `BLOB_READ_WRITE_TOKEN`         | Token do Vercel Blob. Sem ele os uploads vão para `public/uploads` (dev).            |
+| `RESEND_API_KEY`, `EMAIL_FROM`  | Envio dos lembretes por e-mail (Resend). Sem chave, o e-mail só aparece no log.      |
+| `CRON_SECRET`                   | Protege `GET /api/cron/reminders`; a Vercel envia no header `Authorization`.         |
 | `FIGMA_TOKEN`, `FIGMA_FILE_KEY` | Opcionais, só para scripts de extração do design.                                    |
 
 ## Scripts
@@ -171,6 +173,7 @@ O `src/proxy.ts` protege `/admin/**` (exige ADMIN) e `/meus-horarios/**` (exige 
 | `/admin/clientes/[id]`   | —             | Ficha: KPIs, histórico, anotações, contato                                                                                                                               |
 | `/admin/bio`             | —             | Editar página pública com prévia ao vivo                                                                                                                                 |
 | `/admin/fundos`          | —             | Fotos e vídeos de fundo: biblioteca (upload) e qual mídia aparece em cada tela, com véu por tela                                                                         |
+| `/api/cron/reminders`    | —             | Envia os lembretes de e-mail vencidos (Vercel Cron a cada 15 min, `vercel.json`)                                                                                         |
 | `/admin/mais`            | —             | Item "Mais" da barra inferior no celular (portfólio, clientes, bio, fundos, sair)                                                                                        |
 
 ### Desenvolvimento
@@ -179,6 +182,22 @@ O `src/proxy.ts` protege `/admin/**` (exige ADMIN) e `/meus-horarios/**` (exige 
 | ------------- | ------------------------------------------------------ |
 | `/dev/tokens` | Paleta, escala tipográfica e gradientes do brand board |
 | `/dev/ui`     | Galeria do kit de componentes                          |
+
+## Lembretes (confirmação, 24 h e 2 h)
+
+Ao criar ou remarcar um agendamento, `bookAppointment` chama `scheduleReminders`, que cria um
+`Reminder` por canal da cliente (e-mail e/ou WhatsApp) e por tipo: confirmação (sai na hora),
+24 h e 2 h antes (só se ainda cabem). Cancelar, concluir ou marcar falta cancela os pendentes;
+reabrir volta a agendá-los (`src/features/reminders`).
+
+- **E-mail**: `GET /api/cron/reminders` envia os vencidos via Resend (`RESEND_API_KEY`); sem chave,
+  um notificador de console registra no log e marca como enviado, para testar em dev. Na Vercel o
+  cron vem de `vercel.json`; fora dela, chame a rota com `Authorization: Bearer $CRON_SECRET`.
+- **WhatsApp**: ainda sem provedor (decisão pendente no plano). O painel de detalhe do agendamento
+  lista os lembretes e, para os de WhatsApp, oferece o link `wa.me` com o texto pronto e o botão
+  "Marcar enviado".
+- Os textos ficam em `templates.ts` (funções puras, com testes) e os botões apontam para o
+  comprovante com o token de gerenciamento, onde a cliente remarca ou cancela sem cadastro.
 
 ## Fundos das telas (fotos e vídeos)
 
@@ -234,10 +253,11 @@ src/components/
 src/features/<área>/ queries.ts (leitura), actions.ts (Server Actions), schemas.ts (Zod), components/
   booking/core.ts    slotsForDay, monthAvailability, bookAppointment (transação serializável)
   backgrounds/       mídias de fundo: pages.ts (telas e rota → tela), queries, actions, upload
+  reminders/         lembretes: plan.ts (quando), templates.ts (textos), core.ts (agendar/enviar)
 src/lib/
   scheduling/        motor puro de horários (slots, intervalos) + testes
   finance/           receita, lucro, ocupação, ticket médio + testes
-  auth.ts, session.ts, prisma.ts, dates.ts, money.ts, storage.ts, use-media-query.ts
+  auth.ts, session.ts, prisma.ts, dates.ts, money.ts, storage.ts, notifications.ts, use-media-query.ts
 src/proxy.ts         controle de acesso por rota
 src/generated/prisma cliente Prisma gerado (ignorado pelo git; pnpm db:generate)
 tests/integration/   testes que usam o banco

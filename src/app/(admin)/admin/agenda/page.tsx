@@ -118,6 +118,11 @@ export default async function AgendaPage({ searchParams }: PageProps<"/admin/age
               timezone={timezone}
               services={services}
               ymd={dayKey(detail.startsAt, timezone)}
+              business={{
+                name: business.name,
+                addressLine: business.addressLine,
+                neighborhood: business.neighborhood,
+              }}
             />
           </PanelHost>
         ) : null}
