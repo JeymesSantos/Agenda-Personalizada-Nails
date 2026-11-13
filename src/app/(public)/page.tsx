@@ -197,7 +197,8 @@ export default async function HomePage() {
       {/* ---------- DESKTOP (D1) ---------- */}
       {/* ocupa a altura da tela abaixo do cabeçalho (88px) com o conteúdo centralizado; as fotos ficam no fundo do layout */}
       <section className="hidden min-h-[calc(100dvh-88px)] flex-col justify-center px-10 pt-16 pb-20 lg:flex xl:px-20">
-        <div className="mx-auto grid max-w-[1280px] grid-cols-[minmax(0,1fr)_minmax(0,460px)] items-center gap-10 xl:grid-cols-[minmax(0,1fr)_520px] xl:gap-16">
+        {/* a coluna das fotos cresce com a tela (até 44% em telas largas) */}
+        <div className="mx-auto grid w-full max-w-[1280px] grid-cols-[minmax(0,1fr)_minmax(0,460px)] items-center gap-10 xl:grid-cols-[minmax(0,1fr)_minmax(0,40%)] xl:gap-16 2xl:max-w-[1600px] 2xl:grid-cols-[minmax(0,1fr)_minmax(0,44%)]">
           <div className="flex flex-col gap-6">
             <p className="display-label text-pink-300">Nail designer · Agenda online</p>
             <h1 className="display-xl">{b.name}</h1>
@@ -231,8 +232,8 @@ export default async function HomePage() {
               </div>
             </dl>
           </div>
-          {/* 4 quadros que rodam pelas demais fotos de destaque */}
-          <div className="grid grid-cols-2 gap-4">
+          {/* 4 quadros que rodam pelas demais fotos de destaque; altura presa à tela para a grade nunca estourar o hero */}
+          <div className="grid h-[clamp(440px,calc(100dvh-88px-176px),820px)] grid-cols-2 grid-rows-2 gap-4 py-6">
             {Array.from({ length: Math.min(4, photos.length) }, (_, slot) => (
               <RotatingPhotoTile
                 key={slot}
@@ -242,10 +243,10 @@ export default async function HomePage() {
                 sizes="(min-width: 1024px) 260px, 33vw"
                 className={
                   slot === 0
-                    ? "-mt-8 aspect-[4/5]"
+                    ? "h-full -translate-y-6"
                     : slot === 3
-                      ? "-mb-8 aspect-[4/5]"
-                      : "aspect-[5/4]"
+                      ? "h-full translate-y-6"
+                      : "h-full"
                 }
               />
             ))}
