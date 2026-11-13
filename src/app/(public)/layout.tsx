@@ -1,20 +1,42 @@
+import Link from "next/link"
 import { AtSignIcon, MessageCircleIcon } from "lucide-react"
 
 import { BottomNav } from "@/components/layout/bottom-nav"
+import { HeroSlideshow, PUBLIC_HERO_SLIDES } from "@/components/layout/hero-slideshow"
 import { PublicHeader } from "@/components/layout/public-header"
+import { Button } from "@/components/ui/button"
+import { SignOutButton } from "@/features/auth/components/sign-out-button"
 import { clientBottomNavItems, clientHeaderItems } from "@/features/public/nav"
 import { getPublicBusinessOrThrow } from "@/features/public/queries"
+import { getCurrentUser } from "@/lib/session"
 
 /*
- * Moldura da área pública: header com menu no desktop (D1/D2), barra inferior
- * no celular (M1–M8) e rodapé com endereço, horário e contatos.
+ * Moldura da área pública: fotos da profissional fixas ao fundo da página inteira,
+ * header translúcido com menu no desktop (D1/D2), barra inferior no celular (M1–M8)
+ * e rodapé com endereço, horário e contatos.
+ * À direita de "Agendar horário": "Sair" se a cliente está logada, senão "Login".
  */
 export default async function PublicLayout({ children }: LayoutProps<"/">) {
-  const b = await getPublicBusinessOrThrow()
+  const [b, user] = await Promise.all([getPublicBusinessOrThrow(), getCurrentUser()])
+  const loggedIn = user?.role === "CLIENT"
 
   return (
-    <div className="flex min-h-dvh flex-col">
-      <PublicHeader items={clientHeaderItems} businessName={b.name} ctaHref="/agendar" />
+    <div className="relative isolate flex min-h-dvh flex-col">
+      <HeroSlideshow slides={PUBLIC_HERO_SLIDES} />
+      <PublicHeader
+        items={clientHeaderItems}
+        businessName={b.name}
+        ctaHref="/agendar"
+        trailing={
+          loggedIn ? (
+            <SignOutButton role="CLIENT" variant="secondary" size="default" />
+          ) : (
+            <Button asChild variant="secondary">
+              <Link href="/entrar">Login</Link>
+            </Button>
+          )
+        }
+      />
       <div className="flex flex-1 flex-col pb-24 lg:pb-0">{children}</div>
       <footer className="border-subtle type-body text-secondary-txt hidden items-center justify-between border-t px-10 py-8 lg:flex xl:px-20">
         <p>{[b.addressLine, b.neighborhood, b.hoursSummary].filter(Boolean).join(" · ")}</p>

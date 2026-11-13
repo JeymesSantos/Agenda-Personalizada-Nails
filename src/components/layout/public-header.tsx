@@ -11,7 +11,9 @@ export type PublicNavItem = { href: string; label: string }
 
 /*
  * Cabeçalho desktop da área pública (Figma D1/D2): logo + nome em caps,
- * links centrais (ativo em pink-300) e botão "Agendar horário" à direita.
+ * links centrais (ativo em pink-300), botão "Agendar horário" à direita e,
+ * depois dele, `trailing` (Sair/Login conforme a sessão).
+ * Fundo levemente translúcido com blur para deixar as fotos do layout aparecerem.
  * No mobile só aparece a BottomNav, então o header fica oculto abaixo de lg.
  */
 function PublicHeader({
@@ -19,6 +21,7 @@ function PublicHeader({
   businessName,
   ctaHref = "/agendar",
   ctaLabel = "Agendar horário",
+  trailing,
   className,
   activeHref,
   ...props
@@ -27,6 +30,7 @@ function PublicHeader({
   businessName: string
   ctaHref?: string
   ctaLabel?: string
+  trailing?: React.ReactNode
   activeHref?: string
 }) {
   const pathname = usePathname()
@@ -36,7 +40,7 @@ function PublicHeader({
     <header
       data-slot="public-header"
       className={cn(
-        "border-subtle hidden h-[140px] items-center border-b px-10 lg:flex xl:px-20",
+        "border-subtle bg-background/60 hidden h-[140px] items-center border-b px-10 backdrop-blur-md lg:flex xl:px-20",
         className,
       )}
       {...props}
@@ -67,6 +71,7 @@ function PublicHeader({
         <Button asChild className="ml-2">
           <Link href={ctaHref}>{ctaLabel}</Link>
         </Button>
+        {trailing}
       </nav>
     </header>
   )

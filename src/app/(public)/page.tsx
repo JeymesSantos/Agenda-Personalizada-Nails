@@ -97,7 +97,7 @@ export default async function HomePage() {
   return (
     <main className="flex flex-col">
       {/* ---------- MOBILE (M1) ---------- */}
-      <section className="bg-gradient-hero flex flex-col gap-6 px-5 pt-10 pb-6 lg:hidden">
+      <section className="flex flex-col gap-6 px-5 pt-10 pb-6 lg:hidden">
         <div className="flex flex-col items-center gap-4 text-center">
           <div className="bg-surface-2 relative size-[100px] overflow-hidden rounded-full">
             {b.logoUrl ? (
@@ -199,7 +199,8 @@ export default async function HomePage() {
       </section>
 
       {/* ---------- DESKTOP (D1) ---------- */}
-      <section className="bg-gradient-hero hidden px-10 pt-16 pb-20 lg:block xl:px-20">
+      {/* ocupa a altura da tela abaixo do cabeçalho (140px) com o conteúdo centralizado; as fotos ficam no fundo do layout */}
+      <section className="hidden min-h-[calc(100dvh-140px)] flex-col justify-center px-10 pt-16 pb-20 lg:flex xl:px-20">
         <div className="mx-auto grid max-w-[1280px] grid-cols-[minmax(0,1fr)_minmax(0,460px)] items-center gap-10 xl:grid-cols-[minmax(0,1fr)_520px] xl:gap-16">
           <div className="flex flex-col gap-6">
             <p className="display-label text-pink-300">Nail designer · Agenda online</p>
@@ -269,7 +270,6 @@ export default async function HomePage() {
                   title: s.title,
                   description: s.description,
                   durationMin: s.durationMin,
-                  bufferMin: s.bufferMin,
                   priceCents: s.priceCents,
                   priceFrom: s.priceFrom,
                   photoUrl: s.photoUrls[0] ?? null,

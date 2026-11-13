@@ -18,6 +18,7 @@ export type SidebarItem = NavMatch & {
  * Sidebar do painel (Figma A1–A6): 264px, logo + "Painel da profissional",
  * itens com ícone linear; ativo com fundo magenta sólido e texto pink-100.
  * Rodapé: "Ver minha página pública" (botão contornado) e "Sair".
+ * Fundo translúcido com blur para deixar as fotos do layout aparecerem.
  */
 function Sidebar({
   items,
@@ -41,7 +42,7 @@ function Sidebar({
     <aside
       data-slot="sidebar"
       className={cn(
-        "bg-surface border-subtle hidden w-[264px] shrink-0 flex-col border-r lg:flex",
+        "bg-surface/70 border-subtle hidden w-[264px] shrink-0 flex-col border-r backdrop-blur-md lg:flex",
         className,
       )}
       {...props}

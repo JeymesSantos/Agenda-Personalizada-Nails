@@ -11,6 +11,8 @@ const nextConfig: NextConfig = {
     /* placeholders do seed e logos são SVG; CSP restritiva por segurança */
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+    /* 70 é usado nas fotos do slideshow de fundo (hero-slideshow) */
+    qualities: [70, 75],
   },
   turbopack: {
     rules: {

@@ -334,3 +334,134 @@
 @utility pb-safe {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
+
+/*
+ * Fundo com fotos (HeroSlideshow): fotos da profissional passando atrás do
+ * conteúdo em crossfade lento com leve zoom (Ken Burns), sob um véu escuro +
+ * gradiente magenta para o texto seguir legível.
+ *
+ * Com N fotos cada uma ocupa 1/N do ciclo: 0–5% entra, fica visível até 100/N%
+ * e sai nos 5% seguintes, enquanto a próxima entra. O componente escalona o
+ * `animation-delay` de cada foto em -1/N do ciclo, mais -5% para a primeira já
+ * nascer visível, e escolhe os keyframes pelo `data-count` (5 na área pública,
+ * 3 no painel).
+ */
+:root {
+  --hero-cycle: 35s;
+}
+
+@keyframes hero-slide-3 {
+  0% {
+    opacity: 0;
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+  5%,
+  33.33% {
+    opacity: 1;
+  }
+  38.33% {
+    opacity: 0;
+    transform: scale(1.08) translate3d(-1%, -1.5%, 0);
+  }
+  38.34%,
+  100% {
+    opacity: 0;
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+}
+
+@keyframes hero-slide-5 {
+  0% {
+    opacity: 0;
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+  5%,
+  20% {
+    opacity: 1;
+  }
+  25% {
+    opacity: 0;
+    transform: scale(1.08) translate3d(-1%, -1.5%, 0);
+  }
+  25.01%,
+  100% {
+    opacity: 0;
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+}
+
+.hero-slideshow {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.hero-slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transform-origin: 50% 30%;
+  animation: hero-slide-5 var(--hero-cycle) ease-in-out infinite;
+  animation-delay: var(--hero-slide-delay, 0s);
+  will-change: opacity, transform;
+}
+
+.hero-slideshow[data-count="3"] .hero-slide {
+  animation-name: hero-slide-3;
+}
+
+.hero-slide > img {
+  object-fit: cover;
+  object-position: 50% 28%;
+  filter: saturate(0.9);
+}
+
+/*
+ * véu: escurece a foto e reaplica o gradiente magenta. O slideshow é fixo na
+ * viewport e cobre a página inteira, então o véu adensa mais embaixo, onde ficam
+ * cards e listas, sem nunca virar fundo sólido.
+ */
+.hero-slideshow-fade {
+  position: absolute;
+  inset: 0;
+  background:
+    var(--gradient-hero),
+    linear-gradient(
+      to bottom,
+      rgba(14, 10, 12, 0.62) 0%,
+      rgba(14, 10, 12, 0.74) 45%,
+      rgba(14, 10, 12, 0.86) 100%
+    );
+}
+
+/* no desktop o texto do hero fica à esquerda: véu mais denso desse lado */
+@media (min-width: 1024px) {
+  .hero-slideshow-fade {
+    background:
+      var(--gradient-hero),
+      linear-gradient(
+        to right,
+        rgba(14, 10, 12, 0.88) 0%,
+        rgba(14, 10, 12, 0.72) 45%,
+        rgba(14, 10, 12, 0.5) 100%
+      ),
+      linear-gradient(to bottom, rgba(14, 10, 12, 0.2) 0%, transparent 35%, rgba(14, 10, 12, 0.45) 100%);
+  }
+}
+
+/* painel: véu mais fechado e uniforme, para tabelas e formulários lerem bem */
+.hero-slideshow[data-tone="dense"] .hero-slideshow-fade {
+  background:
+    var(--gradient-hero),
+    linear-gradient(to bottom, rgba(14, 10, 12, 0.66) 0%, rgba(14, 10, 12, 0.82) 100%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-slide {
+    animation: none;
+  }
+  .hero-slide:first-child {
+    opacity: 1;
+  }
+}
