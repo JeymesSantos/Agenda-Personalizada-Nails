@@ -2,27 +2,29 @@ import Link from "next/link"
 import { AtSignIcon, MessageCircleIcon } from "lucide-react"
 
 import { BottomNav } from "@/components/layout/bottom-nav"
-import { HeroSlideshow, PUBLIC_HERO_SLIDES } from "@/components/layout/hero-slideshow"
+import { BackgroundSlideshow } from "@/components/layout/background-slideshow"
 import { PublicHeader } from "@/components/layout/public-header"
 import { Button } from "@/components/ui/button"
 import { SignOutButton } from "@/features/auth/components/sign-out-button"
+import { getAreaBackgrounds } from "@/features/backgrounds/queries"
 import { clientBottomNavItems, clientHeaderItems } from "@/features/public/nav"
 import { getPublicBusinessOrThrow } from "@/features/public/queries"
 import { getCurrentUser } from "@/lib/session"
 
 /*
- * Moldura da área pública: fotos da profissional fixas ao fundo da página inteira,
+ * Moldura da área pública: mídias de fundo (escolhidas por tela em /admin/fundos),
  * header translúcido com menu no desktop (D1/D2), barra inferior no celular (M1–M8)
  * e rodapé com endereço, horário e contatos.
  * À direita de "Agendar horário": "Sair" se a cliente está logada, senão "Login".
  */
 export default async function PublicLayout({ children }: LayoutProps<"/">) {
   const [b, user] = await Promise.all([getPublicBusinessOrThrow(), getCurrentUser()])
+  const backgrounds = await getAreaBackgrounds(b.id, "PUBLIC")
   const loggedIn = user?.role === "CLIENT"
 
   return (
     <div className="relative isolate flex min-h-dvh flex-col">
-      <HeroSlideshow slides={PUBLIC_HERO_SLIDES} />
+      <BackgroundSlideshow data={backgrounds} />
       <PublicHeader
         items={clientHeaderItems}
         businessName={b.name}
