@@ -22,6 +22,7 @@ describe.skipIf(!hasDb)("lembretes", () => {
   let businessId: string
   let serviceId: string
   let clientId: string
+  let clientEmail = ""
   let appointmentId: string
   const sent: EmailMessage[] = []
   const fakeNotifier: EmailNotifier = {
@@ -37,10 +38,11 @@ describe.skipIf(!hasDb)("lembretes", () => {
     const service = await prisma.service.findFirstOrThrow({ where: { businessId, visible: true } })
     serviceId = service.id
     const stamp = Date.now()
+    clientEmail = `lembrete-${stamp}@example.com`
     const client = await prisma.user.create({
       data: {
         name: "Teste Lembrete",
-        email: `lembrete-${stamp}@example.com`,
+        email: clientEmail,
         whatsapp: `57${stamp}`.slice(0, 13),
         role: "CLIENT",
       },
@@ -84,8 +86,10 @@ describe.skipIf(!hasDb)("lembretes", () => {
     expect(confirmation.status).toBe("SENT")
     expect(mine.filter((r) => r.status === "SCHEDULED")).toHaveLength(2)
     expect(result.sent).toBeGreaterThanOrEqual(1)
-    const msg = sent.find((m) => m.subject.includes("Horário confirmado"))!
-    expect(msg.to).toMatch(/^lembrete-/)
+    /* o cron também envia as confirmações do seed: procurar pelo e-mail desta cliente */
+    const msg = sent.find((m) => m.to === clientEmail)!
+    expect(msg).toBeDefined()
+    expect(msg.subject).toContain("Horário confirmado")
     expect(msg.text).toContain(
       `/agendamento/${(await prisma.appointment.findUniqueOrThrow({ where: { id: appointmentId } })).code}?t=`,
     )
