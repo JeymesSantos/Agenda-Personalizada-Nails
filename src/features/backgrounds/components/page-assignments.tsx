@@ -99,6 +99,7 @@ function PageCard({
   const [pickerOpen, setPickerOpen] = useState(false)
 
   const inherits = !row.isDefault && ids.length === 0
+  /* lista em vigor: a própria ou, herdando, a do padrão. Qualquer edição parte dela e vira lista própria. */
   const shown = inherits ? (defaultRow?.mediaIds ?? []) : ids
   const effectiveVeil = row.veil ?? defaultRow?.veil ?? "MEDIUM"
 
@@ -116,8 +117,8 @@ function PageCard({
 
   const move = (i: number, dir: -1 | 1) => {
     const j = i + dir
-    if (j < 0 || j >= ids.length) return
-    const next = [...ids]
+    if (j < 0 || j >= shown.length) return
+    const next = [...shown]
     ;[next[i], next[j]] = [next[j], next[i]]
     save(next)
   }
@@ -170,49 +171,53 @@ function PageCard({
               key={id}
               className={cn(
                 "bg-surface-2 border-subtle group relative aspect-[4/3] w-[120px] overflow-hidden rounded-sm border",
-                inherits && "opacity-60",
+                inherits && "opacity-75",
               )}
               title={m.name}
             >
               <MediaThumb media={m} sizes="120px" />
-              {!inherits ? (
-                <>
-                  <Button
-                    type="button"
-                    variant="danger"
-                    size="icon-xs"
-                    aria-label={`Remover ${m.name} de ${row.label}`}
-                    className="absolute top-1 right-1 size-7 rounded-full"
-                    onClick={() => save(ids.filter((x) => x !== id))}
-                    disabled={pending}
-                  >
-                    <XIcon className="size-3.5" />
-                  </Button>
-                  {ids.length > 1 ? (
-                    <div className="absolute inset-x-0 bottom-0 flex items-center justify-between bg-black/55 px-1 py-0.5">
-                      <button
-                        type="button"
-                        aria-label={`Mover ${m.name} para trás`}
-                        className="text-foreground rounded-xs p-0.5 hover:bg-white/15 disabled:opacity-30"
-                        onClick={() => move(i, -1)}
-                        disabled={i === 0 || pending}
-                      >
-                        <ChevronLeftIcon className="size-4" />
-                      </button>
-                      <span className="type-caption text-secondary-txt">{i + 1}</span>
-                      <button
-                        type="button"
-                        aria-label={`Mover ${m.name} para frente`}
-                        className="text-foreground rounded-xs p-0.5 hover:bg-white/15 disabled:opacity-30"
-                        onClick={() => move(i, 1)}
-                        disabled={i === ids.length - 1 || pending}
-                      >
-                        <ChevronRightIcon className="size-4" />
-                      </button>
-                    </div>
-                  ) : null}
-                </>
-              ) : null}
+              <>
+                <Button
+                  type="button"
+                  variant="danger"
+                  size="icon-xs"
+                  aria-label={`Remover ${m.name} de ${row.label}`}
+                  className="absolute top-1 right-1 size-7 rounded-full"
+                  onClick={() => save(shown.filter((x) => x !== id))}
+                  /* lista vazia significa "herda o padrão": uma tela comum não fica sem a última mídia */
+                  disabled={pending || (!row.isDefault && shown.length === 1)}
+                  title={
+                    !row.isDefault && shown.length === 1
+                      ? "Adicione outra mídia antes de remover a última"
+                      : undefined
+                  }
+                >
+                  <XIcon className="size-3.5" />
+                </Button>
+                {shown.length > 1 ? (
+                  <div className="absolute inset-x-0 bottom-0 flex items-center justify-between bg-black/55 px-1 py-0.5">
+                    <button
+                      type="button"
+                      aria-label={`Mover ${m.name} para trás`}
+                      className="text-foreground rounded-xs p-0.5 hover:bg-white/15 disabled:opacity-30"
+                      onClick={() => move(i, -1)}
+                      disabled={i === 0 || pending}
+                    >
+                      <ChevronLeftIcon className="size-4" />
+                    </button>
+                    <span className="type-caption text-secondary-txt">{i + 1}</span>
+                    <button
+                      type="button"
+                      aria-label={`Mover ${m.name} para frente`}
+                      className="text-foreground rounded-xs p-0.5 hover:bg-white/15 disabled:opacity-30"
+                      onClick={() => move(i, 1)}
+                      disabled={i === shown.length - 1 || pending}
+                    >
+                      <ChevronRightIcon className="size-4" />
+                    </button>
+                  </div>
+                ) : null}
+              </>
             </div>
           )
         })}
@@ -223,7 +228,7 @@ function PageCard({
           onClick={() => setPickerOpen(true)}
           disabled={pending || library.length === 0}
         >
-          <PlusIcon /> {inherits ? "Fundo próprio" : "Adicionar"}
+          <PlusIcon /> Adicionar
         </Button>
         {!row.isDefault && !inherits ? (
           <Button
@@ -246,14 +251,14 @@ function PageCard({
           </DialogHeader>
           <div className="grid max-h-[60vh] grid-cols-3 gap-3 overflow-y-auto sm:grid-cols-4">
             {library
-              .filter((m) => !ids.includes(m.id))
+              .filter((m) => !shown.includes(m.id))
               .map((m) => (
                 <button
                   key={m.id}
                   type="button"
                   className="bg-surface-2 border-subtle hover:border-magenta-500 relative aspect-[4/3] overflow-hidden rounded-sm border text-left transition-colors"
                   onClick={() => {
-                    save([...ids, m.id])
+                    save([...shown, m.id])
                     setPickerOpen(false)
                   }}
                 >
@@ -263,7 +268,7 @@ function PageCard({
                   </span>
                 </button>
               ))}
-            {library.filter((m) => !ids.includes(m.id)).length === 0 ? (
+            {library.filter((m) => !shown.includes(m.id)).length === 0 ? (
               <p className="type-body text-secondary-txt col-span-full py-6 text-center">
                 Todas as mídias já estão nesta tela.
               </p>
