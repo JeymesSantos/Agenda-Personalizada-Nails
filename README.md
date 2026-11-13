@@ -93,6 +93,13 @@ seed). Para inspecionar os dados: `pnpm db:studio`.
 Clientes sem cadastro (Camila, Rita, Paula, Nanda, Carla…) acessam seus agendamentos pelo link
 com token de gerenciamento (`/meus-horarios?t=<token>`), o mesmo que vai na confirmação.
 
+Cada link com token permite consultar, remarcar ou cancelar **somente o agendamento que o
+originou**. O histórico completo exige login na conta da cliente. Informar um WhatsApp no
+agendamento público não altera o nome já cadastrado. O cadastro não incorpora registros
+existentes por WhatsApp ou e-mail: a conversão de uma cliente sem conta fica bloqueada até
+haver comprovação de identidade. Enquanto isso, ela usa o link do comprovante ou procura o
+studio para ajuda com o cadastro.
+
 ### Variáveis de ambiente
 
 | Variável                        | Uso                                                                                      |

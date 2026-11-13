@@ -22,7 +22,7 @@ export default async function MeusHorariosPage({ searchParams }: PageProps<"/meu
   if (!access) redirect("/entrar?next=%2Fmeus-horarios")
   const now = new Date()
   const [{ client, upcoming, past }, business] = await Promise.all([
-    getMyAppointments(access.clientId, now),
+    getMyAppointments(access, now),
     getPublicBusinessOrThrow(),
   ])
   const firstName = client.name.split(" ")[0]
@@ -120,14 +120,11 @@ export default async function MeusHorariosPage({ searchParams }: PageProps<"/meu
 
       {access.kind === "token" && !client.passwordHash ? (
         <div className="bg-surface border-subtle flex flex-col gap-3 rounded-md border p-4">
-          <p className="type-body-medium">Quer guardar seu histórico?</p>
+          <p className="type-body-medium">Guarde o link deste agendamento</p>
           <p className="type-body text-secondary-txt">
-            Crie uma conta com este WhatsApp e seus agendamentos ficam salvos para remarcar com um
-            toque.
+            Este link permite consultar, remarcar ou cancelar somente este agendamento. Para ajuda
+            com seu cadastro, fale com o studio.
           </p>
-          <Button asChild variant="secondary" size="sm" className="w-fit">
-            <Link href="/cadastro?next=%2Fmeus-horarios">Criar conta</Link>
-          </Button>
         </div>
       ) : null}
     </main>

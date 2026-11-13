@@ -5,6 +5,7 @@ import { AuthError } from "next-auth"
 import { isRedirectError } from "next/dist/client/components/redirect-error"
 import { redirect } from "next/navigation"
 
+import { Prisma } from "@/generated/prisma/client"
 import { signIn, signOut } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { loginSchema, registerSchema, safeNext, type FormState } from "./schemas"
@@ -69,33 +70,39 @@ export async function registerAction(_prev: FormState, formData: FormData): Prom
   const { name, whatsapp, email, password, next } = parsed.data
 
   const existingEmail = await prisma.user.findUnique({ where: { email } })
-  if (existingEmail?.passwordHash) {
+  if (existingEmail) {
     return {
       fieldErrors: { email: ["Já existe uma conta com esse e-mail. Entre para continuar."] },
       values,
     }
   }
 
-  const passwordHash = await bcrypt.hash(password, 10)
   const existingByWhatsapp = await prisma.user.findUnique({ where: { whatsapp } })
 
-  if (
-    existingByWhatsapp &&
-    existingByWhatsapp.role === "CLIENT" &&
-    !existingByWhatsapp.passwordHash
-  ) {
-    /* Cliente que já agendou sem cadastro: a conta assume o histórico dela. */
-    await prisma.user.update({
-      where: { id: existingByWhatsapp.id },
-      data: { name, email, passwordHash },
-    })
-  } else if (existingByWhatsapp) {
+  if (existingByWhatsapp) {
     return {
-      fieldErrors: { whatsapp: ["Esse WhatsApp já está em uma conta. Entre para continuar."] },
+      fieldErrors: {
+        whatsapp: [
+          "Não foi possível usar este WhatsApp. Se já agendou, use o link do comprovante ou fale com o studio. Se tem conta, entre para continuar.",
+        ],
+      },
       values,
     }
-  } else {
+  }
+
+  /* Sem comprovação de identidade, o cadastro nunca incorpora um registro existente. */
+  const passwordHash = await bcrypt.hash(password, 10)
+  try {
     await prisma.user.create({ data: { name, whatsapp, email, passwordHash, role: "CLIENT" } })
+  } catch (error) {
+    /* Outra solicitação pode ter usado o e-mail/WhatsApp após as consultas acima. */
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      return {
+        error: "Não foi possível criar a conta com esses dados. Entre ou fale com o studio.",
+        values,
+      }
+    }
+    throw error
   }
 
   try {
