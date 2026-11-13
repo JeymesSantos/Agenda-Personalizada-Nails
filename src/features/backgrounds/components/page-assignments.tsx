@@ -147,7 +147,7 @@ function PageCard({
         <div className="flex items-center gap-2">
           <span className="type-caption text-secondary-txt">Véu</span>
           <Select value={effectiveVeil} onValueChange={(v) => setVeil(v as BackgroundVeil)}>
-            <SelectTrigger className="h-10 w-[120px]" aria-label={`Véu de ${row.label}`}>
+            <SelectTrigger size="sm" className="w-[132px]" aria-label={`Véu de ${row.label}`}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
