@@ -177,6 +177,7 @@ O `src/proxy.ts` protege `/admin/**` (exige ADMIN) e `/meus-horarios/**` (exige 
 | `/admin/bio`             | —             | Editar página pública com prévia ao vivo                                                                                                                                 |
 | `/admin/fundos`          | —             | Fotos e vídeos de fundo: biblioteca (upload) e qual mídia aparece em cada tela, com véu por tela                                                                         |
 | `/api/cron/reminders`    | —             | Envia os lembretes de e-mail vencidos (Vercel Cron a cada 15 min, `vercel.json`)                                                                                         |
+| `/manifest.webmanifest`  | —             | Manifest do PWA (nome do estúdio lido do banco); `/offline` é a tela sem conexão do service worker                                                                       |
 | `/admin/mais`            | —             | Item "Mais" da barra inferior no celular (portfólio, clientes, bio, fundos, sair)                                                                                        |
 
 ### Desenvolvimento
@@ -185,6 +186,20 @@ O `src/proxy.ts` protege `/admin/**` (exige ADMIN) e `/meus-horarios/**` (exige 
 | ------------- | ------------------------------------------------------ |
 | `/dev/tokens` | Paleta, escala tipográfica e gradientes do brand board |
 | `/dev/ui`     | Galeria do kit de componentes                          |
+
+## PWA (instalável na tela inicial)
+
+- `src/app/manifest.ts` gera o manifest com o nome e a descrição do estúdio, `display: standalone`,
+  tema `#0E0A0C` e atalhos para Agendar e Meus horários. Ícones em `public/icons/` (192, 512 e 512
+  maskable) gerados a partir de `public/brand/app-icon.svg`; `app/icon.png` e `app/apple-icon.png`
+  cobrem favicon e iOS.
+- `public/sw.js` é um service worker mínimo: não guarda páginas em cache (a agenda é em tempo real),
+  só serve `/offline` quando uma navegação falha e mantém os ícones. Registrado por
+  `components/pwa/service-worker-register.tsx` no layout raiz.
+- Toque: inputs com 16px (sem zoom no iOS), `-webkit-tap-highlight-color` transparente,
+  `viewport-fit=cover` e `pb-safe` na barra inferior. Barra de status do iOS opaca (`black`).
+- Para regenerar os ícones depois de trocar o SVG: rode um script com `sharp` (há um exemplo no
+  histórico do commit `feat(pwa)`), ou qualquer gerador de favicon, mantendo os nomes em `public/icons/`.
 
 ## Lembretes (confirmação, 24 h e 2 h)
 
@@ -247,7 +262,8 @@ src/app/
   (public)/          layout com header/rodapé/barra inferior e as páginas da cliente
   (auth)/            entrar, cadastro, admin/entrar
   (admin)/admin/     layout com sidebar/barra inferior e as páginas do painel
-  api/               Auth.js, logout e upload das mídias de fundo
+  api/               Auth.js, logout, upload das mídias de fundo e cron dos lembretes
+  manifest.ts        manifest do PWA; offline/ é a tela sem conexão
   dev/               tokens e galeria de UI
   globals.css        variáveis de design, @theme do Tailwind, utilitários tipográficos
 src/components/
