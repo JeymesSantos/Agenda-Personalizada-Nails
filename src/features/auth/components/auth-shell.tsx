@@ -2,13 +2,17 @@ import Image from "next/image"
 import Link from "next/link"
 import { ChevronLeftIcon } from "lucide-react"
 
+import { BackgroundSlideshow } from "@/components/layout/background-slideshow"
 import { Button } from "@/components/ui/button"
+import { getAreaBackgrounds } from "@/features/backgrounds/queries"
+import { getPublicBusinessOrThrow } from "@/features/public/queries"
 
 /*
- * Moldura das telas de entrar/cadastro: fundo com o gradiente de hero,
- * logo, rótulo em Display/Label e título H1, conteúdo centralizado (max 420px).
+ * Moldura das telas de entrar/cadastro: mídias de fundo da tela "Login e
+ * cadastro" (/admin/fundos), logo, rótulo em Display/Label e título H1,
+ * conteúdo centralizado (max 420px).
  */
-export function AuthShell({
+export async function AuthShell({
   eyebrow,
   title,
   description,
@@ -23,8 +27,11 @@ export function AuthShell({
   children: React.ReactNode
   footer?: React.ReactNode
 }) {
+  const business = await getPublicBusinessOrThrow()
+  const backgrounds = await getAreaBackgrounds(business.id, "PUBLIC")
   return (
-    <main className="bg-gradient-hero flex min-h-dvh flex-col">
+    <main className="relative isolate flex min-h-dvh flex-col">
+      <BackgroundSlideshow data={backgrounds} />
       <div className="mx-auto flex w-full max-w-[420px] flex-1 flex-col px-5 pt-6 pb-12">
         <div className="flex items-center justify-between">
           <Button asChild variant="soft" size="icon-sm" aria-label="Voltar">

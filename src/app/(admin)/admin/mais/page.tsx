@@ -10,7 +10,7 @@ export const metadata = { title: "Mais" }
 /* Item "Mais" da barra inferior (mobile): lista as áreas que não cabem na barra. */
 export default function MaisPage() {
   const items = adminSidebarItems.filter((i) =>
-    ["/admin/portfolio", "/admin/clientes", "/admin/bio"].includes(i.href),
+    ["/admin/portfolio", "/admin/clientes", "/admin/bio", "/admin/fundos"].includes(i.href),
   )
   return (
     <main className="mx-auto flex w-full max-w-[640px] flex-col gap-6 px-5 py-6">

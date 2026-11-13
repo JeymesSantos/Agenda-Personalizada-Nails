@@ -336,95 +336,67 @@
 }
 
 /*
- * Fundo com fotos (HeroSlideshow): fotos da profissional passando atrás do
- * conteúdo em crossfade lento com leve zoom (Ken Burns), sob um véu escuro +
- * gradiente magenta para o texto seguir legível.
- *
- * Com N fotos cada uma ocupa 1/N do ciclo: 0–5% entra, fica visível até 100/N%
- * e sai nos 5% seguintes, enquanto a próxima entra. O componente escalona o
- * `animation-delay` de cada foto em -1/N do ciclo, mais -5% para a primeira já
- * nascer visível, e escolhe os keyframes pelo `data-count` (5 na área pública,
- * 3 no painel).
+ * Fundo com mídias (BackgroundSlideshow): fotos e vídeos passando atrás do
+ * conteúdo em crossfade com leve zoom (Ken Burns), sob um véu escuro +
+ * gradiente magenta para o texto seguir legível. A troca é controlada pelo
+ * componente; aqui ficam só a transição e o véu em três intensidades.
  */
-:root {
-  --hero-cycle: 35s;
-}
-
-@keyframes hero-slide-3 {
-  0% {
-    opacity: 0;
-    transform: scale(1) translate3d(0, 0, 0);
-  }
-  5%,
-  33.33% {
-    opacity: 1;
-  }
-  38.33% {
-    opacity: 0;
-    transform: scale(1.08) translate3d(-1%, -1.5%, 0);
-  }
-  38.34%,
-  100% {
-    opacity: 0;
-    transform: scale(1) translate3d(0, 0, 0);
-  }
-}
-
-@keyframes hero-slide-5 {
-  0% {
-    opacity: 0;
-    transform: scale(1) translate3d(0, 0, 0);
-  }
-  5%,
-  20% {
-    opacity: 1;
-  }
-  25% {
-    opacity: 0;
-    transform: scale(1.08) translate3d(-1%, -1.5%, 0);
-  }
-  25.01%,
-  100% {
-    opacity: 0;
-    transform: scale(1) translate3d(0, 0, 0);
-  }
-}
-
-.hero-slideshow {
+.bg-slideshow {
   position: fixed;
   inset: 0;
   overflow: hidden;
   pointer-events: none;
 }
 
-.hero-slide {
+.bg-slide {
   position: absolute;
   inset: 0;
   opacity: 0;
   transform-origin: 50% 30%;
-  animation: hero-slide-5 var(--hero-cycle) ease-in-out infinite;
-  animation-delay: var(--hero-slide-delay, 0s);
+  transition: opacity 1.5s ease-in-out;
   will-change: opacity, transform;
 }
 
-.hero-slideshow[data-count="3"] .hero-slide {
-  animation-name: hero-slide-3;
+.bg-slide[data-state="in"] {
+  opacity: 1;
+  animation: bg-slide-zoom 24s ease-out forwards;
 }
 
-.hero-slide > img {
+.bg-slide > img,
+.bg-slide > video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
   object-position: 50% 28%;
   filter: saturate(0.9);
 }
 
+@keyframes bg-slide-zoom {
+  from {
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+  to {
+    transform: scale(1.08) translate3d(-1%, -1.5%, 0);
+  }
+}
+
+/* sem movimento: primeira mídia parada */
+.bg-slideshow-still .bg-slide[data-state="in"] {
+  animation: none;
+  transition: none;
+}
+
 /*
- * véu: escurece a foto e reaplica o gradiente magenta. O slideshow é fixo na
- * viewport e cobre a página inteira, então o véu adensa mais embaixo, onde ficam
- * cards e listas, sem nunca virar fundo sólido.
+ * véu: escurece a mídia e reaplica o gradiente magenta. O slideshow é fixo na
+ * viewport, então o véu adensa mais embaixo, onde ficam cards e listas, sem
+ * nunca virar fundo sólido. Três intensidades, escolhidas por tela no painel.
  */
-.hero-slideshow-fade {
+.bg-slideshow-fade {
   position: absolute;
   inset: 0;
+  z-index: 2;
   background:
     var(--gradient-hero),
     linear-gradient(
@@ -435,9 +407,21 @@
     );
 }
 
-/* no desktop o texto do hero fica à esquerda: véu mais denso desse lado */
+.bg-slideshow[data-veil="LIGHT"] .bg-slideshow-fade {
+  background:
+    var(--gradient-hero),
+    linear-gradient(to bottom, rgba(14, 10, 12, 0.42) 0%, rgba(14, 10, 12, 0.68) 100%);
+}
+
+.bg-slideshow[data-veil="DENSE"] .bg-slideshow-fade {
+  background:
+    var(--gradient-hero),
+    linear-gradient(to bottom, rgba(14, 10, 12, 0.7) 0%, rgba(14, 10, 12, 0.86) 100%);
+}
+
+/* no desktop o texto do hero fica à esquerda: véu médio mais denso desse lado */
 @media (min-width: 1024px) {
-  .hero-slideshow-fade {
+  .bg-slideshow[data-veil="MEDIUM"] .bg-slideshow-fade {
     background:
       var(--gradient-hero),
       linear-gradient(
@@ -446,22 +430,11 @@
         rgba(14, 10, 12, 0.72) 45%,
         rgba(14, 10, 12, 0.5) 100%
       ),
-      linear-gradient(to bottom, rgba(14, 10, 12, 0.2) 0%, transparent 35%, rgba(14, 10, 12, 0.45) 100%);
-  }
-}
-
-/* painel: véu mais fechado e uniforme, para tabelas e formulários lerem bem */
-.hero-slideshow[data-tone="dense"] .hero-slideshow-fade {
-  background:
-    var(--gradient-hero),
-    linear-gradient(to bottom, rgba(14, 10, 12, 0.66) 0%, rgba(14, 10, 12, 0.82) 100%);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .hero-slide {
-    animation: none;
-  }
-  .hero-slide:first-child {
-    opacity: 1;
+      linear-gradient(
+        to bottom,
+        rgba(14, 10, 12, 0.2) 0%,
+        transparent 35%,
+        rgba(14, 10, 12, 0.45) 100%
+      );
   }
 }

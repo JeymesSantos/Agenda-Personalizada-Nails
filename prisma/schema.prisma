@@ -39,6 +39,44 @@ enum ExpenseType {
   VARIABLE
 }
 
+/**
+ * Mídias de fundo (fotos/vídeos atrás das telas), gerenciadas em /admin/fundos.
+ */
+enum BackgroundKind {
+  IMAGE
+  VIDEO
+}
+
+/**
+ * Telas que podem ter fundo próprio; *_DEFAULT é o padrão da área.
+ */
+enum BackgroundPage {
+  PUBLIC_DEFAULT
+  PUBLIC_HOME
+  PUBLIC_SERVICES
+  PUBLIC_PORTFOLIO
+  PUBLIC_BOOKING
+  PUBLIC_MY_APPOINTMENTS
+  PUBLIC_CONFIRMATION
+  PUBLIC_LOGIN
+  ADMIN_DEFAULT
+  ADMIN_DASHBOARD
+  ADMIN_AGENDA
+  ADMIN_SERVICES
+  ADMIN_PORTFOLIO
+  ADMIN_EXPENSES
+  ADMIN_CLIENTS
+  ADMIN_BIO
+  ADMIN_AVAILABILITY
+  ADMIN_MORE
+}
+
+enum BackgroundVeil {
+  LIGHT
+  MEDIUM
+  DENSE
+}
+
 enum Recurrence {
   NONE
   MONTHLY
@@ -113,6 +151,10 @@ model Business {
   albums       Album[]
   photos       Photo[]
   expenses     Expense[]
+
+  backgroundMedia       BackgroundMedia[]
+  backgroundAssignments BackgroundAssignment[]
+  backgroundSettings    BackgroundPageSetting[]
 }
 
 model ServiceCategory {
@@ -297,4 +339,56 @@ model Reminder {
 
   @@unique([appointmentId, channel, kind])
   @@index([status, sendAt])
+}
+
+/**
+ * Biblioteca de mídias de fundo: cada arquivo é enviado uma vez e atribuído a N telas.
+ */
+model BackgroundMedia {
+  id         String         @id @default(cuid())
+  businessId String
+  kind       BackgroundKind
+  url        String
+  posterUrl  String? // só vídeo: imagem mostrada enquanto carrega e quando o vídeo não toca
+  name       String
+  focusX     Int            @default(50) // enquadramento: ponto de interesse em % (object-position)
+  focusY     Int            @default(28)
+  order      Int            @default(0)
+  createdAt  DateTime       @default(now())
+
+  business    Business               @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  assignments BackgroundAssignment[]
+
+  @@index([businessId, order])
+}
+
+/**
+ * Mídia X aparece na tela Y, na posição `order`. Tela sem atribuição herda o *_DEFAULT da área.
+ */
+model BackgroundAssignment {
+  id         String         @id @default(cuid())
+  businessId String
+  mediaId    String
+  page       BackgroundPage
+  order      Int            @default(0)
+
+  business Business        @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  media    BackgroundMedia @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  @@unique([mediaId, page])
+  @@index([businessId, page, order])
+}
+
+/**
+ * Ajustes por tela (hoje só o véu). Tela sem registro herda o *_DEFAULT da área.
+ */
+model BackgroundPageSetting {
+  id         String         @id @default(cuid())
+  businessId String
+  page       BackgroundPage
+  veil       BackgroundVeil @default(MEDIUM)
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@unique([businessId, page])
 }

@@ -13,6 +13,8 @@ const nextConfig: NextConfig = {
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
     /* 70 é usado nas fotos do slideshow de fundo (hero-slideshow) */
     qualities: [70, 75],
+    /* mídias de fundo em produção ficam no Vercel Blob */
+    remotePatterns: [{ protocol: "https", hostname: "*.public.blob.vercel-storage.com" }],
   },
   turbopack: {
     rules: {
