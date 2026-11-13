@@ -40,7 +40,7 @@ function PublicHeader({
     <header
       data-slot="public-header"
       className={cn(
-        "border-subtle bg-background/60 hidden h-[140px] items-center border-b px-10 backdrop-blur-md lg:flex xl:px-20",
+        "border-subtle bg-background/60 hidden h-[88px] items-center border-b px-10 backdrop-blur-md lg:flex xl:px-20",
         className,
       )}
       {...props}

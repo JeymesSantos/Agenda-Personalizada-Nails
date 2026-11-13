@@ -199,8 +199,8 @@ export default async function HomePage() {
       </section>
 
       {/* ---------- DESKTOP (D1) ---------- */}
-      {/* ocupa a altura da tela abaixo do cabeçalho (140px) com o conteúdo centralizado; as fotos ficam no fundo do layout */}
-      <section className="hidden min-h-[calc(100dvh-140px)] flex-col justify-center px-10 pt-16 pb-20 lg:flex xl:px-20">
+      {/* ocupa a altura da tela abaixo do cabeçalho (88px) com o conteúdo centralizado; as fotos ficam no fundo do layout */}
+      <section className="hidden min-h-[calc(100dvh-88px)] flex-col justify-center px-10 pt-16 pb-20 lg:flex xl:px-20">
         <div className="mx-auto grid max-w-[1280px] grid-cols-[minmax(0,1fr)_minmax(0,460px)] items-center gap-10 xl:grid-cols-[minmax(0,1fr)_520px] xl:gap-16">
           <div className="flex flex-col gap-6">
             <p className="display-label text-pink-300">Nail designer · Agenda online</p>
