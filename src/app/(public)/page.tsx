@@ -244,7 +244,7 @@ export default async function HomePage() {
                 className={
                   /* 1º e 4º quadros mais altos que a célula: um sobe, o outro desce */
                   slot === 0
-                    ? "h-[calc(100%+3.75rem)] -translate-y-15"
+                    ? "h-[calc(100%+5rem)] -translate-y-20"
                     : slot === 3
                       ? "h-[calc(100%+5rem)]"
                       : "h-full"
