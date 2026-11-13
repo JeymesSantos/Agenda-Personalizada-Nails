@@ -78,6 +78,26 @@ export async function renameBackgroundMediaAction(
   return { success: "Nome atualizado." }
 }
 
+/* Ponto de interesse (enquadramento) em %, aplicado como object-position no fundo. */
+export async function setMediaFocusAction(
+  id: string,
+  x: number,
+  y: number,
+): Promise<BackgroundResult> {
+  const business = await ownerBusiness()
+  const parsed = z
+    .object({ x: z.number().int().min(0).max(100), y: z.number().int().min(0).max(100) })
+    .safeParse({ x, y })
+  if (!parsed.success) return { error: "Enquadramento inválido." }
+  const r = await prisma.backgroundMedia.updateMany({
+    where: { id, businessId: business.id },
+    data: { focusX: parsed.data.x, focusY: parsed.data.y },
+  })
+  if (r.count === 0) return { error: "Mídia não encontrada." }
+  revalidateBackgrounds()
+  return { success: "Enquadramento salvo." }
+}
+
 /* Apaga o registro (as atribuições caem em cascata) e os arquivos. */
 export async function deleteBackgroundMediaAction(id: string): Promise<BackgroundResult> {
   const business = await ownerBusiness()

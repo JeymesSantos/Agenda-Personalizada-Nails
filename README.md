@@ -193,6 +193,9 @@ gerenciado em `/admin/fundos`:
   (`BackgroundAssignment`) e véu (`BackgroundPageSetting`: leve, médio, denso). Tela sem mídia
   própria herda o `*_DEFAULT` da área. A rota é mapeada para a tela em
   `src/features/backgrounds/pages.ts`.
+- **Enquadramento**: cada mídia tem um ponto de interesse (`focusX`/`focusY`, em %) aplicado como
+  `object-position`; em `/admin/fundos` o botão de enquadrar abre a mídia inteira com um marcador
+  arrastável e prévias de computador e celular.
 - **Exibição**: `BackgroundSlideshow` (cliente) resolve a tela pela rota, troca foto a cada 7 s e
   vídeo ao terminar (teto de 20 s), mudo e em loop quando é a única mídia. Com "reduzir movimento"
   ou economia de dados mostra só a primeira mídia parada.

@@ -28,6 +28,8 @@ export default async function FundosPage() {
     posterUrl: m.posterUrl,
     name: m.name,
     pages: m.assignments.map((a) => a.page),
+    focusX: m.focusX,
+    focusY: m.focusY,
   }))
   const pages = BACKGROUND_PAGES.map((p) => ({
     key: p.key,

@@ -138,6 +138,8 @@ function Slide({
   onEnded?: () => void
   priority: boolean
 }) {
+  /* enquadramento definido em /admin/fundos */
+  const style = { objectPosition: `${item.focusX}% ${item.focusY}%` }
   if (item.kind === "VIDEO" && !still) {
     return (
       <video
@@ -149,10 +151,13 @@ function Slide({
         loop={loop}
         preload={active ? "auto" : "metadata"}
         onEnded={onEnded}
+        style={style}
       />
     )
   }
   const src = item.kind === "VIDEO" ? item.posterUrl : item.url
   if (!src) return null
-  return <Image src={src} alt="" fill sizes="100vw" priority={priority} quality={70} />
+  return (
+    <Image src={src} alt="" fill sizes="100vw" priority={priority} quality={70} style={style} />
+  )
 }

@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "BackgroundMedia" ADD COLUMN     "focusX" INTEGER NOT NULL DEFAULT 50,
+ADD COLUMN     "focusY" INTEGER NOT NULL DEFAULT 28;

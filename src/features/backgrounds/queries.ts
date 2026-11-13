@@ -10,6 +10,9 @@ export type BackgroundItem = {
   kind: BackgroundKind
   url: string
   posterUrl: string | null
+  /* ponto de interesse em % (object-position) */
+  focusX: number
+  focusY: number
 }
 
 export type BackgroundPageData = { items: BackgroundItem[]; veil: BackgroundVeil }
@@ -29,7 +32,11 @@ export async function getAreaBackgrounds(
     prisma.backgroundAssignment.findMany({
       where: { businessId, page: { in: keys } },
       orderBy: [{ page: "asc" }, { order: "asc" }],
-      include: { media: { select: { id: true, kind: true, url: true, posterUrl: true } } },
+      include: {
+        media: {
+          select: { id: true, kind: true, url: true, posterUrl: true, focusX: true, focusY: true },
+        },
+      },
     }),
     prisma.backgroundPageSetting.findMany({ where: { businessId, page: { in: keys } } }),
   ])

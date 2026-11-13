@@ -27,6 +27,7 @@ import {
 } from "../actions"
 import { PAGE_LABELS } from "../pages"
 import { type UploadMode, uploadBackgroundFile } from "../upload"
+import { FramingDialog } from "./framing-dialog"
 
 export type MediaTile = {
   id: string
@@ -35,6 +36,8 @@ export type MediaTile = {
   posterUrl: string | null
   name: string
   pages: BackgroundPage[]
+  focusX: number
+  focusY: number
 }
 
 const IMAGE_ACCEPT = "image/jpeg,image/png,image/webp"
@@ -186,6 +189,7 @@ function MediaCard({ media }: { media: MediaTile }) {
             <FilmIcon aria-hidden /> Vídeo
           </Badge>
         ) : null}
+        <FramingDialog media={media} />
         <Button
           type="button"
           variant="danger"
@@ -220,16 +224,19 @@ function MediaCard({ media }: { media: MediaTile }) {
   )
 }
 
-/* Miniatura: foto, ou vídeo com pôster (sem pôster, o próprio vídeo parado). */
+/* Miniatura: foto, ou vídeo com pôster (sem pôster, o próprio vídeo parado), já com o enquadramento. */
 export function MediaThumb({
   media,
   sizes,
 }: {
-  media: Pick<MediaTile, "kind" | "url" | "posterUrl">
+  media: Pick<MediaTile, "kind" | "url" | "posterUrl" | "focusX" | "focusY">
   sizes: string
 }) {
   const src = media.kind === "VIDEO" ? media.posterUrl : media.url
-  if (src) return <Image src={src} alt="" fill sizes={sizes} className="object-cover" />
+  const style = { objectPosition: `${media.focusX}% ${media.focusY}%` }
+  if (src) {
+    return <Image src={src} alt="" fill sizes={sizes} className="object-cover" style={style} />
+  }
   return (
     <video
       src={media.url}
@@ -237,6 +244,7 @@ export function MediaThumb({
       playsInline
       preload="metadata"
       className="absolute inset-0 size-full object-cover"
+      style={style}
     />
   )
 }

@@ -351,6 +351,8 @@ model BackgroundMedia {
   url        String
   posterUrl  String? // só vídeo: imagem mostrada enquanto carrega e quando o vídeo não toca
   name       String
+  focusX     Int            @default(50) // enquadramento: ponto de interesse em % (object-position)
+  focusY     Int            @default(28)
   order      Int            @default(0)
   createdAt  DateTime       @default(now())
 
