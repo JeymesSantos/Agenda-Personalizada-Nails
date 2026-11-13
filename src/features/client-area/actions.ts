@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache"
 
 import { BookingError, bookAppointment } from "@/features/booking/core"
+import { cancelReminders } from "@/features/reminders/core"
 import { prisma } from "@/lib/prisma"
 import { canChange, getMyAppointment, resolveClientAccess } from "./queries"
 
@@ -34,6 +35,7 @@ export async function cancelMyAppointmentAction(
     where: { id },
     data: { status: "CANCELLED", cancelledAt: now, cancelledBy: "CLIENT" },
   })
+  await cancelReminders(id)
   revalidateClientArea()
   return { success: "Agendamento cancelado." }
 }

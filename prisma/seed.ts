@@ -11,6 +11,7 @@ import { PrismaPg } from "@prisma/adapter-pg"
 import bcrypt from "bcryptjs"
 import { addDays, addMinutes, startOfDay, subDays } from "date-fns"
 
+import { planReminders } from "../src/features/reminders/plan"
 import { PrismaClient, type AppointmentStatus } from "../src/generated/prisma/client"
 
 const TZ = "America/Sao_Paulo"
@@ -421,6 +422,35 @@ async function main() {
   )
   created += 2
   console.log(`   ${created} agendamentos`)
+
+  /*
+   * Lembretes dos agendamentos futuros ativos, nos canais da cliente:
+   * confirmação (vencida, para o cron enviar) + 24 h + 2 h quando ainda cabem.
+   */
+  console.log("→ lembretes")
+  const now = new Date()
+  const upcoming = await prisma.appointment.findMany({
+    where: {
+      businessId: business.id,
+      startsAt: { gt: now },
+      status: { in: ["CONFIRMED", "PENDING"] },
+    },
+    select: { id: true, startsAt: true, client: { select: { email: true, whatsapp: true } } },
+  })
+  let reminders = 0
+  for (const a of upcoming) {
+    const channels = [
+      a.client.email ? "EMAIL" : null,
+      a.client.whatsapp ? "WHATSAPP" : null,
+    ].filter((c): c is "EMAIL" | "WHATSAPP" => c !== null)
+    for (const channel of channels) {
+      for (const { kind, sendAt } of planReminders(a.startsAt, now)) {
+        await prisma.reminder.create({ data: { appointmentId: a.id, channel, kind, sendAt } })
+        reminders++
+      }
+    }
+  }
+  console.log(`   ${reminders} lembretes`)
 
   console.log("→ portfólio")
   const albumsData: [string, number][] = [
