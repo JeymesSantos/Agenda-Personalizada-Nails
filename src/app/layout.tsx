@@ -18,6 +18,8 @@ const montserrat = Montserrat({
 })
 
 export const metadata: Metadata = {
+  /* base dos links absolutos (Open Graph etc.): a URL pública da aplicação */
+  metadataBase: new URL(process.env.AUTH_URL || "http://localhost:3000"),
   title: {
     default: "MinhaAgenda",
     template: "%s · MinhaAgenda",

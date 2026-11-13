@@ -24,12 +24,12 @@ Documentos de apoio:
 
 ## Status
 
-| Fase                                             | Situação                                                                           |
-| ------------------------------------------------ | ---------------------------------------------------------------------------------- |
-| A — Fundação (Next, tokens, kit de UI, DB, auth) | Concluída                                                                          |
-| B — Motor de horários e painel da profissional   | Concluída                                                                          |
-| C — Jornada da cliente                           | Concluída                                                                          |
-| D — Lembretes, PWA, e2e, CI, deploy              | Em andamento: D1 lembretes, D2 PWA, D3 e2e e D4 CI concluídos; falta o deploy (D5) |
+| Fase                                             | Situação                                                                   |
+| ------------------------------------------------ | -------------------------------------------------------------------------- |
+| A — Fundação (Next, tokens, kit de UI, DB, auth) | Concluída                                                                  |
+| B — Motor de horários e painel da profissional   | Concluída                                                                  |
+| C — Jornada da cliente                           | Concluída                                                                  |
+| D — Lembretes, PWA, e2e, CI, deploy              | Concluída (lembretes, PWA, Playwright e2e, GitHub Actions, guia de deploy) |
 
 ## Stack
 
@@ -100,6 +100,7 @@ com token de gerenciamento (`/meus-horarios?t=<token>`), o mesmo que vai na conf
 | `DATABASE_URL`                  | Conexão Postgres. O valor do `.env.example` casa com o `docker-compose.yml`.             |
 | `AUTH_SECRET`                   | Segredo do Auth.js (obrigatório).                                                        |
 | `AUTH_URL`                      | URL pública da aplicação (`http://localhost:3000` em dev).                               |
+| `AUTH_TRUST_HOST`               | `true` atrás de proxy (Vercel); pode ficar vazio em desenvolvimento.                     |
 | `TZ`                            | Fuso do processo Node; o fuso do estúdio também fica gravado em `Business.timezone`.     |
 | `BLOB_READ_WRITE_TOKEN`         | Token do Vercel Blob. Sem ele os uploads vão para `public/uploads` (dev).                |
 | `RESEND_API_KEY`, `EMAIL_FROM`  | Envio dos lembretes por e-mail (Resend). Sem chave, o e-mail só aparece no log.          |
@@ -109,25 +110,27 @@ com token de gerenciamento (`/meus-horarios?t=<token>`), o mesmo que vai na conf
 
 ## Scripts
 
-| Comando            | O que faz                                                                |
-| ------------------ | ------------------------------------------------------------------------ |
-| `pnpm dev`         | Next.js em modo desenvolvimento (Turbopack)                              |
-| `pnpm build`       | Build de produção                                                        |
-| `pnpm start`       | Serve o build de produção                                                |
-| `pnpm lint`        | ESLint                                                                   |
-| `pnpm typecheck`   | `next typegen` + `tsc --noEmit`                                          |
-| `pnpm format`      | Prettier em todo o projeto (`format:check` só verifica)                  |
-| `pnpm test`        | Vitest (`test:watch` para modo interativo)                               |
-| `pnpm test:e2e`    | Playwright: sobe a app em produção na porta 3100 contra o banco de teste |
-| `pnpm test:e2e:ui` | O mesmo, no modo interativo do Playwright                                |
-| `pnpm db:up`       | Sobe o Postgres do `docker-compose.yml`                                  |
-| `pnpm db:down`     | Derruba o container (os dados ficam no volume)                           |
-| `pnpm db:migrate`  | `prisma migrate dev`                                                     |
-| `pnpm db:deploy`   | `prisma migrate deploy` (produção)                                       |
-| `pnpm db:seed`     | Popula o banco com os dados do Figma (`prisma/seed.ts`)                  |
-| `pnpm db:reset`    | Apaga, migra e semeia de novo                                            |
-| `pnpm db:generate` | Regera o cliente Prisma em `src/generated/prisma`                        |
-| `pnpm db:studio`   | Prisma Studio                                                            |
+| Comando             | O que faz                                                                         |
+| ------------------- | --------------------------------------------------------------------------------- |
+| `pnpm dev`          | Next.js em modo desenvolvimento (Turbopack)                                       |
+| `pnpm build`        | Build de produção                                                                 |
+| `pnpm start`        | Serve o build de produção                                                         |
+| `pnpm lint`         | ESLint                                                                            |
+| `pnpm typecheck`    | `next typegen` + `tsc --noEmit`                                                   |
+| `pnpm format`       | Prettier em todo o projeto (`format:check` só verifica)                           |
+| `pnpm test`         | Vitest (`test:watch` para modo interativo)                                        |
+| `pnpm test:e2e`     | Playwright: sobe a app em produção na porta 3100 contra o banco de teste          |
+| `pnpm test:e2e:ui`  | O mesmo, no modo interativo do Playwright                                         |
+| `pnpm db:up`        | Sobe o Postgres do `docker-compose.yml`                                           |
+| `pnpm db:down`      | Derruba o container (os dados ficam no volume)                                    |
+| `pnpm db:migrate`   | `prisma migrate dev`                                                              |
+| `pnpm db:deploy`    | `prisma migrate deploy` (produção)                                                |
+| `pnpm db:seed`      | Popula o banco com os dados do Figma (`prisma/seed.ts`)                           |
+| `pnpm db:reset`     | Apaga, migra e semeia de novo                                                     |
+| `pnpm db:generate`  | Regera o cliente Prisma em `src/generated/prisma`                                 |
+| `pnpm db:studio`    | Prisma Studio                                                                     |
+| `pnpm admin:create` | Cria a profissional e o estúdio num banco vazio (ou redefine a senha); ver Deploy |
+| `pnpm build:vercel` | `prisma migrate deploy` + `next build` (build command da Vercel)                  |
 
 ## Rotas
 
@@ -324,12 +327,74 @@ agendamento pelo link com token. Cada passo também confere o banco.
 banco de teste). Em falha do e2e, o relatório e os traces sobem como artefato `playwright-report`.
 Execuções em sequência no mesmo branch cancelam a anterior.
 
-## Deploy (previsto na Fase D)
+## Deploy (Vercel + Neon + Blob + Resend)
 
-Vercel + Neon (Postgres) + Vercel Blob (fotos) + Resend (e-mail) + Vercel Cron para lembretes.
-Variáveis mínimas em produção: `DATABASE_URL`, `AUTH_SECRET`, `AUTH_URL` e `BLOB_READ_WRITE_TOKEN`
-(sem ele os uploads tentam gravar no disco, que não persiste na Vercel). Rode
-`pnpm db:deploy` no build e `pnpm db:seed` uma vez se quiser os dados de exemplo.
+Produção prevista no plano: **Vercel** (app, cron e Blob), **Neon** (Postgres) e **Resend**
+(e-mails). Qualquer Postgres acessível pela internet serve no lugar do Neon (Supabase, por
+exemplo); o resto não muda.
+
+### 1. Banco
+
+1. Crie o projeto no Neon e copie a connection string **pooled** (com `-pooler` no host). O Prisma
+   usa o driver `pg`, então o pooler funciona bem em serverless.
+2. Guarde-a como `DATABASE_URL` (inclua `?sslmode=require`).
+
+As migrations rodam no build da Vercel (`pnpm run build:vercel` = `prisma migrate deploy` +
+`next build`, definido em `vercel.json`). Se usar **Preview Deployments**, dê a eles um banco
+próprio ou deixe `DATABASE_URL` só no ambiente Production, senão cada preview migra o banco
+de produção.
+
+### 2. Projeto na Vercel
+
+Importe o repositório (framework Next.js, pnpm detectado pelo `packageManager`) e defina as
+variáveis de ambiente:
+
+| Variável                | Valor                                                                                                                         |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`          | Connection string do passo 1                                                                                                  |
+| `AUTH_SECRET`           | `openssl rand -base64 32`                                                                                                     |
+| `AUTH_URL`              | URL pública, ex.: `https://agenda.seudominio.com.br` (entra nos links dos e-mails, no manifest e no Open Graph)               |
+| `AUTH_TRUST_HOST`       | `true`                                                                                                                        |
+| `TZ`                    | `America/Sao_Paulo`                                                                                                           |
+| `BLOB_READ_WRITE_TOKEN` | Criado ao conectar um **Blob store** ao projeto (Storage → Blob); sem ele os uploads tentam gravar no disco, que não persiste |
+| `RESEND_API_KEY`        | Chave do Resend; sem ela os lembretes por e-mail só aparecem no log                                                           |
+| `EMAIL_FROM`            | Remetente com domínio verificado no Resend, ex.: `Letícia Fagundes <agenda@seudominio.com.br>`                                |
+| `CRON_SECRET`           | Qualquer segredo longo; a Vercel envia no `Authorization` das chamadas do cron                                                |
+
+O cron dos lembretes (`GET /api/cron/reminders` a cada 15 min) vem de `vercel.json` e é criado
+no primeiro deploy. Em **Settings → Cron Jobs** dá para ver as execuções.
+
+### 3. Primeira conta e dados
+
+Depois do primeiro deploy o banco está migrado e vazio. Crie a profissional e o estúdio com o
+`DATABASE_URL` de produção no seu `.env` local (ou numa shell com a variável):
+
+```bash
+pnpm admin:create --email leticia@exemplo.com --senha "uma senha forte"   --nome "Letícia Fagundes" --estudio "Letícia Fagundes" --slug leticia --prefixo LF
+```
+
+O script é idempotente: com um estúdio já existente, só redefine nome, e-mail e senha da dona
+(serve para recuperar a senha). O resto — horário, serviços, bio, fundos, portfólio — se
+configura pelo painel. Se quiser os dados de demonstração em vez disso, `pnpm db:seed` com o
+`DATABASE_URL` de produção (apaga tudo e recria o conteúdo do Figma).
+
+### 4. Domínio e PWA
+
+Aponte o domínio na Vercel e atualize `AUTH_URL`. O manifest (`/manifest.webmanifest`) e os
+ícones já vêm do projeto; o nome exibido na instalação é o do estúdio.
+
+### Checklist pós-deploy
+
+- `/` carrega com o fundo e os serviços; `/admin/entrar` aceita a conta criada.
+- Uma foto enviada no portfólio abre a partir de `*.public.blob.vercel-storage.com`.
+- `curl -H "Authorization: Bearer $CRON_SECRET" https://.../api/cron/reminders` responde `{"ok":true,...}`.
+- Com `RESEND_API_KEY`, um agendamento de cliente com e-mail recebe a confirmação.
+
+### Pendências de produto
+
+- **WhatsApp automático**: hoje o envio é manual pelo painel (link `wa.me` + "Marcar enviado").
+  Para automatizar, escolher um provedor (Meta Cloud API, Z-API ou Twilio) e implementar um
+  `WhatsAppNotifier` ao lado do `EmailNotifier` em `src/lib/notifications.ts`.
 
 ## Problemas comuns
 
@@ -339,3 +404,6 @@ Variáveis mínimas em produção: `DATABASE_URL`, `AUTH_SECRET`, `AUTH_URL` e `
   suba o servidor novamente.
 - **`prisma generate` falhou / tipos do Prisma ausentes** — `pnpm db:generate`.
 - **Login não funciona** — confira `AUTH_SECRET` preenchido no `.env` e o banco semeado.
+- **Na Vercel, upload falha ou some depois** — falta `BLOB_READ_WRITE_TOKEN`; o disco da função não persiste.
+- **Cron responde 401** — `CRON_SECRET` da Vercel diferente do configurado, ou chamada manual sem o header `Authorization: Bearer`.
+- **Build da Vercel falha em `migrate deploy`** — `DATABASE_URL` ausente no ambiente do build ou banco inacessível; confira o pooler e o `sslmode`.
