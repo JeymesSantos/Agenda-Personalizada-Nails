@@ -11,6 +11,9 @@ import { StatusBadge } from "@/components/ui/status-badge"
 import { SummaryRow } from "@/components/ui/summary-list"
 import { fmtShortDate, fmtTime } from "@/lib/dates"
 import { formatCents } from "@/lib/money"
+import { appBaseUrl } from "@/lib/notifications"
+import { ReminderList } from "@/features/reminders/components/reminder-list"
+import { reminderText, whatsappLink } from "@/features/reminders/templates"
 import type { getAppointmentDetail } from "../queries"
 import { AppointmentActions } from "./appointment-actions"
 import type { ServiceOption } from "./new-appointment-dialog"
@@ -44,13 +47,44 @@ export function AppointmentPanel({
   timezone,
   services,
   ymd,
+  business,
 }: {
   appointment: Detail
   timezone: string
   services: ServiceOption[]
   ymd: string
+  business: { name: string; addressLine: string | null; neighborhood: string | null }
 }) {
   const a = appointment
+  const baseUrl = appBaseUrl()
+  const reminders = a.reminders.map((r) => ({
+    id: r.id,
+    channel: r.channel,
+    kind: r.kind,
+    status: r.status,
+    sendAt: r.sendAt,
+    sentAt: r.sentAt,
+    error: r.error,
+    whatsappUrl:
+      r.channel === "WHATSAPP" && a.client.whatsapp
+        ? whatsappLink(
+            a.client.whatsapp,
+            reminderText({
+              kind: r.kind,
+              clientName: a.client.name,
+              businessName: business.name,
+              serviceTitle: a.service.title,
+              startsAt: a.startsAt,
+              timezone,
+              code: a.code,
+              manageToken: a.manageToken,
+              baseUrl,
+              addressLine: business.addressLine,
+              neighborhood: business.neighborhood,
+            }),
+          )
+        : null,
+  }))
   return (
     <div className="flex flex-col gap-5">
       <h2 className="type-h3">Detalhe do agendamento</h2>
@@ -110,6 +144,10 @@ export function AppointmentPanel({
           note={a.note}
           services={services}
         />
+      </div>
+      <div className="flex flex-col gap-2">
+        <p className="type-caption text-secondary-txt">Lembretes</p>
+        <ReminderList reminders={reminders} timezone={timezone} />
       </div>
       <p className="type-body text-muted-txt text-center">Comprovante #{a.code}</p>
     </div>

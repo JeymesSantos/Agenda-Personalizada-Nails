@@ -2,6 +2,7 @@ import "server-only"
 import { TZDate } from "@date-fns/tz"
 import { addDays, addMinutes } from "date-fns"
 
+import { scheduleReminders } from "@/features/reminders/core"
 import { Prisma } from "@/generated/prisma/client"
 import type { AppointmentOrigin, AppointmentStatus } from "@/generated/prisma/enums"
 import { prisma } from "@/lib/prisma"
@@ -154,6 +155,13 @@ export type BookInput = {
  * Lança BookingError("UNAVAILABLE") quando o horário acabou de ser ocupado.
  */
 export async function bookAppointment(input: BookInput) {
+  const appointment = await reserve(input)
+  /* fora da transação: lembretes de confirmação, 24 h e 2 h (reagendados ao remarcar) */
+  await scheduleReminders(appointment.id)
+  return appointment
+}
+
+async function reserve(input: BookInput) {
   const service = await prisma.service.findFirst({
     where: { id: input.serviceId, businessId: input.businessId },
   })

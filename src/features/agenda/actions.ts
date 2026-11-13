@@ -6,6 +6,7 @@ import { z } from "zod"
 import type { AppointmentStatus } from "@/generated/prisma/enums"
 import { whatsappSchema } from "@/features/auth/schemas"
 import { BookingError, bookAppointment, slotsForDay } from "@/features/booking/core"
+import { cancelReminders, scheduleReminders } from "@/features/reminders/core"
 import { fmtTime } from "@/lib/dates"
 import { prisma } from "@/lib/prisma"
 import { requireAdmin } from "@/lib/session"
@@ -54,6 +55,9 @@ export async function setAppointmentStatusAction(
       cancelledBy: status === "CANCELLED" ? "ADMIN" : null,
     },
   })
+  /* lembretes só fazem sentido para agendamento ativo; reabrir volta a agendá-los */
+  if (status === "PENDING" || status === "CONFIRMED") await scheduleReminders(id)
+  else await cancelReminders(id)
   revalidateAgenda()
   const labels: Record<AppointmentStatus, string> = {
     PENDING: "Marcado como pendente.",
