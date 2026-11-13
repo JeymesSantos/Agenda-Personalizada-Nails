@@ -240,7 +240,7 @@ Push ao fim de cada fase. Cada commit lista entregas e critério de pronto.
 
 **D1 `feat(reminders): confirmação e lembretes 24 h / 2 h`**
 
-- `Reminder` criado junto com o agendamento; `api/cron/reminders` (Vercel Cron a cada 15 min) envia pendentes; `EmailNotifier` (Resend) e `WhatsAppNotifier` (provedor a definir; até lá, gera link `wa.me` com texto pronto para a profissional). Botões Confirmar/Remarcar no lembrete apontam para o link de gerenciamento.
+- `Reminder` criado junto com o agendamento; `api/cron/reminders` (Vercel Cron diário às 09:00 UTC / 06:00 em São Paulo, compatível com Hobby) envia pendentes; `EmailNotifier` (Resend) e `WhatsAppNotifier` (provedor a definir; até lá, gera link `wa.me` com texto pronto para a profissional). A frequência diária não garante envio pontual dos lembretes de 24 h e 2 h; ver [limites operacionais no README](../README.md#frequência-do-cron-e-limites-da-homologação). Botões Confirmar/Remarcar no lembrete apontam para o link de gerenciamento.
 - Pronto quando um agendamento do seed gera 3 reminders e o cron os marca como enviados.
 
 **D2 `feat(pwa): manifest, ícones e ajustes de toque`**
@@ -318,3 +318,26 @@ Decisões e aprendizados: Radix Tabs ativa no `mousedown` (automação precisa d
 | C6 `feat(client)`                    | Meus horários M7 por conta ou token, remarcar/trocar serviço reaproveitando o passo 2, cancelar em sheet M8; prazo `cancelMinHours` aplicado no servidor.                                  |
 
 Decisões: agendamentos feitos pela cliente nascem `CONFIRMED` (a profissional pode mudar no painel); o token de gerenciamento (`?t=`) identifica a cliente sem cadastro em todas as telas da área da cliente; dados de visitante lembrados no `localStorage` via refs (sem `setState` em efeito). O banco foi re-semeado ao fim da fase.
+
+## 10. Preparação da homologação — atualização de 2026-11-13
+
+### Processo de validação
+
+Executar um passo por vez, em uma branch por passo. O próximo passo depende da validação
+explícita do usuário. Manter requisitos, operação e limitações documentados junto das mudanças.
+
+### Situação atual
+
+| Item                                           | Situação                                     | Evidência / observação                                                                                                                    |
+| ---------------------------------------------- | -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Passo 1 — vínculo de contas e acesso por token | Implementado; aguarda validação do usuário   | Branch `fix/homologacao-01-vinculo-contas`, commit `4e0c790`; 53 testes unitários/de integração e 4 cenários de navegador aprovados       |
+| Alterações anteriores de interface e despesas  | Incluídas em commit separado na mesma branch | Commit `e3e217b`: proporção dos fundos, valores com centavos e cobertura de interface                                                     |
+| Bloqueio de deploy na Vercel Hobby             | Causa confirmada; ajuste diário autorizado   | O cron de 15 minutos foi rejeitado antes do build. A configuração passa a `0 9 * * *`                                                     |
+| Horário e alcance do cron                      | Diário, 09:00 UTC / 06:00 em São Paulo       | No Hobby pode executar dentro dessa hora. O disparo automático ocorre somente em produção, não em preview                                 |
+| Lembretes pontuais de 24 h e 2 h               | Pendente para uso real                       | A execução diária não garante esses horários; detalhes e requisitos em [README](../README.md#frequência-do-cron-e-limites-da-homologação) |
+| Uploads no ambiente publicado                  | Pendente                                     | O teste de produção local retorna 404 para arquivo recém-enviado sem Blob; validar o armazenamento publicado                              |
+| Demais passos da homologação                   | Aguardam validação do passo 1                | Configuração do ambiente, infraestrutura, dados fictícios, publicação validada e teste com a profissional                                 |
+
+O ajuste de cron é uma correção pontual autorizada nesta branch. Não representa a conclusão
+dos passos de infraestrutura ou a liberação para clientes reais. O status do deployment deve
+ser conferido após enviar a alteração ao `origin`.

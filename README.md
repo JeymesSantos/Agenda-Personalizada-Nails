@@ -183,7 +183,7 @@ O `src/proxy.ts` protege `/admin/**` (exige ADMIN) e `/meus-horarios/**` (exige 
 | `/admin/clientes/[id]`   | —             | Ficha: KPIs, histórico, anotações, contato                                                                                                                               |
 | `/admin/bio`             | —             | Editar página pública com prévia ao vivo                                                                                                                                 |
 | `/admin/fundos`          | —             | Fotos e vídeos de fundo: biblioteca (upload) e qual mídia aparece em cada tela, com véu por tela                                                                         |
-| `/api/cron/reminders`    | —             | Envia os lembretes de e-mail vencidos (Vercel Cron a cada 15 min, `vercel.json`)                                                                                         |
+| `/api/cron/reminders`    | —             | Envia os lembretes de e-mail vencidos (Vercel Cron diário às 09:00 UTC / 06:00 em São Paulo, `vercel.json`)                                                              |
 | `/manifest.webmanifest`  | —             | Manifest do PWA (nome do estúdio lido do banco); `/offline` é a tela sem conexão do service worker                                                                       |
 | `/admin/mais`            | —             | Item "Mais" da barra inferior no celular (portfólio, clientes, bio, fundos, sair)                                                                                        |
 
@@ -211,7 +211,7 @@ O `src/proxy.ts` protege `/admin/**` (exige ADMIN) e `/meus-horarios/**` (exige 
 ## Lembretes (confirmação, 24 h e 2 h)
 
 Ao criar ou remarcar um agendamento, `bookAppointment` chama `scheduleReminders`, que cria um
-`Reminder` por canal da cliente (e-mail e/ou WhatsApp) e por tipo: confirmação (sai na hora),
+`Reminder` por canal da cliente (e-mail e/ou WhatsApp) e por tipo: confirmação (vence na hora),
 24 h e 2 h antes (só se ainda cabem). Cancelar, concluir ou marcar falta cancela os pendentes;
 reabrir volta a agendá-los (`src/features/reminders`).
 
@@ -223,6 +223,28 @@ reabrir volta a agendá-los (`src/features/reminders`).
   "Marcar enviado".
 - Os textos ficam em `templates.ts` (funções puras, com testes) e os botões apontam para o
   comprovante com o token de gerenciamento, onde a cliente remarca ou cancela sem cadastro.
+
+### Frequência do cron e limites da homologação
+
+| Configuração      | Valor                                                                                            |
+| ----------------- | ------------------------------------------------------------------------------------------------ |
+| Arquivo           | `vercel.json`                                                                                    |
+| Rota              | `GET /api/cron/reminders`                                                                        |
+| Expressão         | `0 9 * * *`                                                                                      |
+| Horário           | Diariamente às 09:00 UTC, equivalente a 06:00 em `America/Sao_Paulo`                             |
+| Precisão no Hobby | Pode executar entre 06:00 e 06:59 em São Paulo                                                   |
+| Ativação          | Automática apenas em deployments de produção; previews exigem chamada manual para testar         |
+| Proteção          | Configurar `CRON_SECRET` no ambiente publicado; a Vercel envia `Authorization: Bearer <segredo>` |
+
+A frequência diária atende ao limite do plano Hobby e substitui a configuração anterior de
+15 minutos, que impedia o deploy. Consulte os [limites oficiais do cron](https://vercel.com/docs/cron-jobs/usage-and-pricing).
+
+Cada execução processa até 50 e-mails vencidos. A confirmação pode aguardar a próxima rodada;
+os lembretes de 24 h e 2 h não têm garantia de envio no horário previsto. Lembretes desses dois
+tipos são cancelados se o atendimento já começou. O cron diário é uma configuração temporária
+para testes; envio pontual depende de um agendador mais frequente antes do uso com clientes reais.
+Sem `RESEND_API_KEY`, o envio é simulado no log e ainda assim marcado como enviado; isso não
+comprova entrega de e-mail.
 
 ## Fundos das telas (fotos e vídeos)
 
@@ -335,8 +357,10 @@ Execuções em sequência no mesmo branch cancelam a anterior.
 
 Vercel + Neon (Postgres) + Vercel Blob (fotos) + Resend (e-mail) + Vercel Cron para lembretes.
 Variáveis mínimas em produção: `DATABASE_URL`, `AUTH_SECRET`, `AUTH_URL` e `BLOB_READ_WRITE_TOKEN`
-(sem ele os uploads tentam gravar no disco, que não persiste na Vercel). Rode
-`pnpm db:deploy` no build e `pnpm db:seed` uma vez se quiser os dados de exemplo.
+(sem ele os uploads tentam gravar no disco, que não persiste na Vercel). Para ativar o envio
+real de lembretes, configure também `CRON_SECRET`, `RESEND_API_KEY` e `EMAIL_FROM`.
+Rode `pnpm db:deploy` para aplicar as migrations. O seed é exclusivo para um banco de testes
+descartável: `pnpm db:seed` apaga os registros existentes antes de inserir os exemplos.
 
 ## Problemas comuns
 
