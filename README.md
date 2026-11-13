@@ -24,12 +24,12 @@ Documentos de apoio:
 
 ## Status
 
-| Fase                                             | Situação                                                                         |
-| ------------------------------------------------ | -------------------------------------------------------------------------------- |
-| A — Fundação (Next, tokens, kit de UI, DB, auth) | Concluída                                                                        |
-| B — Motor de horários e painel da profissional   | Concluída                                                                        |
-| C — Jornada da cliente                           | Concluída                                                                        |
-| D — Lembretes, PWA, e2e, CI, deploy              | Em andamento: D1 lembretes concluído; faltam PWA, Playwright e2e, GitHub Actions |
+| Fase                                             | Situação                                                                     |
+| ------------------------------------------------ | ---------------------------------------------------------------------------- |
+| A — Fundação (Next, tokens, kit de UI, DB, auth) | Concluída                                                                    |
+| B — Motor de horários e painel da profissional   | Concluída                                                                    |
+| C — Jornada da cliente                           | Concluída                                                                    |
+| D — Lembretes, PWA, e2e, CI, deploy              | Em andamento: D1 lembretes, D2 PWA e D3 e2e concluídos; falta GitHub Actions |
 
 ## Stack
 
@@ -95,36 +95,39 @@ com token de gerenciamento (`/meus-horarios?t=<token>`), o mesmo que vai na conf
 
 ### Variáveis de ambiente
 
-| Variável                        | Uso                                                                                  |
-| ------------------------------- | ------------------------------------------------------------------------------------ |
-| `DATABASE_URL`                  | Conexão Postgres. O valor do `.env.example` casa com o `docker-compose.yml`.         |
-| `AUTH_SECRET`                   | Segredo do Auth.js (obrigatório).                                                    |
-| `AUTH_URL`                      | URL pública da aplicação (`http://localhost:3000` em dev).                           |
-| `TZ`                            | Fuso do processo Node; o fuso do estúdio também fica gravado em `Business.timezone`. |
-| `BLOB_READ_WRITE_TOKEN`         | Token do Vercel Blob. Sem ele os uploads vão para `public/uploads` (dev).            |
-| `RESEND_API_KEY`, `EMAIL_FROM`  | Envio dos lembretes por e-mail (Resend). Sem chave, o e-mail só aparece no log.      |
-| `CRON_SECRET`                   | Protege `GET /api/cron/reminders`; a Vercel envia no header `Authorization`.         |
-| `FIGMA_TOKEN`, `FIGMA_FILE_KEY` | Opcionais, só para scripts de extração do design.                                    |
+| Variável                        | Uso                                                                                      |
+| ------------------------------- | ---------------------------------------------------------------------------------------- |
+| `DATABASE_URL`                  | Conexão Postgres. O valor do `.env.example` casa com o `docker-compose.yml`.             |
+| `AUTH_SECRET`                   | Segredo do Auth.js (obrigatório).                                                        |
+| `AUTH_URL`                      | URL pública da aplicação (`http://localhost:3000` em dev).                               |
+| `TZ`                            | Fuso do processo Node; o fuso do estúdio também fica gravado em `Business.timezone`.     |
+| `BLOB_READ_WRITE_TOKEN`         | Token do Vercel Blob. Sem ele os uploads vão para `public/uploads` (dev).                |
+| `RESEND_API_KEY`, `EMAIL_FROM`  | Envio dos lembretes por e-mail (Resend). Sem chave, o e-mail só aparece no log.          |
+| `CRON_SECRET`                   | Protege `GET /api/cron/reminders`; a Vercel envia no header `Authorization`.             |
+| `E2E_DATABASE_URL`, `E2E_PORT`  | Banco e porta dos testes e2e (padrão: `minhaagenda_test` no mesmo Postgres, porta 3100). |
+| `FIGMA_TOKEN`, `FIGMA_FILE_KEY` | Opcionais, só para scripts de extração do design.                                        |
 
 ## Scripts
 
-| Comando            | O que faz                                               |
-| ------------------ | ------------------------------------------------------- |
-| `pnpm dev`         | Next.js em modo desenvolvimento (Turbopack)             |
-| `pnpm build`       | Build de produção                                       |
-| `pnpm start`       | Serve o build de produção                               |
-| `pnpm lint`        | ESLint                                                  |
-| `pnpm typecheck`   | `next typegen` + `tsc --noEmit`                         |
-| `pnpm format`      | Prettier em todo o projeto (`format:check` só verifica) |
-| `pnpm test`        | Vitest (`test:watch` para modo interativo)              |
-| `pnpm db:up`       | Sobe o Postgres do `docker-compose.yml`                 |
-| `pnpm db:down`     | Derruba o container (os dados ficam no volume)          |
-| `pnpm db:migrate`  | `prisma migrate dev`                                    |
-| `pnpm db:deploy`   | `prisma migrate deploy` (produção)                      |
-| `pnpm db:seed`     | Popula o banco com os dados do Figma (`prisma/seed.ts`) |
-| `pnpm db:reset`    | Apaga, migra e semeia de novo                           |
-| `pnpm db:generate` | Regera o cliente Prisma em `src/generated/prisma`       |
-| `pnpm db:studio`   | Prisma Studio                                           |
+| Comando            | O que faz                                                                |
+| ------------------ | ------------------------------------------------------------------------ |
+| `pnpm dev`         | Next.js em modo desenvolvimento (Turbopack)                              |
+| `pnpm build`       | Build de produção                                                        |
+| `pnpm start`       | Serve o build de produção                                                |
+| `pnpm lint`        | ESLint                                                                   |
+| `pnpm typecheck`   | `next typegen` + `tsc --noEmit`                                          |
+| `pnpm format`      | Prettier em todo o projeto (`format:check` só verifica)                  |
+| `pnpm test`        | Vitest (`test:watch` para modo interativo)                               |
+| `pnpm test:e2e`    | Playwright: sobe a app em produção na porta 3100 contra o banco de teste |
+| `pnpm test:e2e:ui` | O mesmo, no modo interativo do Playwright                                |
+| `pnpm db:up`       | Sobe o Postgres do `docker-compose.yml`                                  |
+| `pnpm db:down`     | Derruba o container (os dados ficam no volume)                           |
+| `pnpm db:migrate`  | `prisma migrate dev`                                                     |
+| `pnpm db:deploy`   | `prisma migrate deploy` (produção)                                       |
+| `pnpm db:seed`     | Popula o banco com os dados do Figma (`prisma/seed.ts`)                  |
+| `pnpm db:reset`    | Apaga, migra e semeia de novo                                            |
+| `pnpm db:generate` | Regera o cliente Prisma em `src/generated/prisma`                        |
+| `pnpm db:studio`   | Prisma Studio                                                            |
 
 ## Rotas
 
@@ -261,6 +264,7 @@ src/lib/
 src/proxy.ts         controle de acesso por rota
 src/generated/prisma cliente Prisma gerado (ignorado pelo git; pnpm db:generate)
 tests/integration/   testes que usam o banco
+tests/e2e/           Playwright: jornada ponta a ponta contra o banco de teste (global-setup, helpers)
 ```
 
 Convenções: páginas são Server Components que leem via `queries.ts` e recebem estado pela URL
@@ -279,6 +283,22 @@ pnpm test
 - `src/lib/finance/finance.test.ts` — receita (só DONE), lucro, ocupação, ticket médio.
 - `tests/integration/booking.test.ts` — dois pedidos simultâneos no mesmo horário: um confirma e
   o outro recebe `UNAVAILABLE`. Precisa do Postgres do `pnpm db:up` com o seed aplicado.
+
+### Ponta a ponta (Playwright)
+
+`pnpm test:e2e` roda `tests/e2e/jornada.spec.ts`, a jornada do plano (D3): a profissional cria um
+serviço e bloqueia uma tarde → uma cliente sem cadastro agenda de manhã (a tarde não aparece) →
+a profissional conclui o atendimento → o dashboard soma a receita → a cliente cancela outro
+agendamento pelo link com token. Cada passo também confere o banco.
+
+- O `global-setup` cria o banco `minhaagenda_test` (se não existir), aplica as migrations e roda o
+  seed; o `webServer` do Playwright faz `next build` e sobe `next start` na porta 3100 apontando
+  para esse banco. Precisa do Postgres do docker compose no ar e do Chromium do Playwright
+  (`pnpm exec playwright install chromium`, uma vez).
+- Fora do CI o servidor de teste é reaproveitado se já estiver na porta 3100
+  (`reuseExistingServer`). Falhas deixam trace, screenshot e contexto em `test-results/`.
+- O acesso ao banco nos testes usa `pg` direto, porque o cliente Prisma gerado é ESM e o runner
+  do Playwright não o carrega.
 
 ## Deploy (previsto na Fase D)
 
