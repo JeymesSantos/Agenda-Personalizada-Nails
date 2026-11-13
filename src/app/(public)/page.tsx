@@ -189,7 +189,11 @@ export default async function HomePage() {
             </div>
             <div className="grid grid-cols-3 gap-3">
               {photos.slice(0, 3).map((p) => (
-                <Link key={p.id} href={`/portfolio?foto=${p.id}`}>
+                <Link
+                  key={p.id}
+                  href={`/portfolio?foto=${p.id}`}
+                  aria-label={p.caption ? `Ver foto: ${p.caption}` : "Ver foto do portfólio"}
+                >
                   <PhotoTile url={p.url} className="aspect-[4/5]" />
                 </Link>
               ))}
