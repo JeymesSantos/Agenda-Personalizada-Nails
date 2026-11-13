@@ -26,7 +26,6 @@ export function SlotSelector({
   serviceId,
   serviceTitle,
   durationMin,
-  bufferMin,
   priceCents,
   priceFrom,
   dayLabel,
@@ -38,7 +37,6 @@ export function SlotSelector({
   serviceId: string
   serviceTitle: string
   durationMin: number
-  bufferMin: number
   priceCents: number
   priceFrom: boolean
   dayLabel: string
@@ -83,8 +81,8 @@ export function SlotSelector({
         })
       )}
       <InfoBox tone="info">
-        Horários calculados para {fmtDuration(durationMin).replace("h00", "h")} de serviço
-        {bufferMin ? ` + ${bufferMin} min de reorganização` : ""}. Atualizados em tempo real.
+        Horários calculados para {fmtDuration(durationMin).replace("h00", "h")} de serviço.
+        Atualizados em tempo real.
       </InfoBox>
     </div>
   )
@@ -121,10 +119,7 @@ export function SlotSelector({
             </span>
             <span className="flex min-w-0 flex-1 flex-col">
               <span className="type-body-medium truncate">{serviceTitle}</span>
-              <span className="type-body text-secondary-txt">
-                {fmtDuration(durationMin)}
-                {bufferMin ? ` · +${bufferMin} min` : ""}
-              </span>
+              <span className="type-body text-secondary-txt">{fmtDuration(durationMin)}</span>
             </span>
             <Link href="/agendar" className="type-body-medium text-pink-300 hover:underline">
               Trocar

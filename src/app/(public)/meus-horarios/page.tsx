@@ -31,10 +31,17 @@ export default async function MeusHorariosPage({ searchParams }: PageProps<"/meu
 
   return (
     <main className="mx-auto flex w-full max-w-[640px] flex-col gap-6 px-5 pt-8 pb-10 lg:pt-12">
+      {/* no desktop o "Sair" fica no cabeçalho público; aqui só no celular */}
       <PageHeader
         eyebrow={`Olá, ${firstName}`}
         title="Meus horários"
-        actions={access.kind === "member" ? <SignOutButton role="CLIENT" /> : undefined}
+        actions={
+          access.kind === "member" ? (
+            <div className="lg:hidden">
+              <SignOutButton role="CLIENT" />
+            </div>
+          ) : undefined
+        }
       />
 
       <Tabs defaultValue="proximos">

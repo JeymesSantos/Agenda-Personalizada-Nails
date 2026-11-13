@@ -143,7 +143,6 @@ export default async function HorarioPage({
           serviceId={service.id}
           serviceTitle={service.title}
           durationMin={service.durationMin}
-          bufferMin={service.bufferMin}
           priceCents={service.priceCents}
           priceFrom={service.priceFrom}
           dayLabel={dayLabel}

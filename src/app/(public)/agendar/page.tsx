@@ -26,7 +26,6 @@ export default async function AgendarPage() {
           title: s.title,
           description: s.description,
           durationMin: s.durationMin,
-          bufferMin: s.bufferMin,
           priceCents: s.priceCents,
           priceFrom: s.priceFrom,
           photoUrl: s.photoUrls[0] ?? null,

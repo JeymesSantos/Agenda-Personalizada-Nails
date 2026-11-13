@@ -12,7 +12,6 @@ export type ServiceCardData = {
   title: string
   description?: string | null
   durationMin: number
-  bufferMin: number
   priceCents: number
   priceFrom?: boolean
   photoUrl?: string | null
@@ -20,7 +19,8 @@ export type ServiceCardData = {
 
 /*
  * Card de serviço do Figma (M3 / D1 / pré-visualização em A3): foto (ou placeholder
- * "FOTO DO SERVIÇO"), título, descrição, duração + intervalo, preço em pink e botão Agendar.
+ * "FOTO DO SERVIÇO"), título, descrição, duração, preço em pink e botão Agendar.
+ * O intervalo de reorganização é interno do estúdio e não aparece para a cliente.
  */
 export function ServiceCard({
   service,
@@ -74,7 +74,6 @@ export function ServiceCard({
         <p className="type-body text-secondary-txt flex items-center gap-2">
           <ClockIcon className="size-4" aria-hidden />
           {fmtDuration(service.durationMin)}
-          {service.bufferMin > 0 ? ` · +${service.bufferMin} min intervalo` : null}
         </p>
         <div className="mt-1 flex items-center justify-between">
           <span className="type-h2 text-pink-300">

@@ -397,7 +397,6 @@ export function ServiceForm({
             title: values.title || "Nome do serviço",
             description: values.description,
             durationMin: values.durationMin,
-            bufferMin: values.bufferMin,
             priceCents: values.priceCents,
             priceFrom: values.priceFrom,
             photoUrl: values.photoUrls[0] ?? null,

@@ -167,7 +167,7 @@ export default async function RemarcarPage({
               slots={slots}
               dayLabel={selectedDate ? fmtLongDate(selectedDate, tz) : "Escolha um dia"}
               backHref={backHref}
-              note={`Horários calculados para ${fmtDuration(service.durationMin).replace("h00", "h")} de serviço${service.bufferMin ? ` + ${service.bufferMin} min de reorganização` : ""}. Seu horário atual é ignorado no cálculo.`}
+              note={`Horários calculados para ${fmtDuration(service.durationMin).replace("h00", "h")} de serviço. Seu horário atual é ignorado no cálculo.`}
             />
           ) : (
             <Button asChild variant="secondary">
