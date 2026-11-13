@@ -40,7 +40,7 @@ function PublicHeader({
     <header
       data-slot="public-header"
       className={cn(
-        "border-subtle bg-background/60 hidden h-[140px] items-center border-b px-10 backdrop-blur-md lg:flex xl:px-20",
+        "border-subtle bg-background/60 hidden h-[88px] items-center border-b px-10 backdrop-blur-md lg:flex xl:px-20",
         className,
       )}
       {...props}
@@ -51,7 +51,7 @@ function PublicHeader({
           {businessName}
         </span>
       </Link>
-      <nav aria-label="Páginas" className="ml-auto flex items-center gap-8">
+      <nav aria-label="Páginas" className="ml-auto flex items-center gap-6 xl:gap-8">
         {items.map((item) => {
           const active = current === item.href
           return (
@@ -60,7 +60,7 @@ function PublicHeader({
               href={item.href}
               aria-current={active ? "page" : undefined}
               className={cn(
-                "type-body-l hover:text-foreground transition-colors",
+                "type-body-l hover:text-foreground whitespace-nowrap transition-colors",
                 active ? "text-pink-300" : "text-secondary-txt",
               )}
             >

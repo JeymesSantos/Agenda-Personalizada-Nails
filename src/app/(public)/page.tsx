@@ -10,6 +10,7 @@ import {
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import { RotatingPhotoTile } from "@/features/public/components/rotating-photo-tile"
 import { ServiceCard } from "@/features/services/components/service-card"
 import {
   getNextFreeSlots,
@@ -69,28 +70,16 @@ function LinkCard({
   )
 }
 
-function PhotoTile({ url, className }: { url: string; className?: string }) {
-  return (
-    <div className={`bg-surface-2 relative overflow-hidden rounded-md ${className ?? ""}`}>
-      <Image
-        src={url}
-        alt=""
-        fill
-        sizes="(min-width: 1024px) 260px, 33vw"
-        className="object-cover"
-      />
-    </div>
-  )
-}
-
 /* Bio / Início — M1 (mobile) e D1 (desktop). */
 export default async function HomePage() {
   const b = await getPublicBusinessOrThrow()
   const [services, photos, nextSlots] = await Promise.all([
     listPublicServices(b.id),
-    listFeaturedPhotos(b.id, 4),
+    listFeaturedPhotos(b.id, 4, 12),
     getNextFreeSlots(b.id, b.timezone, 3),
   ])
+  /* só o que o componente cliente precisa */
+  const featured = photos.map((p) => ({ id: p.id, url: p.url, caption: p.caption }))
   const instagramUrl = b.instagram ? `https://instagram.com/${b.instagram}` : null
   const whatsappUrl = b.whatsapp ? `https://wa.me/55${b.whatsapp}` : null
 
@@ -187,11 +176,18 @@ export default async function HomePage() {
                 Ver tudo
               </Link>
             </div>
+            {/* 3 quadros que rodam pelas demais fotos de destaque */}
             <div className="grid grid-cols-3 gap-3">
-              {photos.slice(0, 3).map((p) => (
-                <Link key={p.id} href={`/portfolio?foto=${p.id}`}>
-                  <PhotoTile url={p.url} className="aspect-[4/5]" />
-                </Link>
+              {Array.from({ length: Math.min(3, photos.length) }, (_, slot) => (
+                <RotatingPhotoTile
+                  key={slot}
+                  photos={featured}
+                  slot={slot}
+                  slots={3}
+                  sizes="33vw"
+                  className="aspect-[4/5]"
+                  linkToPortfolio
+                />
               ))}
             </div>
           </div>
@@ -199,9 +195,10 @@ export default async function HomePage() {
       </section>
 
       {/* ---------- DESKTOP (D1) ---------- */}
-      {/* ocupa a altura da tela abaixo do cabeçalho (140px) com o conteúdo centralizado; as fotos ficam no fundo do layout */}
-      <section className="hidden min-h-[calc(100dvh-140px)] flex-col justify-center px-10 pt-16 pb-20 lg:flex xl:px-20">
-        <div className="mx-auto grid max-w-[1280px] grid-cols-[minmax(0,1fr)_minmax(0,460px)] items-center gap-10 xl:grid-cols-[minmax(0,1fr)_520px] xl:gap-16">
+      {/* ocupa a altura da tela abaixo do cabeçalho (88px) com o conteúdo centralizado; as fotos ficam no fundo do layout */}
+      <section className="hidden min-h-[calc(100dvh-88px)] flex-col justify-center px-10 pt-16 pb-20 lg:flex xl:px-20">
+        {/* a coluna das fotos cresce com a tela (até 44% em telas largas) */}
+        <div className="mx-auto grid w-full max-w-[1280px] grid-cols-[minmax(0,1fr)_minmax(0,460px)] items-center gap-10 xl:grid-cols-[minmax(0,1fr)_minmax(0,40%)] xl:gap-16 2xl:max-w-[1600px] 2xl:grid-cols-[minmax(0,1fr)_minmax(0,44%)]">
           <div className="flex flex-col gap-6">
             <p className="display-label text-pink-300">Nail designer · Agenda online</p>
             <h1 className="display-xl">{b.name}</h1>
@@ -235,13 +232,22 @@ export default async function HomePage() {
               </div>
             </dl>
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            {photos.slice(0, 4).map((p, i) => (
-              <PhotoTile
-                key={p.id}
-                url={p.url}
+          {/* 4 quadros que rodam pelas demais fotos de destaque; altura presa à tela para a grade nunca estourar o hero */}
+          <div className="grid h-[clamp(440px,calc(100dvh-88px-176px),820px)] grid-cols-2 grid-rows-2 gap-4 py-6">
+            {Array.from({ length: Math.min(4, photos.length) }, (_, slot) => (
+              <RotatingPhotoTile
+                key={slot}
+                photos={featured}
+                slot={slot}
+                slots={4}
+                sizes="(min-width: 1024px) 260px, 33vw"
                 className={
-                  i === 0 ? "-mt-8 aspect-[4/5]" : i === 3 ? "-mb-8 aspect-[4/5]" : "aspect-[5/4]"
+                  /* 1º e 4º quadros mais altos que a célula: um sobe, o outro desce */
+                  slot === 0
+                    ? "h-[calc(100%+5rem)] -translate-y-20"
+                    : slot === 3
+                      ? "h-[calc(100%+5rem)]"
+                      : "h-full"
                 }
               />
             ))}
