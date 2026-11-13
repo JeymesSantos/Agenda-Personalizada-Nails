@@ -94,7 +94,11 @@ function Slides({
     <div
       aria-hidden
       data-veil={veil}
-      className={cn("bg-slideshow -z-10", still && "bg-slideshow-still", className)}
+      className={cn(
+        "bg-slideshow pointer-events-none fixed inset-0 -z-10 overflow-hidden",
+        still && "bg-slideshow-still",
+        className,
+      )}
     >
       {items.map((item, i) => {
         const isCurrent = i === current
@@ -103,7 +107,7 @@ function Slides({
         return (
           <div
             key={item.id}
-            className="bg-slide"
+            className="bg-slide absolute inset-0"
             data-state={isCurrent ? "in" : "out"}
             style={{ zIndex: isCurrent ? 1 : 0 }}
           >
@@ -118,7 +122,7 @@ function Slides({
           </div>
         )
       })}
-      <div className="bg-slideshow-fade" />
+      <div className="bg-slideshow-fade absolute inset-0 z-[2]" />
     </div>
   )
 }
@@ -138,8 +142,9 @@ function Slide({
   onEnded?: () => void
   priority: boolean
 }) {
-  /* enquadramento definido em /admin/fundos */
+  /* enquadramento definido em /admin/fundos; `object-cover` mantém a proporção em qualquer janela */
   const style = { objectPosition: `${item.focusX}% ${item.focusY}%` }
+  const media = "absolute inset-0 size-full object-cover"
   if (item.kind === "VIDEO" && !still) {
     return (
       <video
@@ -151,6 +156,7 @@ function Slide({
         loop={loop}
         preload={active ? "auto" : "metadata"}
         onEnded={onEnded}
+        className={media}
         style={style}
       />
     )
@@ -158,6 +164,15 @@ function Slide({
   const src = item.kind === "VIDEO" ? item.posterUrl : item.url
   if (!src) return null
   return (
-    <Image src={src} alt="" fill sizes="100vw" priority={priority} quality={70} style={style} />
+    <Image
+      src={src}
+      alt=""
+      fill
+      sizes="100vw"
+      priority={priority}
+      quality={70}
+      className={media}
+      style={style}
+    />
   )
 }

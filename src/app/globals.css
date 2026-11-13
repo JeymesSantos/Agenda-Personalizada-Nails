@@ -340,17 +340,10 @@
  * conteúdo em crossfade com leve zoom (Ken Burns), sob um véu escuro +
  * gradiente magenta para o texto seguir legível. A troca é controlada pelo
  * componente; aqui ficam só a transição e o véu em três intensidades.
+ * Posição, tamanho e `object-fit: cover` ficam em utilitários no próprio
+ * componente, para o fundo nunca depender deste bloco para não esticar.
  */
-.bg-slideshow {
-  position: fixed;
-  inset: 0;
-  overflow: hidden;
-  pointer-events: none;
-}
-
 .bg-slide {
-  position: absolute;
-  inset: 0;
   opacity: 0;
   transform-origin: 50% 30%;
   transition: opacity 1.5s ease-in-out;
@@ -364,11 +357,6 @@
 
 .bg-slide > img,
 .bg-slide > video {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
   object-position: 50% 28%;
   filter: saturate(0.9);
 }
@@ -394,9 +382,6 @@
  * nunca virar fundo sólido. Três intensidades, escolhidas por tela no painel.
  */
 .bg-slideshow-fade {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
   background:
     var(--gradient-hero),
     linear-gradient(
