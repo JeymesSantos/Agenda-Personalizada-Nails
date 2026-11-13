@@ -42,6 +42,9 @@ function atLocalTime(day: Date, minutesFromMidnight: number) {
 
 async function main() {
   console.log("→ limpando dados")
+  await prisma.backgroundAssignment.deleteMany()
+  await prisma.backgroundPageSetting.deleteMany()
+  await prisma.backgroundMedia.deleteMany()
   await prisma.reminder.deleteMany()
   await prisma.appointment.deleteMany()
   await prisma.clientNote.deleteMany()
@@ -453,6 +456,39 @@ async function main() {
       photoIndex++
     }
   }
+
+  console.log("→ fundos")
+  /* as mesmas fotos que estavam fixas em public/hero e public/hero-admin */
+  const backgrounds: [string, "PUBLIC_DEFAULT" | "ADMIN_DEFAULT", string][] = [
+    ["/hero/hero-1.jpg", "PUBLIC_DEFAULT", "Studio 1"],
+    ["/hero/hero-2.jpg", "PUBLIC_DEFAULT", "Studio 2"],
+    ["/hero/hero-3.jpg", "PUBLIC_DEFAULT", "Studio 3"],
+    ["/hero/hero-4.jpg", "PUBLIC_DEFAULT", "Studio 4"],
+    ["/hero/hero-5.jpg", "PUBLIC_DEFAULT", "Studio 5"],
+    ["/hero-admin/admin-1.jpg", "ADMIN_DEFAULT", "Ensaio 1"],
+    ["/hero-admin/admin-2.jpg", "ADMIN_DEFAULT", "Ensaio 2"],
+    ["/hero-admin/admin-3.jpg", "ADMIN_DEFAULT", "Ensaio 3"],
+  ]
+  let bgOrder = 0
+  for (const [url, page, name] of backgrounds) {
+    await prisma.backgroundMedia.create({
+      data: {
+        businessId: business.id,
+        kind: "IMAGE",
+        url,
+        name,
+        order: bgOrder,
+        assignments: { create: { businessId: business.id, page, order: bgOrder } },
+      },
+    })
+    bgOrder++
+  }
+  await prisma.backgroundPageSetting.createMany({
+    data: [
+      { businessId: business.id, page: "PUBLIC_DEFAULT", veil: "MEDIUM" },
+      { businessId: business.id, page: "ADMIN_DEFAULT", veil: "DENSE" },
+    ],
+  })
 
   console.log("→ despesas")
   const month = new TZDate(today, TZ).getMonth() + 1
