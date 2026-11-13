@@ -242,10 +242,11 @@ export default async function HomePage() {
                 slots={4}
                 sizes="(min-width: 1024px) 260px, 33vw"
                 className={
+                  /* 1º e 4º quadros mais altos que a célula: um sobe, o outro desce */
                   slot === 0
-                    ? "h-full -translate-y-6"
+                    ? "h-[calc(100%+2.5rem)] -translate-y-10"
                     : slot === 3
-                      ? "h-full translate-y-6"
+                      ? "h-[calc(100%+2.5rem)]"
                       : "h-full"
                 }
               />
