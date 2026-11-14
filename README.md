@@ -93,6 +93,13 @@ seed). Para inspecionar os dados: `pnpm db:studio`.
 Clientes sem cadastro (Camila, Rita, Paula, Nanda, Carla…) acessam seus agendamentos pelo link
 com token de gerenciamento (`/meus-horarios?t=<token>`), o mesmo que vai na confirmação.
 
+Cada link com token permite consultar, remarcar ou cancelar **somente o agendamento que o
+originou**. O histórico completo exige login na conta da cliente. Informar um WhatsApp no
+agendamento público não altera o nome já cadastrado. O cadastro não incorpora registros
+existentes por WhatsApp ou e-mail: a conversão de uma cliente sem conta fica bloqueada até
+haver comprovação de identidade. Enquanto isso, ela usa o link do comprovante ou procura o
+studio para ajuda com o cadastro.
+
 ### Variáveis de ambiente
 
 | Variável                        | Uso                                                                                      |
@@ -179,7 +186,7 @@ O `src/proxy.ts` protege `/admin/**` (exige ADMIN) e `/meus-horarios/**` (exige 
 | `/admin/clientes/[id]`   | —             | Ficha: KPIs, histórico, anotações, contato                                                                                                                               |
 | `/admin/bio`             | —             | Editar página pública com prévia ao vivo                                                                                                                                 |
 | `/admin/fundos`          | —             | Fotos e vídeos de fundo: biblioteca (upload) e qual mídia aparece em cada tela, com véu por tela                                                                         |
-| `/api/cron/reminders`    | —             | Envia os lembretes de e-mail vencidos (Vercel Cron a cada 15 min, `vercel.json`)                                                                                         |
+| `/api/cron/reminders`    | —             | Envia os lembretes de e-mail vencidos (Vercel Cron diário às 09:00 UTC / 06:00 em São Paulo, `vercel.json`)                                                              |
 | `/manifest.webmanifest`  | —             | Manifest do PWA (nome do estúdio lido do banco); `/offline` é a tela sem conexão do service worker                                                                       |
 | `/admin/mais`            | —             | Item "Mais" da barra inferior no celular (portfólio, clientes, bio, fundos, sair)                                                                                        |
 
@@ -207,7 +214,7 @@ O `src/proxy.ts` protege `/admin/**` (exige ADMIN) e `/meus-horarios/**` (exige 
 ## Lembretes (confirmação, 24 h e 2 h)
 
 Ao criar ou remarcar um agendamento, `bookAppointment` chama `scheduleReminders`, que cria um
-`Reminder` por canal da cliente (e-mail e/ou WhatsApp) e por tipo: confirmação (sai na hora),
+`Reminder` por canal da cliente (e-mail e/ou WhatsApp) e por tipo: confirmação (vence na hora),
 24 h e 2 h antes (só se ainda cabem). Cancelar, concluir ou marcar falta cancela os pendentes;
 reabrir volta a agendá-los (`src/features/reminders`).
 
@@ -219,6 +226,28 @@ reabrir volta a agendá-los (`src/features/reminders`).
   "Marcar enviado".
 - Os textos ficam em `templates.ts` (funções puras, com testes) e os botões apontam para o
   comprovante com o token de gerenciamento, onde a cliente remarca ou cancela sem cadastro.
+
+### Frequência do cron e limites da homologação
+
+| Configuração      | Valor                                                                                            |
+| ----------------- | ------------------------------------------------------------------------------------------------ |
+| Arquivo           | `vercel.json`                                                                                    |
+| Rota              | `GET /api/cron/reminders`                                                                        |
+| Expressão         | `0 9 * * *`                                                                                      |
+| Horário           | Diariamente às 09:00 UTC, equivalente a 06:00 em `America/Sao_Paulo`                             |
+| Precisão no Hobby | Pode executar entre 06:00 e 06:59 em São Paulo                                                   |
+| Ativação          | Automática apenas em deployments de produção; previews exigem chamada manual para testar         |
+| Proteção          | Configurar `CRON_SECRET` no ambiente publicado; a Vercel envia `Authorization: Bearer <segredo>` |
+
+A frequência diária atende ao limite do plano Hobby e substitui a configuração anterior de
+15 minutos, que impedia o deploy. Consulte os [limites oficiais do cron](https://vercel.com/docs/cron-jobs/usage-and-pricing).
+
+Cada execução processa até 50 e-mails vencidos. A confirmação pode aguardar a próxima rodada;
+os lembretes de 24 h e 2 h não têm garantia de envio no horário previsto. Lembretes desses dois
+tipos são cancelados se o atendimento já começou. O cron diário é uma configuração temporária
+para testes; envio pontual depende de um agendador mais frequente antes do uso com clientes reais.
+Sem `RESEND_API_KEY`, o envio é simulado no log e ainda assim marcado como enviado; isso não
+comprova entrega de e-mail.
 
 ## Fundos das telas (fotos e vídeos)
 
@@ -361,8 +390,9 @@ variáveis de ambiente:
 | `EMAIL_FROM`            | Remetente com domínio verificado no Resend, ex.: `Letícia Fagundes <agenda@seudominio.com.br>`                                |
 | `CRON_SECRET`           | Qualquer segredo longo; a Vercel envia no `Authorization` das chamadas do cron                                                |
 
-O cron dos lembretes (`GET /api/cron/reminders` a cada 15 min) vem de `vercel.json` e é criado
-no primeiro deploy. Em **Settings → Cron Jobs** dá para ver as execuções.
+O cron dos lembretes (`GET /api/cron/reminders`, diário às 09:00 UTC) vem de `vercel.json` e é criado
+no primeiro deploy de produção. Em **Settings → Cron Jobs** dá para ver as execuções. Consulte a seção
+[Frequência do cron e limites da homologação](#frequência-do-cron-e-limites-da-homologação) para as limitações do envio diário.
 
 ### 3. Primeira conta e dados
 
@@ -375,8 +405,8 @@ pnpm admin:create --email leticia@exemplo.com --senha "uma senha forte"   --nome
 
 O script é idempotente: com um estúdio já existente, só redefine nome, e-mail e senha da dona
 (serve para recuperar a senha). O resto — horário, serviços, bio, fundos, portfólio — se
-configura pelo painel. Se quiser os dados de demonstração em vez disso, `pnpm db:seed` com o
-`DATABASE_URL` de produção (apaga tudo e recria o conteúdo do Figma).
+configura pelo painel. Para dados de demonstração, use `pnpm db:seed` somente com um banco de testes
+descartável: o seed apaga os registros existentes antes de inserir os exemplos do Figma.
 
 ### 4. Domínio e PWA
 

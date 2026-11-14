@@ -1,4 +1,4 @@
 {
   "buildCommand": "pnpm run build:vercel",
-  "crons": [{ "path": "/api/cron/reminders", "schedule": "*/15 * * * *" }]
+  "crons": [{ "path": "/api/cron/reminders", "schedule": "0 9 * * *" }]
 }

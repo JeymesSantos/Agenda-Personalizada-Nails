@@ -4,33 +4,37 @@ import { prisma } from "@/lib/prisma"
 import { getCurrentUser } from "@/lib/session"
 
 export type ClientAccess =
-  { kind: "member"; clientId: string } | { kind: "token"; clientId: string; token: string } | null
+  | { kind: "member"; clientId: string }
+  | { kind: "token"; clientId: string; appointmentId: string; token: string }
+  | null
 
 /**
  * Quem está acessando "Meus horários": cliente logada ou link com token de
- * gerenciamento (cliente sem cadastro). O token identifica a cliente do agendamento.
+ * gerenciamento. Cada token autoriza somente o agendamento que o originou.
  */
 export async function resolveClientAccess(token: string | null): Promise<ClientAccess> {
   if (token) {
     const a = await prisma.appointment.findUnique({
       where: { manageToken: token },
-      select: { clientId: true },
+      select: { id: true, clientId: true },
     })
-    if (a) return { kind: "token", clientId: a.clientId, token }
+    if (a) return { kind: "token", clientId: a.clientId, appointmentId: a.id, token }
+    return null
   }
   const user = await getCurrentUser()
   if (user?.role === "CLIENT") return { kind: "member", clientId: user.id }
   return null
 }
 
-export async function getMyAppointments(clientId: string, now: Date) {
+export async function getMyAppointments(access: NonNullable<ClientAccess>, now: Date) {
+  const clientId = access.clientId
   const [client, appointments] = await Promise.all([
     prisma.user.findUniqueOrThrow({
       where: { id: clientId },
       select: { id: true, name: true, whatsapp: true, passwordHash: true },
     }),
     prisma.appointment.findMany({
-      where: { clientId },
+      where: { clientId, ...(access.kind === "token" ? { id: access.appointmentId } : {}) },
       include: {
         service: true,
         business: { select: { timezone: true, cancelMinHours: true, whatsapp: true, name: true } },
@@ -49,7 +53,11 @@ export async function getMyAppointments(clientId: string, now: Date) {
 export async function getMyAppointment(id: string, access: ClientAccess) {
   if (!access) return null
   const a = await prisma.appointment.findFirst({
-    where: { id, clientId: access.clientId },
+    where: {
+      id,
+      clientId: access.clientId,
+      ...(access.kind === "token" ? { manageToken: access.token } : {}),
+    },
     include: { service: true, business: true },
   })
   return a

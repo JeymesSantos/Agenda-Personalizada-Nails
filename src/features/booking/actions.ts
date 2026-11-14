@@ -98,9 +98,7 @@ export async function createPublicBookingAction(
     const existing = await prisma.user.findUnique({ where: { whatsapp: parsed.data.whatsapp } })
     if (existing) {
       clientId = existing.id
-      if (!existing.passwordHash && existing.name !== parsed.data.name) {
-        await prisma.user.update({ where: { id: existing.id }, data: { name: parsed.data.name } })
-      }
+      /* Informar o WhatsApp não autoriza alterar a identidade de uma cliente existente. */
     } else {
       const created = await prisma.user.create({
         data: { name: parsed.data.name, whatsapp: parsed.data.whatsapp, role: "CLIENT" },

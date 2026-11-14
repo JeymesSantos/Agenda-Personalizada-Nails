@@ -21,7 +21,7 @@ import { ExpenseRowActions } from "@/features/expenses/components/expense-row-ac
 import { getExpensesData } from "@/features/expenses/queries"
 import { capitalize, fmt, tz } from "@/lib/dates"
 import { deltaPct } from "@/lib/finance"
-import { formatCents, formatPercent } from "@/lib/money"
+import { formatCentsExact, formatPercent } from "@/lib/money"
 import { prisma } from "@/lib/prisma"
 import { requireAdmin } from "@/lib/session"
 
@@ -86,7 +86,7 @@ export default async function DespesasPage({ searchParams }: PageProps<"/admin/d
         <KpiCard
           icon={<ReceiptIcon />}
           label="Despesas do mês"
-          value={formatCents(summary.expensesCents)}
+          value={formatCentsExact(summary.expensesCents)}
           delta={delta != null ? `${formatPercent(delta, true)} vs. mês anterior` : undefined}
           deltaTone={delta != null && delta > 0 ? "error" : "success"}
           hint={delta == null ? "Sem base de comparação" : undefined}
@@ -94,13 +94,13 @@ export default async function DespesasPage({ searchParams }: PageProps<"/admin/d
         <KpiCard
           icon={<RepeatIcon />}
           label="Fixas"
-          value={formatCents(summary.fixedCents)}
+          value={formatCentsExact(summary.fixedCents)}
           hint={`${data.recurringCount} lançamento${data.recurringCount === 1 ? "" : "s"} recorrente${data.recurringCount === 1 ? "" : "s"}`}
         />
         <KpiCard
           icon={<WalletIcon />}
           label="Variáveis"
-          value={formatCents(summary.variableCents)}
+          value={formatCentsExact(summary.variableCents)}
           hint={`${data.variableCount} lançamento${data.variableCount === 1 ? "" : "s"}`}
         />
       </section>
@@ -155,7 +155,7 @@ export default async function DespesasPage({ searchParams }: PageProps<"/admin/d
                           {e.recurrence === "MONTHLY" ? "Mensal" : "—"}
                         </td>
                         <td className="type-body-medium text-error px-3 py-4 text-right whitespace-nowrap">
-                          − {formatCents(e.amountCents)}
+                          − {formatCentsExact(e.amountCents)}
                         </td>
                         <td className="px-3 py-2">
                           <ExpenseRowActions
@@ -182,7 +182,7 @@ export default async function DespesasPage({ searchParams }: PageProps<"/admin/d
                         Total do mês
                       </td>
                       <td className="type-h3 text-error px-3 py-4 text-right whitespace-nowrap">
-                        − {formatCents(summary.expensesCents)}
+                        − {formatCentsExact(summary.expensesCents)}
                       </td>
                       <td />
                     </tr>
@@ -207,7 +207,7 @@ export default async function DespesasPage({ searchParams }: PageProps<"/admin/d
                     <div className="flex items-center justify-between gap-3">
                       <span className="type-body-medium truncate">{c.category}</span>
                       <span className="type-body text-secondary-txt shrink-0">
-                        {formatCents(c.amountCents)} · {c.pct}%
+                        {formatCentsExact(c.amountCents)} · {c.pct}%
                       </span>
                     </div>
                     <div className="bg-elevated h-1 w-full overflow-hidden rounded-full">
@@ -222,7 +222,8 @@ export default async function DespesasPage({ searchParams }: PageProps<"/admin/d
             )}
             <InfoBox tone={summary.profitCents >= 0 ? "success" : "warning"}>
               {summary.profitCents >= 0 ? "Lucro" : "Prejuízo"} de{" "}
-              {fmt(range.start, "MMMM", timezone)}: {formatCents(Math.abs(summary.profitCents))}
+              {fmt(range.start, "MMMM", timezone)}:{" "}
+              {formatCentsExact(Math.abs(summary.profitCents))}
               {summary.revenueCents > 0
                 ? ` (${Math.abs(summary.marginPct)}% do faturamento)`
                 : " (sem faturamento no mês)"}
