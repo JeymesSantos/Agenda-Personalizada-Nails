@@ -1,3 +1,4 @@
+import { photoPosition } from "@/lib/media-focus"
 import type { Metadata } from "next"
 import Image from "next/image"
 import Link from "next/link"
@@ -279,6 +280,7 @@ export default async function HomePage() {
                   priceCents: s.priceCents,
                   priceFrom: s.priceFrom,
                   photoUrl: s.photoUrls[0] ?? null,
+                  photoPosition: photoPosition(s.photoFocus, s.photoUrls[0]),
                 }}
               />
             ))}

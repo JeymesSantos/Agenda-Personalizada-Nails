@@ -15,6 +15,7 @@ export type ServiceCardData = {
   priceCents: number
   priceFrom?: boolean
   photoUrl?: string | null
+  photoPosition?: string
 }
 
 /*
@@ -58,6 +59,7 @@ export function ServiceCard({
             fill
             sizes="(min-width: 1024px) 320px, 100vw"
             className="object-cover"
+            style={{ objectPosition: service.photoPosition }}
           />
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-pink-300/70">

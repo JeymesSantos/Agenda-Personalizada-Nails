@@ -10,7 +10,12 @@ import { getCurrentUser } from "@/lib/session"
 export async function getAppointmentByCode(code: string, token: string | null) {
   const a = await prisma.appointment.findUnique({
     where: { code },
-    include: { service: true, client: true, business: true },
+    include: {
+      service: true,
+      client: true,
+      business: true,
+      notices: { orderBy: { createdAt: "desc" }, take: 5 },
+    },
   })
   if (!a) return null
   if (token && token === a.manageToken) return a

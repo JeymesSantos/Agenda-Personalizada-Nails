@@ -13,6 +13,7 @@ import {
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
+import { PhoneInput } from "@/components/ui/phone-input"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
@@ -236,7 +237,7 @@ export function BioForm({ initial, baseUrl }: { initial: BioValues; baseUrl: str
               />
             </Field>
             <Field label="WhatsApp" error={fe.whatsapp}>
-              <Input
+              <PhoneInput
                 name="whatsapp"
                 value={v.whatsapp}
                 onChange={(e) => set("whatsapp", e.target.value)}

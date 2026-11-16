@@ -10,6 +10,7 @@ import { cancelReminders, scheduleReminders } from "@/features/reminders/core"
 import { fmtTime } from "@/lib/dates"
 import { prisma } from "@/lib/prisma"
 import { requireAdmin } from "@/lib/session"
+import { changeAppointmentStatus } from "./status"
 import { searchClients } from "./queries"
 
 async function ownerBusiness() {
@@ -26,35 +27,22 @@ function revalidateAgenda() {
   revalidatePath("/admin/clientes")
   revalidatePath("/meus-horarios")
   revalidatePath("/agendar")
+  revalidatePath("/agendamento", "layout")
 }
 
 export type ActionResult = { error?: string; success?: string }
-
-const transitions: Record<AppointmentStatus, AppointmentStatus[]> = {
-  PENDING: ["CONFIRMED", "CANCELLED", "DONE", "NO_SHOW"],
-  CONFIRMED: ["DONE", "NO_SHOW", "CANCELLED", "PENDING"],
-  DONE: ["CONFIRMED"],
-  NO_SHOW: ["CONFIRMED"],
-  CANCELLED: ["CONFIRMED"],
-}
 
 export async function setAppointmentStatusAction(
   id: string,
   status: AppointmentStatus,
 ): Promise<ActionResult> {
   const business = await ownerBusiness()
-  const a = await prisma.appointment.findFirst({ where: { id, businessId: business.id } })
-  if (!a) return { error: "Agendamento não encontrado." }
-  if (!transitions[a.status].includes(status))
-    return { error: "Essa mudança de status não é permitida." }
-  await prisma.appointment.update({
-    where: { id },
-    data: {
-      status,
-      cancelledAt: status === "CANCELLED" ? new Date() : null,
-      cancelledBy: status === "CANCELLED" ? "ADMIN" : null,
-    },
-  })
+  try {
+    await changeAppointmentStatus(business.id, id, status)
+  } catch (error) {
+    if (error instanceof BookingError) return { error: error.message }
+    throw error
+  }
   /* lembretes só fazem sentido para agendamento ativo; reabrir volta a agendá-los */
   if (status === "PENDING" || status === "CONFIRMED") await scheduleReminders(id)
   else await cancelReminders(id)

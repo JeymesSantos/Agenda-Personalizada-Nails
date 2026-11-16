@@ -4,6 +4,7 @@ import { useActionState } from "react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
+import { PhoneInput } from "@/components/ui/phone-input"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { updateClientContactAction, type ClientActionResult } from "../actions"
@@ -32,7 +33,7 @@ export function ClientContactForm({
       </div>
       <div className="flex flex-col gap-2">
         <Label htmlFor="whatsapp">WhatsApp</Label>
-        <Input
+        <PhoneInput
           id="whatsapp"
           name="whatsapp"
           defaultValue={whatsapp ?? ""}

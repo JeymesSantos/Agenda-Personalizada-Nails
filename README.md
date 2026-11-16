@@ -367,6 +367,21 @@ exemplo); o resto não muda.
 1. Crie o projeto no Neon e copie a connection string **pooled** (com `-pooler` no host). O Prisma
    usa o driver `pg`, então o pooler funciona bem em serverless.
 2. Guarde-a como `DATABASE_URL` (inclua `?sslmode=require`).
+3. Guarde também a conexão **direta**, sem `-pooler` no host, como
+   `DATABASE_URL_UNPOOLED`. O Prisma usa essa variável nas migrations; no Docker
+   local, quando ela está vazia, usa `DATABASE_URL`.
+
+O projeto Neon deste repositório é `minhaagenda` (`delicate-lake-01051672`), na
+região AWS US East (N. Virginia), com PostgreSQL 17. A branch `development` é
+usada pelo `.env` local; a branch `main` fica reservada à produção. As conexões
+também estão nos arquivos locais `.env.neon.development` e `.env.neon.production`,
+ignorados pelo Git. Esses arquivos de referência não são carregados automaticamente
+pelo Next.js. A configuração local anterior foi preservada em `.env.before-neon`.
+
+Na Vercel, configure **as duas variáveis de conexão** da branch `main` apenas em
+Production. Para previews, use uma branch própria. O banco novo recebe somente
+as migrations, sem dados de demonstração; a criação da primeira conta é descrita
+no passo 3 abaixo.
 
 As migrations rodam no build da Vercel (`pnpm run build:vercel` = `prisma migrate deploy` +
 `next build`, definido em `vercel.json`). Se usar **Preview Deployments**, dê a eles um banco
@@ -381,6 +396,7 @@ variáveis de ambiente:
 | Variável                | Valor                                                                                                                         |
 | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
 | `DATABASE_URL`          | Connection string do passo 1                                                                                                  |
+| `DATABASE_URL_UNPOOLED` | Conexão direta do mesmo banco, usada pelo Prisma nas migrations                                                               |
 | `AUTH_SECRET`           | `openssl rand -base64 32`                                                                                                     |
 | `AUTH_URL`              | URL pública, ex.: `https://agenda.seudominio.com.br` (entra nos links dos e-mails, no manifest e no Open Graph)               |
 | `AUTH_TRUST_HOST`       | `true`                                                                                                                        |

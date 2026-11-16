@@ -1,3 +1,5 @@
+import Link from "next/link"
+import { XIcon } from "lucide-react"
 import { PageHeader } from "@/components/layout/page-header"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -47,11 +49,18 @@ export default async function DisponibilidadePage({
         variant="heading"
         title="Dias e horários de atendimento"
         actions={
-          <ExceptionDialog
-            today={today}
-            defaultOpen={bloquear === "1"}
-            trigger={<Button>Bloquear / liberar</Button>}
-          />
+          <div className="flex flex-wrap gap-2">
+            <Button asChild variant="secondary">
+              <Link href="/admin/agenda">
+                <XIcon /> Fechar
+              </Link>
+            </Button>
+            <ExceptionDialog
+              today={today}
+              defaultOpen={bloquear === "1"}
+              trigger={<Button>Bloquear / liberar</Button>}
+            />
+          </div>
         }
       />
 
@@ -60,7 +69,8 @@ export default async function DisponibilidadePage({
           <CardHeader>
             <CardTitle>Horário de funcionamento</CardTitle>
             <CardDescription>
-              Base usada pelo motor de horários. Exceções ficam ao lado.
+              Defina os dias de atendimento, o expediente e o intervalo de almoço. Salve para
+              aplicar à agenda.
             </CardDescription>
           </CardHeader>
           <CardContent>

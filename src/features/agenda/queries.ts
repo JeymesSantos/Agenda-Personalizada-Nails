@@ -6,6 +6,7 @@ import type { AppointmentStatus, ExceptionType } from "@/generated/prisma/enums"
 import { dayStart, tz } from "@/lib/dates"
 import { prisma } from "@/lib/prisma"
 import { minutesFromDayStart, localDayStart } from "@/lib/scheduling"
+import { resolveAgendaBlocks } from "./resolve-blocks"
 
 export type AgendaView = "dia" | "semana" | "mes"
 
@@ -222,7 +223,17 @@ export async function getAgendaData(
         ? `${days[0].dayNumber} – ${days[days.length - 1].dayNumber} de ${monthName(days[days.length - 1].date, timezone)}`
         : cap(z.toLocaleDateString("pt-BR", { month: "long", year: "numeric", timeZone: timezone }))
 
-  return { view, anchor, rangeStart, rangeEnd, days, blocks, gridStartMin, gridEndMin, title }
+  return {
+    view,
+    anchor,
+    rangeStart,
+    rangeEnd,
+    days,
+    blocks: resolveAgendaBlocks(blocks),
+    gridStartMin,
+    gridEndMin,
+    title,
+  }
 }
 
 function formatDur(min: number) {
@@ -243,7 +254,12 @@ function cap(s: string) {
 export async function getAppointmentDetail(businessId: string, id: string) {
   const a = await prisma.appointment.findFirst({
     where: { id, businessId },
-    include: { client: true, service: true, reminders: { orderBy: { sendAt: "asc" } } },
+    include: {
+      client: true,
+      service: true,
+      reminders: { orderBy: { sendAt: "asc" } },
+      notices: { orderBy: { createdAt: "desc" }, take: 5 },
+    },
   })
   if (!a) return null
   const visits = await prisma.appointment.count({

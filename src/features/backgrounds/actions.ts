@@ -83,15 +83,27 @@ export async function setMediaFocusAction(
   id: string,
   x: number,
   y: number,
+  desktopX: number = x,
+  desktopY: number = y,
 ): Promise<BackgroundResult> {
   const business = await ownerBusiness()
   const parsed = z
-    .object({ x: z.number().int().min(0).max(100), y: z.number().int().min(0).max(100) })
-    .safeParse({ x, y })
+    .object({
+      x: z.number().int().min(0).max(100),
+      y: z.number().int().min(0).max(100),
+      desktopX: z.number().int().min(0).max(100),
+      desktopY: z.number().int().min(0).max(100),
+    })
+    .safeParse({ x, y, desktopX, desktopY })
   if (!parsed.success) return { error: "Enquadramento inválido." }
   const r = await prisma.backgroundMedia.updateMany({
     where: { id, businessId: business.id },
-    data: { focusX: parsed.data.x, focusY: parsed.data.y },
+    data: {
+      focusX: parsed.data.x,
+      focusY: parsed.data.y,
+      desktopFocusX: parsed.data.desktopX,
+      desktopFocusY: parsed.data.desktopY,
+    },
   })
   if (r.count === 0) return { error: "Mídia não encontrada." }
   revalidateBackgrounds()
@@ -113,10 +125,11 @@ export async function deleteBackgroundMediaAction(id: string): Promise<Backgroun
 const pageSchema = z.enum(Object.values(BackgroundPage) as [BackgroundPage, ...BackgroundPage[]])
 const veilSchema = z.enum(Object.values(BackgroundVeil) as [BackgroundVeil, ...BackgroundVeil[]])
 
-/* Substitui a lista de mídias de uma tela pela ordem recebida. Lista vazia = herda o padrão da área. */
+/* Lista vazia remove o fundo desta tela; herança só volta quando solicitada explicitamente. */
 export async function setPageMediaAction(
   page: BackgroundPage,
   mediaIds: string[],
+  inheritMedia = false,
 ): Promise<BackgroundResult> {
   const business = await ownerBusiness()
   const parsed = z.object({ page: pageSchema, mediaIds: z.array(z.string()).max(20) }).safeParse({
@@ -132,6 +145,11 @@ export async function setPageMediaAction(
     if (owned !== ids.length) return { error: "Mídia inválida." }
   }
   await prisma.$transaction([
+    prisma.backgroundPageSetting.upsert({
+      where: { businessId_page: { businessId: business.id, page } },
+      update: { inheritMedia },
+      create: { businessId: business.id, page, inheritMedia },
+    }),
     prisma.backgroundAssignment.deleteMany({ where: { businessId: business.id, page } }),
     ...(ids.length > 0
       ? [

@@ -34,6 +34,7 @@ export default defineConfig({
     reuseExistingServer: !process.env.CI,
     env: {
       DATABASE_URL: E2E_DATABASE_URL,
+      DATABASE_URL_UNPOOLED: E2E_DATABASE_URL,
       AUTH_URL: E2E_BASE_URL,
       AUTH_TRUST_HOST: "true",
       /* sem e-mail nem Blob nos testes: cai no console e no disco */

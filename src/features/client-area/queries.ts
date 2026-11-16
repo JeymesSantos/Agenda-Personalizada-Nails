@@ -37,6 +37,7 @@ export async function getMyAppointments(access: NonNullable<ClientAccess>, now: 
       where: { clientId, ...(access.kind === "token" ? { id: access.appointmentId } : {}) },
       include: {
         service: true,
+        notices: { orderBy: { createdAt: "desc" }, take: 5 },
         business: { select: { timezone: true, cancelMinHours: true, whatsapp: true, name: true } },
       },
       orderBy: { startsAt: "desc" },

@@ -6,6 +6,7 @@ import { ServiceForm } from "@/features/services/components/service-form"
 import { getService, listCategories, typicalOpenMinutes } from "@/features/services/queries"
 import { prisma } from "@/lib/prisma"
 import { requireAdmin } from "@/lib/session"
+import { readPhotoFocus } from "@/lib/media-focus"
 
 export const metadata = { title: "Editar serviço" }
 
@@ -43,6 +44,7 @@ export default async function EditarServicoPage({ params }: PageProps<"/admin/se
           priceFrom: service.priceFrom,
           visible: service.visible,
           photoUrls: service.photoUrls,
+          photoFocus: readPhotoFocus(service.photoFocus),
         }}
         categories={categories.map((c) => ({ id: c.id, name: c.name }))}
         typicalOpenMinutes={openMinutes}

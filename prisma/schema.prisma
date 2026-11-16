@@ -183,6 +183,7 @@ model Service {
   visible     Boolean  @default(true)
   order       Int      @default(0)
   photoUrls   String[] @default([])
+  photoFocus  Json     @default("{}")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -248,10 +249,11 @@ model Appointment {
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @updatedAt
 
-  business  Business   @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  client    User       @relation("AppointmentClient", fields: [clientId], references: [id])
-  service   Service    @relation(fields: [serviceId], references: [id])
+  business  Business            @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  client    User                @relation("AppointmentClient", fields: [clientId], references: [id])
+  service   Service             @relation(fields: [serviceId], references: [id])
   reminders Reminder[]
+  notices   AppointmentNotice[]
 
   @@index([businessId, startsAt])
   @@index([businessId, status])
@@ -269,6 +271,16 @@ model ClientNote {
   client   User     @relation(fields: [clientId], references: [id], onDelete: Cascade)
 
   @@index([businessId, clientId, createdAt])
+}
+
+model AppointmentNotice {
+  id            String      @id @default(cuid())
+  appointmentId String
+  message       String
+  createdAt     DateTime    @default(now())
+  appointment   Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+
+  @@index([appointmentId, createdAt])
 }
 
 model Album {
@@ -345,16 +357,18 @@ model Reminder {
  * Biblioteca de mídias de fundo: cada arquivo é enviado uma vez e atribuído a N telas.
  */
 model BackgroundMedia {
-  id         String         @id @default(cuid())
-  businessId String
-  kind       BackgroundKind
-  url        String
-  posterUrl  String? // só vídeo: imagem mostrada enquanto carrega e quando o vídeo não toca
-  name       String
-  focusX     Int            @default(50) // enquadramento: ponto de interesse em % (object-position)
-  focusY     Int            @default(28)
-  order      Int            @default(0)
-  createdAt  DateTime       @default(now())
+  id            String         @id @default(cuid())
+  businessId    String
+  kind          BackgroundKind
+  url           String
+  posterUrl     String? // só vídeo: imagem mostrada enquanto carrega e quando o vídeo não toca
+  name          String
+  focusX        Int            @default(50) // enquadramento: ponto de interesse em % (object-position)
+  focusY        Int            @default(28)
+  desktopFocusX Int?
+  desktopFocusY Int?
+  order         Int            @default(0)
+  createdAt     DateTime       @default(now())
 
   business    Business               @relation(fields: [businessId], references: [id], onDelete: Cascade)
   assignments BackgroundAssignment[]
@@ -383,10 +397,11 @@ model BackgroundAssignment {
  * Ajustes por tela (hoje só o véu). Tela sem registro herda o *_DEFAULT da área.
  */
 model BackgroundPageSetting {
-  id         String         @id @default(cuid())
-  businessId String
-  page       BackgroundPage
-  veil       BackgroundVeil @default(MEDIUM)
+  id           String         @id @default(cuid())
+  businessId   String
+  page         BackgroundPage
+  veil         BackgroundVeil @default(MEDIUM)
+  inheritMedia Boolean        @default(true)
 
   business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
 

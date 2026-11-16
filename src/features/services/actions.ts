@@ -22,7 +22,14 @@ function revalidateServices() {
 }
 
 function parseForm(formData: FormData) {
+  let photoFocus: unknown = {}
+  try {
+    photoFocus = JSON.parse(String(formData.get("photoFocus") ?? "{}"))
+  } catch {
+    photoFocus = null
+  }
   return serviceSchema.safeParse({
+    photoFocus,
     title: formData.get("title"),
     description: formData.get("description") ?? "",
     categoryId: formData.get("categoryId") ?? "",
@@ -56,6 +63,9 @@ export async function saveServiceAction(
     priceFrom: v.priceFrom,
     visible: v.visible,
     photoUrls: v.photoUrls,
+    photoFocus: Object.fromEntries(
+      Object.entries(v.photoFocus).filter(([url]) => v.photoUrls.includes(url)),
+    ),
   }
 
   if (v.categoryId) {

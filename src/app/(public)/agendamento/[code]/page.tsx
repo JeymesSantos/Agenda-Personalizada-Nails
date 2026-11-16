@@ -11,6 +11,7 @@ import {
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import { AppointmentNotices } from "@/components/ui/appointment-notices"
 import { SummaryList, SummaryRow } from "@/components/ui/summary-list"
 import { getAppointmentByCode } from "@/features/booking/queries"
 import { fmtShortDate, fmtTime, fmt } from "@/lib/dates"
@@ -35,6 +36,7 @@ export default async function AgendamentoPage({
   const manage = token ? `/meus-horarios?t=${token}` : "/meus-horarios"
   const icsHref = `/agendamento/${a.code}/ics${token ? `?t=${token}` : ""}`
   const cancelled = a.status === "CANCELLED"
+  const active = a.status === "PENDING" || a.status === "CONFIRMED"
 
   return (
     <main className="bg-gradient-hero mx-auto flex w-full max-w-[560px] flex-col items-center gap-6 px-5 pt-14 pb-12 text-center lg:pt-20">
@@ -44,11 +46,17 @@ export default async function AgendamentoPage({
       <div className="flex flex-col gap-2">
         <p className="display-label text-pink-300">{cancelled ? "Cancelado" : "Tudo certo"}</p>
         <h1 className="type-h1">
-          {cancelled ? "Este horário foi cancelado" : "Horário confirmado!"}
+          {cancelled
+            ? "Este horário foi cancelado"
+            : a.status === "NO_SHOW"
+              ? "Falta registrada"
+              : a.status === "DONE"
+                ? "Atendimento concluído"
+                : "Horário confirmado!"}
         </h1>
-        {!cancelled ? (
+        {active ? (
           <p className="type-body-l text-secondary-txt">
-            Te esperamos na {weekday}. Um lembrete chega no seu WhatsApp 24 h antes.
+            Te esperamos na {weekday}. Consulte os detalhes do seu atendimento abaixo.
           </p>
         ) : null}
       </div>
@@ -74,7 +82,8 @@ export default async function AgendamentoPage({
         </SummaryRow>
       </SummaryList>
 
-      {!cancelled ? (
+      <AppointmentNotices items={a.notices} timezone={tz} />
+      {active ? (
         <Button asChild variant="secondary" size="lg" className="w-full">
           <a href={icsHref}>Adicionar ao calendário</a>
         </Button>

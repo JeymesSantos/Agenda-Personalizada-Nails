@@ -1,3 +1,4 @@
+import { photoPosition } from "@/lib/media-focus"
 import Link from "next/link"
 import { PlusIcon } from "lucide-react"
 
@@ -58,6 +59,7 @@ export default async function ServicosPage() {
                 priceFrom: s.priceFrom,
                 visible: s.visible,
                 photoUrl: s.photoUrls[0] ?? null,
+                photoPosition: photoPosition(s.photoFocus, s.photoUrls[0]),
                 appointmentsCount: s._count.appointments,
               }}
             />

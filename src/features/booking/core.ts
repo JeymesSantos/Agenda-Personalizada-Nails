@@ -3,6 +3,7 @@ import { TZDate } from "@date-fns/tz"
 import { addDays, addMinutes } from "date-fns"
 
 import { scheduleReminders } from "@/features/reminders/core"
+import { appointmentNotice } from "@/features/agenda/notice-text"
 import { Prisma } from "@/generated/prisma/client"
 import type { AppointmentOrigin, AppointmentStatus } from "@/generated/prisma/enums"
 import { prisma } from "@/lib/prisma"
@@ -214,6 +215,16 @@ async function reserve(input: BookInput) {
             )
 
           if (input.rescheduleId) {
+            const previous = await tx.appointment.findFirst({
+              where: {
+                id: input.rescheduleId,
+                businessId: input.businessId,
+                clientId: input.clientId,
+              },
+            })
+            if (!previous) throw new BookingError("Agendamento não encontrado.", "NOT_FOUND")
+            if (previous.status !== "PENDING" && previous.status !== "CONFIRMED")
+              throw new BookingError("Esse agendamento não pode ser remarcado.", "INVALID")
             return tx.appointment.update({
               where: { id: input.rescheduleId },
               data: {
@@ -223,6 +234,17 @@ async function reserve(input: BookInput) {
                 endsAt,
                 priceCents: service.priceCents,
                 note: input.note ?? undefined,
+                notices: {
+                  create: {
+                    message: appointmentNotice(
+                      "RESCHEDULED",
+                      service.title,
+                      input.startsAt,
+                      business.timezone,
+                      previous.startsAt,
+                    ),
+                  },
+                },
               },
             })
           }

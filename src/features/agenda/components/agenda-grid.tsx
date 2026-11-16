@@ -116,18 +116,19 @@ export function AgendaGrid({
                   <div
                     key={b.id}
                     className={cn(
-                      "absolute inset-x-1 rounded-sm border border-dashed px-2 py-1.5",
+                      "absolute inset-x-1 overflow-hidden rounded-sm border border-dashed px-2 py-0.5",
                       b.kind === "release"
                         ? "border-success/50 bg-success/8 text-success"
                         : "border-strong bg-elevated/60 text-muted-txt",
                     )}
                     style={{
                       top: top(b.startMin) + 1,
-                      height: Math.max(h(b.startMin, b.endMin) - 2, 22),
+                      height: Math.max(h(b.startMin, b.endMin) - 2, 1),
                     }}
+                    title={`${b.title}${b.subtitle ? ` · ${b.subtitle}` : ""} · ${formatMinutes(b.startMin)} – ${formatMinutes(b.endMin)}`}
                   >
                     <p className="type-caption truncate">{b.title}</p>
-                    {b.subtitle ? (
+                    {b.subtitle && h(b.startMin, b.endMin) >= 44 ? (
                       <p className="type-caption truncate opacity-80">{b.subtitle}</p>
                     ) : null}
                   </div>
@@ -138,7 +139,7 @@ export function AgendaGrid({
                 .map((b) => {
                   const selected = b.id === selectedId
                   const serviceEnd = b.serviceEndMin ?? b.endMin
-                  const serviceH = Math.max(h(b.startMin, serviceEnd) - 2, 26)
+                  const serviceH = Math.max(h(b.startMin, serviceEnd) - 2, 1)
                   const bufferH = Math.max(h(serviceEnd, b.endMin) - 2, 0)
                   return (
                     <div
@@ -150,8 +151,9 @@ export function AgendaGrid({
                         type="button"
                         onClick={() => select(b.id)}
                         aria-pressed={selected}
+                        title={`${b.title} · ${b.subtitle ?? ""} · ${formatMinutes(b.startMin)} – ${formatMinutes(serviceEnd)}`}
                         className={cn(
-                          "w-full overflow-hidden rounded-sm border-l-2 px-2 py-1.5 text-left transition-all",
+                          "w-full overflow-hidden rounded-sm border-l-2 px-2 py-0.5 text-left transition-all",
                           b.status === "DONE" &&
                             "bg-magenta-700/50 border-magenta-700 text-pink-100/90",
                           (b.status === "CONFIRMED" || b.status === "PENDING") &&
@@ -162,7 +164,9 @@ export function AgendaGrid({
                         style={{ height: serviceH }}
                       >
                         <p className="type-caption truncate">{b.title}</p>
-                        <p className="type-caption truncate opacity-80">{b.subtitle}</p>
+                        {serviceH >= 44 ? (
+                          <p className="type-caption truncate opacity-80">{b.subtitle}</p>
+                        ) : null}
                       </button>
                       {bufferH > 0 ? (
                         <div

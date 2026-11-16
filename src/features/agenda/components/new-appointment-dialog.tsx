@@ -15,6 +15,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { PhoneInput } from "@/components/ui/phone-input"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -187,7 +188,7 @@ export function NewAppointmentDialog({
             ) : (
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <Input name="clientName" placeholder="Nome" className="h-12" autoComplete="off" />
-                <Input
+                <PhoneInput
                   name="clientWhatsapp"
                   placeholder="WhatsApp (11) 9 9999-9999"
                   inputMode="tel"

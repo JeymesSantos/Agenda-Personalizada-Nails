@@ -17,7 +17,7 @@ const FADE_MS = 1_500
 
 /*
  * Fotos e vídeos fixos ao fundo de um layout inteiro, escolhidos pela rota atual
- * (ver features/backgrounds/pages). Crossfade com leve zoom; vídeo toca mudo.
+ * (ver features/backgrounds/pages). Crossfade mantém o enquadramento; vídeo toca mudo.
  * Só decoração: fica atrás do conteúdo (-z-10 dentro de um pai `isolate`) e é
  * ignorado por leitores de tela.
  *
@@ -143,8 +143,11 @@ function Slide({
   priority: boolean
 }) {
   /* enquadramento definido em /admin/fundos; `object-cover` mantém a proporção em qualquer janela */
-  const style = { objectPosition: `${item.focusX}% ${item.focusY}%` }
-  const media = "absolute inset-0 size-full object-cover"
+  const style = {
+    "--media-position": `${item.focusX}% ${item.focusY}%`,
+    "--desktop-media-position": `${item.desktopFocusX ?? item.focusX}% ${item.desktopFocusY ?? item.focusY}%`,
+  } as React.CSSProperties
+  const media = "bg-media absolute inset-0 size-full object-cover"
   if (item.kind === "VIDEO" && !still) {
     return (
       <video

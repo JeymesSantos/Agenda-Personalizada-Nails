@@ -2,6 +2,7 @@ import Link from "next/link"
 import { RepeatIcon, SparklesIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import { AppointmentNotices, type AppointmentNoticeItem } from "@/components/ui/appointment-notices"
 import { StatusBadge } from "@/components/ui/status-badge"
 import type { AppointmentStatus } from "@/generated/prisma/enums"
 import { fmt, fmtRange } from "@/lib/dates"
@@ -38,6 +39,7 @@ export function MyAppointmentCard({
   token,
   editable,
   changeAllowed,
+  notices = [],
 }: {
   id: string
   code: string
@@ -49,6 +51,7 @@ export function MyAppointmentCard({
   token: string | null
   editable: boolean
   changeAllowed: boolean
+  notices?: AppointmentNoticeItem[]
 }) {
   const monthIndex = Number(fmt(startsAt, "M", timezone)) - 1
   const day = fmt(startsAt, "dd", timezone)
@@ -87,6 +90,7 @@ export function MyAppointmentCard({
           <CancelButton id={id} token={token} allowed={changeAllowed} />
         </div>
       ) : null}
+      <AppointmentNotices items={notices} timezone={timezone} />
     </article>
   )
 }

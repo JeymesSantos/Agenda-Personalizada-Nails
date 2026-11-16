@@ -28,6 +28,8 @@ type Media = {
   name: string
   focusX: number
   focusY: number
+  desktopFocusX: number | null
+  desktopFocusY: number | null
 }
 
 const clamp = (v: number) => Math.max(0, Math.min(100, Math.round(v)))
@@ -42,6 +44,13 @@ const clamp = (v: number) => Math.max(0, Math.min(100, Math.round(v)))
 export function FramingDialog({ media }: { media: Media }) {
   const [open, setOpen] = React.useState(false)
   const [focus, setFocus] = React.useState({ x: media.focusX, y: media.focusY })
+  const [desktop, setDesktop] = React.useState({
+    x: media.desktopFocusX ?? media.focusX,
+    y: media.desktopFocusY ?? media.focusY,
+  })
+  const [target, setTarget] = React.useState<"desktop" | "mobile">("desktop")
+  const selected = target === "desktop" ? desktop : focus
+  const setSelected = target === "desktop" ? setDesktop : setFocus
   const [pending, startTransition] = React.useTransition()
   const areaRef = React.useRef<HTMLDivElement>(null)
   /* proporção real da mídia: a caixa assume ela, sem faixas, para o % do marcador ser o % da imagem */
@@ -52,7 +61,7 @@ export function FramingDialog({ media }: { media: Media }) {
     const el = areaRef.current
     if (!el) return
     const r = el.getBoundingClientRect()
-    setFocus({
+    setSelected({
       x: clamp(((e.clientX - r.left) / r.width) * 100),
       y: clamp(((e.clientY - r.top) / r.height) * 100),
     })
@@ -60,7 +69,7 @@ export function FramingDialog({ media }: { media: Media }) {
 
   const save = () =>
     startTransition(async () => {
-      const r = await setMediaFocusAction(media.id, focus.x, focus.y)
+      const r = await setMediaFocusAction(media.id, focus.x, focus.y, desktop.x, desktop.y)
       if (r.error) {
         toast.error(r.error)
         return
@@ -69,8 +78,11 @@ export function FramingDialog({ media }: { media: Media }) {
       setOpen(false)
     })
 
-  const position = `${focus.x}% ${focus.y}%`
-  const dirty = focus.x !== media.focusX || focus.y !== media.focusY
+  const dirty =
+    focus.x !== media.focusX ||
+    focus.y !== media.focusY ||
+    desktop.x !== (media.desktopFocusX ?? media.focusX) ||
+    desktop.y !== (media.desktopFocusY ?? media.focusY)
 
   return (
     <Dialog
@@ -78,7 +90,13 @@ export function FramingDialog({ media }: { media: Media }) {
       onOpenChange={(o) => {
         if (pending) return
         setOpen(o)
-        if (o) setFocus({ x: media.focusX, y: media.focusY })
+        if (o) {
+          setFocus({ x: media.focusX, y: media.focusY })
+          setDesktop({
+            x: media.desktopFocusX ?? media.focusX,
+            y: media.desktopFocusY ?? media.focusY,
+          })
+        }
       }}
     >
       <DialogTrigger asChild>
@@ -100,6 +118,23 @@ export function FramingDialog({ media }: { media: Media }) {
             mostram como o fundo corta no computador e no celular.
           </DialogDescription>
         </DialogHeader>
+
+        <div className="flex gap-2" aria-label="Tela para enquadrar">
+          <Button
+            type="button"
+            variant={target === "desktop" ? "primary" : "secondary"}
+            onClick={() => setTarget("desktop")}
+          >
+            Computador
+          </Button>
+          <Button
+            type="button"
+            variant={target === "mobile" ? "primary" : "secondary"}
+            onClick={() => setTarget("mobile")}
+          >
+            Celular
+          </Button>
+        </div>
 
         <div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_200px]">
           {/* mídia inteira (contain) com o marcador */}
@@ -126,7 +161,7 @@ export function FramingDialog({ media }: { media: Media }) {
             <span
               aria-hidden
               className="bg-magenta-500/60 pointer-events-none absolute size-7 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-pink-100 shadow-[0_0_0_2px_rgba(0,0,0,0.5)]"
-              style={{ left: `${focus.x}%`, top: `${focus.y}%` }}
+              style={{ left: `${selected.x}%`, top: `${selected.y}%` }}
             />
           </div>
 
@@ -136,26 +171,26 @@ export function FramingDialog({ media }: { media: Media }) {
               label="Computador"
               className="aspect-[16/9] flex-1"
               media={media}
-              position={position}
+              position={`${desktop.x}% ${desktop.y}%`}
             />
             <Preview
               label="Celular"
               className="aspect-[9/16] w-[90px] md:w-[100px]"
               media={media}
-              position={position}
+              position={`${focus.x}% ${focus.y}%`}
             />
           </div>
         </div>
 
         <DialogFooter className="items-center sm:justify-between">
           <p className="type-caption text-secondary-txt">
-            Ponto: {focus.x}% · {focus.y}%
+            Ponto: {selected.x}% · {selected.y}%
           </p>
           <div className="flex gap-2">
             <Button
               type="button"
               variant="secondary"
-              onClick={() => setFocus({ x: 50, y: 28 })}
+              onClick={() => setSelected({ x: 50, y: 50 })}
               disabled={pending}
             >
               Centralizar
@@ -165,6 +200,30 @@ export function FramingDialog({ media }: { media: Media }) {
             </Button>
           </div>
         </DialogFooter>
+        <div className="grid grid-cols-2 gap-4">
+          <label className="type-caption">
+            Horizontal
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={selected.x}
+              onChange={(e) => setSelected({ ...selected, x: Number(e.target.value) })}
+              className="w-full"
+            />
+          </label>
+          <label className="type-caption">
+            Vertical
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={selected.y}
+              onChange={(e) => setSelected({ ...selected, y: Number(e.target.value) })}
+              className="w-full"
+            />
+          </label>
+        </div>
       </DialogContent>
     </Dialog>
   )
@@ -217,8 +276,13 @@ function Preview({
 }) {
   const src = media.kind === "VIDEO" ? media.posterUrl : media.url
   return (
-    <figure className={cn("flex min-w-0 flex-col gap-1", className)}>
-      <div className="bg-base border-subtle relative flex-1 overflow-hidden rounded-sm border">
+    <figure className="flex min-w-0 flex-col gap-1">
+      <div
+        className={cn(
+          "bg-base border-subtle relative overflow-hidden rounded-sm border",
+          className,
+        )}
+      >
         {src ? (
           <Image
             src={src}
