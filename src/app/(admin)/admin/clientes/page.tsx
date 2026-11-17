@@ -42,7 +42,9 @@ export default async function ClientesPage({ searchParams }: PageProps<"/admin/c
         <EmptyState
           title={term ? "Nenhuma cliente encontrada" : "Nenhuma cliente ainda"}
           description={
-            term ? "Tente outro nome ou WhatsApp." : "As clientes aparecem aqui assim que agendam."
+            term
+              ? "Tente outro nome ou WhatsApp."
+              : "As clientes aparecem aqui ao criar uma conta ou agendar."
           }
         />
       ) : (

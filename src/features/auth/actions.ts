@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs"
 import { AuthError } from "next-auth"
 import { isRedirectError } from "next/dist/client/components/redirect-error"
 import { redirect } from "next/navigation"
+import { revalidatePath } from "next/cache"
 
 import { Prisma } from "@/generated/prisma/client"
 import { signIn, signOut } from "@/lib/auth"
@@ -105,6 +106,7 @@ export async function registerAction(_prev: FormState, formData: FormData): Prom
     throw error
   }
 
+  revalidatePath("/admin/clientes")
   try {
     await signIn("credentials", {
       email,
