@@ -9,6 +9,28 @@ async function noHorizontalOverflow(page: Page) {
   ).toBe(false)
 }
 
+/** Choose a green day from the real calendar, respecting holidays and full days. */
+async function selectAvailableCalendarDay(page: Page): Promise<string> {
+  for (let month = 0; month < 3; month++) {
+    const nextMonth = page.getByRole("link", { name: "Próximo mês", exact: true })
+    await expect(nextMonth).toBeVisible()
+    const day = page
+      .getByRole("link", { name: /^Dia \d+$/ })
+      .filter({ has: page.locator(".bg-success") })
+      .first()
+    if (await day.count()) {
+      const href = new URL((await day.getAttribute("href"))!, page.url())
+      await day.click()
+      await expect(page).toHaveURL(href.toString())
+      return href.searchParams.get("data")!
+    }
+    const nextHref = new URL((await nextMonth.getAttribute("href"))!, page.url())
+    await nextMonth.click()
+    await expect(page).toHaveURL(nextHref.toString())
+  }
+  throw new Error("Nenhum dia disponível encontrado no calendário nos próximos três meses")
+}
+
 for (const viewport of [
   { width: 390, height: 844 },
   { width: 1440, height: 1000 },
@@ -193,17 +215,30 @@ test("fundos: upload, enquadramento, vínculo com tela e exclusão", async ({ pa
     await page.getByRole("button", { name: `Enquadrar ${name}`, exact: true }).click()
     const dialog = page.getByRole("dialog")
     await expect(dialog.getByRole("button", { name: "Salvar enquadramento" })).toBeDisabled()
-    await dialog.locator(".cursor-crosshair").click({ position: { x: 30, y: 30 } })
+    await dialog.getByRole("slider").nth(0).fill("80")
+    await dialog.getByRole("slider").nth(1).fill("60")
+    await dialog.getByRole("button", { name: "Celular", exact: true }).click()
+    await dialog.getByRole("slider").nth(0).fill("25")
+    await dialog.getByRole("slider").nth(1).fill("20")
     await dialog.getByRole("button", { name: "Salvar enquadramento" }).click()
     await expect(dialog).toBeHidden()
-    const media = await db.one<{ id: string; url: string; focusX: number; focusY: number }>(
-      'select id, url, "focusX", "focusY" from "BackgroundMedia" where name = $1',
+    const media = await db.one<{
+      id: string
+      url: string
+      focusX: number
+      focusY: number
+      desktopFocusX: number
+      desktopFocusY: number
+    }>(
+      'select id, url, "focusX", "focusY", "desktopFocusX", "desktopFocusY" from "BackgroundMedia" where name = $1',
       [name],
     )
     expect(media).not.toBeNull()
-    expect(media!.focusX).not.toBe(50)
+    expect(media).toMatchObject({ focusX: 25, focusY: 20, desktopFocusX: 80, desktopFocusY: 60 })
     const image = await page.request.get(media!.url)
     expect.soft(image.status(), "A imagem enviada precisa poder ser exibida").toBe(200)
+    expect(image.headers()["content-type"]).toContain("image/png")
+    expect(await image.body()).toEqual(buffer)
     // Escolher a primeira tela também cobre a configuração do padrão de área.
     const add = page.getByRole("button", { name: "Adicionar", exact: true }).first()
     await add.click()
@@ -257,6 +292,7 @@ test("cliente agenda, baixa calendário e remarca por token sem expor outro agen
       'select id from "Service" where visible = true order by "durationMin" limit 1',
     )
     await page.goto(`/agendar/${service!.id}/horario?data=${workdayAhead(40)}`)
+    await selectAvailableCalendarDay(page)
     await page
       .getByRole("button", { name: /^\d{2}:\d{2}$/ })
       .first()
@@ -282,16 +318,7 @@ test("cliente agenda, baixa calendário e remarca por token sem expor outro agen
     const forbidden = await page.request.get(`${url.pathname}/ics?t=token-invalido`)
     expect(forbidden.status()).toBeGreaterThanOrEqual(400)
     await page.goto(`/meus-horarios/${appointment!.id}/remarcar?t=${token}`)
-    // O calendário conhece também os bloqueios de fim de ano do seed.
-    // Escolher um dia disponível evita supor que todo dia útil está aberto.
-    const otherDay = page
-      .getByRole("link", { name: /^Dia \d+$/ })
-      .filter({ hasNotText: new RegExp(`^${before!.startsAt.getUTCDate()}$`) })
-      .first()
-    const otherDayHref = await otherDay.getAttribute("href")
-    const targetDay = new URL(otherDayHref!, page.url()).searchParams.get("data")!
-    await otherDay.click()
-    await expect(page).toHaveURL(new URL(otherDayHref!, page.url()).toString())
+    const targetDay = await selectAvailableCalendarDay(page)
     await expect(page.getByRole("heading", { level: 2 })).toContainText(
       new RegExp(`, ${Number(targetDay.slice(-2))} de `),
     )

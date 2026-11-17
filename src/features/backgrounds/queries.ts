@@ -13,6 +13,8 @@ export type BackgroundItem = {
   /* ponto de interesse em % (object-position) */
   focusX: number
   focusY: number
+  desktopFocusX: number | null
+  desktopFocusY: number | null
 }
 
 export type BackgroundPageData = { items: BackgroundItem[]; veil: BackgroundVeil }
@@ -34,7 +36,16 @@ export async function getAreaBackgrounds(
       orderBy: [{ page: "asc" }, { order: "asc" }],
       include: {
         media: {
-          select: { id: true, kind: true, url: true, posterUrl: true, focusX: true, focusY: true },
+          select: {
+            id: true,
+            kind: true,
+            url: true,
+            posterUrl: true,
+            focusX: true,
+            focusY: true,
+            desktopFocusX: true,
+            desktopFocusY: true,
+          },
         },
       },
     }),
@@ -57,7 +68,12 @@ export async function getAreaBackgrounds(
   for (const key of keys) {
     const own = grouped.get(key) ?? []
     pages[key] = {
-      items: own.length > 0 ? own : defaultItems,
+      items:
+        own.length > 0
+          ? own
+          : settings.find((s) => s.page === key)?.inheritMedia === false
+            ? []
+            : defaultItems,
       veil: veilOf.get(key) ?? defaultVeil,
     }
   }

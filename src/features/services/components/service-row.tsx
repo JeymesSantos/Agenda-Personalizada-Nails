@@ -23,6 +23,7 @@ export type ServiceRowData = {
   priceFrom: boolean
   visible: boolean
   photoUrl: string | null
+  photoPosition?: string
   appointmentsCount: number
 }
 
@@ -44,7 +45,14 @@ export function ServiceRow({
     >
       <div className="bg-surface-2 relative size-16 shrink-0 overflow-hidden rounded-sm">
         {service.photoUrl ? (
-          <Image src={service.photoUrl} alt="" fill sizes="64px" className="object-cover" />
+          <Image
+            src={service.photoUrl}
+            alt=""
+            fill
+            sizes="64px"
+            className="object-cover"
+            style={{ objectPosition: service.photoPosition }}
+          />
         ) : (
           <SparklesIcon className="absolute inset-0 m-auto size-6 text-pink-300/70" aria-hidden />
         )}

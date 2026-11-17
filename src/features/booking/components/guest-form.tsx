@@ -6,6 +6,7 @@ import { MessageCircleIcon, UserIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { InfoBox } from "@/components/ui/info-box"
+import { PhoneInput } from "@/components/ui/phone-input"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
@@ -145,7 +146,7 @@ export function GuestBookingForm({
           {!member || !member.whatsapp ? (
             <div className="flex flex-col gap-2">
               <Label htmlFor="whatsapp">WhatsApp</Label>
-              <Input
+              <PhoneInput
                 ref={whatsappRef}
                 id="whatsapp"
                 name="whatsapp"

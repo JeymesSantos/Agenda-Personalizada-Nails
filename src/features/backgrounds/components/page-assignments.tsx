@@ -32,7 +32,8 @@ export type PageRow = {
   area: BackgroundArea
   label: string
   isDefault: boolean
-  /* mídias próprias da tela, na ordem; vazio = herda o padrão da área */
+  inheritMedia: boolean
+  /* Lista vazia pode herdar o padrão ou deixar a tela sem mídia. */
   mediaIds: string[]
   /* véu próprio; null = herda o do padrão da área */
   veil: BackgroundVeil | null
@@ -59,8 +60,8 @@ export function PageAssignments({ pages, library }: { pages: PageRow[]; library:
         <p className="display-label text-pink-300">Telas</p>
         <h2 className="type-h2 mt-1">O que aparece em cada tela</h2>
         <p className="type-body text-secondary-txt mt-1">
-          Telas sem mídia própria usam o padrão da área. Com mais de uma mídia, elas passam em
-          sequência; fotos ficam 7 s e vídeos tocam até o fim.
+          Remova mídias só da tela desejada ou use “Voltar ao padrão” para herdar a área. Com mais
+          de uma mídia, elas passam em sequência; fotos ficam 7 s e vídeos tocam até o fim.
         </p>
       </div>
       {areas.map((area) => {
@@ -98,19 +99,23 @@ function PageCard({
   const [ids, setIds] = useState(row.mediaIds)
   const [pickerOpen, setPickerOpen] = useState(false)
 
-  const inherits = !row.isDefault && ids.length === 0
+  const [inheritMedia, setInheritMedia] = useState(row.inheritMedia)
+  const inherits = !row.isDefault && ids.length === 0 && inheritMedia
   /* lista em vigor: a própria ou, herdando, a do padrão. Qualquer edição parte dela e vira lista própria. */
   const shown = inherits ? (defaultRow?.mediaIds ?? []) : ids
   const effectiveVeil = row.veil ?? defaultRow?.veil ?? "MEDIUM"
 
-  const save = (next: string[]) => {
+  const save = (next: string[], inherit = false) => {
     const prev = ids
+    const prevInherit = inheritMedia
     setIds(next)
+    setInheritMedia(inherit)
     startTransition(async () => {
-      const r = await setPageMediaAction(row.key, next)
+      const r = await setPageMediaAction(row.key, next, inherit)
       if (r.error) {
         toast.error(r.error)
         setIds(prev)
+        setInheritMedia(prevInherit)
       }
     })
   }
@@ -143,6 +148,8 @@ function PageCard({
             <Badge variant="magenta">Padrão</Badge>
           ) : inherits ? (
             <Badge variant="neutral">Usa o padrão</Badge>
+          ) : ids.length === 0 ? (
+            <Badge variant="neutral">Sem fundo</Badge>
           ) : null}
         </div>
         <div className="flex items-center gap-2">
@@ -184,13 +191,8 @@ function PageCard({
                   aria-label={`Remover ${m.name} de ${row.label}`}
                   className="absolute top-1 right-1 size-7 rounded-full"
                   onClick={() => save(shown.filter((x) => x !== id))}
-                  /* lista vazia significa "herda o padrão": uma tela comum não fica sem a última mídia */
-                  disabled={pending || (!row.isDefault && shown.length === 1)}
-                  title={
-                    !row.isDefault && shown.length === 1
-                      ? "Adicione outra mídia antes de remover a última"
-                      : undefined
-                  }
+                  disabled={pending}
+                  title="Remover apenas desta página"
                 >
                   <XIcon className="size-3.5" />
                 </Button>
@@ -235,7 +237,7 @@ function PageCard({
             type="button"
             variant="ghost"
             size="sm"
-            onClick={() => save([])}
+            onClick={() => save([], true)}
             disabled={pending}
           >
             Voltar ao padrão

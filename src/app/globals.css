@@ -345,28 +345,23 @@
  */
 .bg-slide {
   opacity: 0;
-  transform-origin: 50% 30%;
   transition: opacity 1.5s ease-in-out;
-  will-change: opacity, transform;
+  will-change: opacity;
 }
 
 .bg-slide[data-state="in"] {
   opacity: 1;
-  animation: bg-slide-zoom 24s ease-out forwards;
 }
 
 .bg-slide > img,
 .bg-slide > video {
-  object-position: 50% 28%;
+  object-position: var(--media-position, 50% 28%);
   filter: saturate(0.9);
 }
 
-@keyframes bg-slide-zoom {
-  from {
-    transform: scale(1) translate3d(0, 0, 0);
-  }
-  to {
-    transform: scale(1.08) translate3d(-1%, -1.5%, 0);
+@media (min-width: 1024px) {
+  .bg-slide > .bg-media {
+    object-position: var(--desktop-media-position, 50% 28%);
   }
 }
 

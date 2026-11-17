@@ -38,6 +38,8 @@ export type MediaTile = {
   pages: BackgroundPage[]
   focusX: number
   focusY: number
+  desktopFocusX: number | null
+  desktopFocusY: number | null
 }
 
 const IMAGE_ACCEPT = "image/jpeg,image/png,image/webp"

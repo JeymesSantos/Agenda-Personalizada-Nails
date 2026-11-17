@@ -26,6 +26,15 @@ export const serviceSchema = z.object({
   priceFrom: z.coerce.boolean().default(false),
   visible: z.coerce.boolean().default(true),
   photoUrls: z.array(z.string().min(1)).max(6, "No máximo 6 fotos").default([]),
+  photoFocus: z
+    .record(
+      z.string(),
+      z.object({
+        x: z.number().int().min(0).max(100),
+        y: z.number().int().min(0).max(100),
+      }),
+    )
+    .default({}),
 })
 
 export type ServiceInput = z.input<typeof serviceSchema>

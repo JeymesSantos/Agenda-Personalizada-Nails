@@ -30,12 +30,15 @@ export default async function FundosPage() {
     pages: m.assignments.map((a) => a.page),
     focusX: m.focusX,
     focusY: m.focusY,
+    desktopFocusX: m.desktopFocusX,
+    desktopFocusY: m.desktopFocusY,
   }))
   const pages = BACKGROUND_PAGES.map((p) => ({
     key: p.key,
     area: p.area,
     label: p.label,
     isDefault: Boolean(p.isDefault),
+    inheritMedia: settings.find((s) => s.page === p.key)?.inheritMedia ?? true,
     mediaIds: media
       .flatMap((m) =>
         m.assignments.filter((a) => a.page === p.key).map((a) => ({ id: m.id, order: a.order })),

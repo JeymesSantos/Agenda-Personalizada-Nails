@@ -12,7 +12,11 @@ import { E2E_DATABASE_URL } from "./env"
  */
 export default async function globalSetup() {
   await ensureDatabase()
-  const env = { ...process.env, DATABASE_URL: E2E_DATABASE_URL }
+  const env = {
+    ...process.env,
+    DATABASE_URL: E2E_DATABASE_URL,
+    DATABASE_URL_UNPOOLED: E2E_DATABASE_URL,
+  }
   execSync("pnpm exec prisma migrate deploy", { stdio: "inherit", env })
   execSync("pnpm exec tsx prisma/seed.ts", { stdio: "inherit", env })
 }

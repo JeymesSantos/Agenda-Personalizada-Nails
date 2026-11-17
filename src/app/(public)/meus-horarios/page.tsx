@@ -67,6 +67,7 @@ export default async function MeusHorariosPage({ searchParams }: PageProps<"/meu
                 id={a.id}
                 code={a.code}
                 serviceTitle={a.service.title}
+                notices={a.notices}
                 startsAt={a.startsAt}
                 serviceEndsAt={a.serviceEndsAt}
                 status={a.status}
@@ -88,6 +89,7 @@ export default async function MeusHorariosPage({ searchParams }: PageProps<"/meu
                 id={a.id}
                 code={a.code}
                 serviceTitle={a.service.title}
+                notices={a.notices}
                 startsAt={a.startsAt}
                 serviceEndsAt={a.serviceEndsAt}
                 status={a.status}

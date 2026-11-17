@@ -27,6 +27,11 @@ export function WorkingHoursForm({ days }: { days: WorkingDayRow[] }) {
   const [enabled, setEnabled] = useState<Record<number, boolean>>(
     Object.fromEntries(days.map((d) => [d.weekday, d.enabled])),
   )
+  const [pause, setPause] = useState<Record<number, boolean>>(
+    Object.fromEntries(
+      days.map((d) => [d.weekday, d.breakStartMin != null && d.breakEndMin != null]),
+    ),
+  )
   const fe = state.fieldErrors ?? {}
   const ordered = [1, 2, 3, 4, 5, 6, 0].map((w) => days.find((d) => d.weekday === w)!)
 
@@ -40,11 +45,14 @@ export function WorkingHoursForm({ days }: { days: WorkingDayRow[] }) {
       {ordered.map((d) => {
         const on = enabled[d.weekday]
         const err =
-          fe[`d${d.weekday}.end`] ?? fe[`d${d.weekday}.breakEnd`] ?? fe[`d${d.weekday}.breakStart`]
+          fe[`d${d.weekday}.start`] ??
+          fe[`d${d.weekday}.end`] ??
+          fe[`d${d.weekday}.breakEnd`] ??
+          fe[`d${d.weekday}.breakStart`]
         return (
           <div
             key={d.weekday}
-            className="bg-surface-2/60 flex flex-col gap-3 rounded-sm p-3 sm:flex-row sm:items-center sm:gap-4"
+            className="bg-surface-2/60 flex flex-col gap-3 rounded-sm p-3"
             data-enabled={on}
           >
             <label className="flex min-w-[140px] items-center gap-3">
@@ -65,30 +73,69 @@ export function WorkingHoursForm({ days }: { days: WorkingDayRow[] }) {
                 name={`d${d.weekday}.start`}
                 defaultValue={minutesToTime(d.startMin)}
                 disabled={!on}
-                label="início"
+                label={`${WEEKDAYS[d.weekday]}: início do expediente`}
               />
               <span className="type-body text-muted-txt">–</span>
               <TimeField
                 name={`d${d.weekday}.end`}
                 defaultValue={minutesToTime(d.endMin)}
                 disabled={!on}
-                label="fim"
-              />
-              <span className="type-caption text-muted-txt ml-2 hidden sm:inline">Pausa</span>
-              <TimeField
-                name={`d${d.weekday}.breakStart`}
-                defaultValue={d.breakStartMin != null ? minutesToTime(d.breakStartMin) : ""}
-                disabled={!on}
-                label="pausa início"
-              />
-              <span className="type-body text-muted-txt">–</span>
-              <TimeField
-                name={`d${d.weekday}.breakEnd`}
-                defaultValue={d.breakEndMin != null ? minutesToTime(d.breakEndMin) : ""}
-                disabled={!on}
-                label="pausa fim"
+                label={`${WEEKDAYS[d.weekday]}: fim do expediente`}
               />
             </div>
+            <label className="type-body flex items-center gap-3">
+              <Switch
+                checked={pause[d.weekday]}
+                disabled={!on}
+                onCheckedChange={(checked) =>
+                  setPause((previous) => ({ ...previous, [d.weekday]: checked }))
+                }
+              />
+              Intervalo de almoço / pausa
+            </label>
+            {pause[d.weekday] ? (
+              <div className="flex flex-wrap items-center gap-2">
+                <TimeField
+                  name={`d${d.weekday}.breakStart`}
+                  defaultValue={d.breakStartMin != null ? minutesToTime(d.breakStartMin) : "12:00"}
+                  disabled={!on}
+                  label={`${WEEKDAYS[d.weekday]}: início do almoço`}
+                />
+                <span className="type-body text-muted-txt">–</span>
+                <TimeField
+                  name={`d${d.weekday}.breakEnd`}
+                  defaultValue={d.breakEndMin != null ? minutesToTime(d.breakEndMin) : "13:00"}
+                  disabled={!on}
+                  label={`${WEEKDAYS[d.weekday]}: fim do almoço`}
+                />
+              </div>
+            ) : (
+              <p className="type-caption text-secondary-txt">Sem intervalo neste dia.</p>
+            )}
+            {!on ? (
+              <>
+                <input
+                  type="hidden"
+                  name={`d${d.weekday}.start`}
+                  value={minutesToTime(d.startMin)}
+                />
+                <input type="hidden" name={`d${d.weekday}.end`} value={minutesToTime(d.endMin)} />
+                {pause[d.weekday] ? (
+                  <>
+                    <input
+                      type="hidden"
+                      name={`d${d.weekday}.breakStart`}
+                      value={d.breakStartMin != null ? minutesToTime(d.breakStartMin) : "12:00"}
+                    />
+                    <input
+                      type="hidden"
+                      name={`d${d.weekday}.breakEnd`}
+                      value={d.breakEndMin != null ? minutesToTime(d.breakEndMin) : "13:00"}
+                    />
+                  </>
+                ) : null}
+              </>
+            ) : null}
             {err ? <p className="type-body text-error sm:basis-full">{err[0]}</p> : null}
           </div>
         )

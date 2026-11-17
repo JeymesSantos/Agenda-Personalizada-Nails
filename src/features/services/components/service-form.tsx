@@ -14,6 +14,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
+import { PhotoFramingDialog } from "@/components/ui/photo-framing-dialog"
+import { photoPosition, type PhotoFocus } from "@/lib/media-focus"
 import { fmtDuration } from "@/lib/dates"
 import { formatCentsExact, parseCents } from "@/lib/money"
 import { createCategoryAction, uploadServicePhotoAction } from "../actions"
@@ -32,6 +34,7 @@ export type ServiceFormValues = {
   priceFrom: boolean
   visible: boolean
   photoUrls: string[]
+  photoFocus: PhotoFocus
 }
 
 const defaults: ServiceFormValues = {
@@ -44,6 +47,7 @@ const defaults: ServiceFormValues = {
   priceFrom: false,
   visible: true,
   photoUrls: [],
+  photoFocus: {},
 }
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
@@ -184,6 +188,7 @@ export function ServiceForm({
       noValidate
     >
       <input type="hidden" name="categoryId" value={values.categoryId} />
+      <input type="hidden" name="photoFocus" value={JSON.stringify(values.photoFocus)} />
       {values.photoUrls.map((url) => (
         <input key={url} type="hidden" name="photoUrls" value={url} />
       ))}
@@ -261,7 +266,19 @@ export function ServiceForm({
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {values.photoUrls.map((url) => (
               <div key={url} className="group relative aspect-square overflow-hidden rounded-sm">
-                <Image src={url} alt="" fill sizes="160px" className="object-cover" />
+                <Image
+                  src={url}
+                  alt=""
+                  fill
+                  sizes="160px"
+                  className="object-cover"
+                  style={{ objectPosition: photoPosition(values.photoFocus, url) }}
+                />
+                <PhotoFramingDialog
+                  url={url}
+                  value={values.photoFocus[url]}
+                  onChange={(focus) => set("photoFocus", { ...values.photoFocus, [url]: focus })}
+                />
                 <button
                   type="button"
                   aria-label="Remover foto"
@@ -271,7 +288,7 @@ export function ServiceForm({
                       values.photoUrls.filter((u) => u !== url),
                     )
                   }
-                  className="bg-base/80 text-foreground absolute top-2 right-2 flex size-8 items-center justify-center rounded-full opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
+                  className="bg-base/80 text-foreground absolute top-2 right-2 flex size-8 items-center justify-center rounded-full"
                 >
                   <XIcon className="size-4" />
                 </button>
@@ -303,6 +320,7 @@ export function ServiceForm({
             ) : null}
           </div>
           <FieldError errors={fe.photoUrls} />
+          <FieldError errors={fe.photoFocus} />
         </Section>
 
         <Section title="Tempo e valor">
@@ -400,6 +418,7 @@ export function ServiceForm({
             priceCents: values.priceCents,
             priceFrom: values.priceFrom,
             photoUrl: values.photoUrls[0] ?? null,
+            photoPosition: photoPosition(values.photoFocus, values.photoUrls[0]),
           }}
         />
         <InfoBox tone="magenta">

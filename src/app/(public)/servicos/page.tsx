@@ -1,3 +1,4 @@
+import { photoPosition } from "@/lib/media-focus"
 import type { Metadata } from "next"
 
 import { PageHeader } from "@/components/layout/page-header"
@@ -27,6 +28,7 @@ export default async function ServicosPublicPage() {
           priceCents: s.priceCents,
           priceFrom: s.priceFrom,
           photoUrl: s.photoUrls[0] ?? null,
+          photoPosition: photoPosition(s.photoFocus, s.photoUrls[0]),
           categoryId: s.categoryId,
           categoryName: s.category?.name ?? null,
         }))}

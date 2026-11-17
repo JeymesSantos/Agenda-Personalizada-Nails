@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache"
 
 import { BookingError, bookAppointment } from "@/features/booking/core"
 import { cancelReminders } from "@/features/reminders/core"
+import { appointmentNotice } from "@/features/agenda/notice-text"
 import { prisma } from "@/lib/prisma"
 import { canChange, getMyAppointment, resolveClientAccess } from "./queries"
 
@@ -14,6 +15,7 @@ function revalidateClientArea() {
   revalidatePath("/admin")
   revalidatePath("/admin/agenda")
   revalidatePath("/")
+  revalidatePath("/agendamento", "layout")
 }
 
 export async function cancelMyAppointmentAction(
@@ -33,7 +35,16 @@ export async function cancelMyAppointmentAction(
   }
   await prisma.appointment.update({
     where: { id },
-    data: { status: "CANCELLED", cancelledAt: now, cancelledBy: "CLIENT" },
+    data: {
+      status: "CANCELLED",
+      cancelledAt: now,
+      cancelledBy: "CLIENT",
+      notices: {
+        create: {
+          message: appointmentNotice("CANCELLED", a.service.title, a.startsAt, a.business.timezone),
+        },
+      },
+    },
   })
   await cancelReminders(id)
   revalidateClientArea()

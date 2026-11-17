@@ -6,6 +6,7 @@ import { LockIcon, MailIcon, MessageCircleIcon, UserIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { InfoBox } from "@/components/ui/info-box"
+import { PhoneInput } from "@/components/ui/phone-input"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import type { FormState } from "../schemas"
@@ -107,7 +108,7 @@ export function RegisterForm({ action, next }: { action: Action; next?: string }
         />
       </Field>
       <Field id="whatsapp" label="WhatsApp" errors={fe.whatsapp}>
-        <Input
+        <PhoneInput
           id="whatsapp"
           name="whatsapp"
           type="tel"

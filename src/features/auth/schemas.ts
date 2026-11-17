@@ -1,15 +1,16 @@
 import { z } from "zod"
+import { normalizeWhatsapp } from "@/lib/phone"
 
 export const whatsappSchema = z
   .string()
   .trim()
-  .transform((v) => v.replace(/\D/g, ""))
+  .transform(normalizeWhatsapp)
   .pipe(
     z
       .string()
       .min(10, "Informe o WhatsApp com DDD")
-      .max(13, "WhatsApp inválido")
-      .regex(/^\d+$/, "WhatsApp inválido"),
+      .max(11, "Informe o WhatsApp com DDD; +55 é opcional")
+      .regex(/^[1-9]\d[2-9]\d{7,8}$/, "Informe um telefone válido com DDD"),
   )
 
 export const loginSchema = z.object({

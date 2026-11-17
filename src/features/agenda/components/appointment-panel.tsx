@@ -7,6 +7,7 @@ import {
 } from "lucide-react"
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { AppointmentNotices } from "@/components/ui/appointment-notices"
 import { StatusBadge } from "@/components/ui/status-badge"
 import { SummaryRow } from "@/components/ui/summary-list"
 import { fmtShortDate, fmtTime } from "@/lib/dates"
@@ -88,6 +89,7 @@ export function AppointmentPanel({
   return (
     <div className="flex flex-col gap-5">
       <h2 className="type-h3">Detalhe do agendamento</h2>
+      <AppointmentNotices items={a.notices} timezone={timezone} />
       <div className="flex items-center gap-3">
         <Avatar className="size-12">
           <AvatarFallback className="bg-surface-2 type-body-medium text-pink-300">
