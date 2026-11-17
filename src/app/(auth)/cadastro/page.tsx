@@ -7,7 +7,7 @@ import { RegisterForm } from "@/features/auth/components/auth-form"
 export const metadata = { title: "Criar conta" }
 
 export default async function CadastroPage({ searchParams }: PageProps<"/cadastro">) {
-  const { next } = await searchParams
+  const { next, convite } = await searchParams
   const nextPath = typeof next === "string" ? next : undefined
   const entrarHref = nextPath ? `/entrar?next=${encodeURIComponent(nextPath)}` : "/entrar"
 
@@ -26,7 +26,11 @@ export default async function CadastroPage({ searchParams }: PageProps<"/cadastr
         </>
       }
     >
-      <RegisterForm action={registerAction} next={nextPath} />
+      <RegisterForm
+        action={registerAction}
+        next={nextPath}
+        invitation={typeof convite === "string" ? convite : undefined}
+      />
     </AuthShell>
   )
 }

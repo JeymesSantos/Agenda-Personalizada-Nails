@@ -97,8 +97,10 @@ Cada link com token permite consultar, remarcar ou cancelar **somente o agendame
 originou**. O histórico completo exige login na conta da cliente. Informar um WhatsApp no
 agendamento público não altera o nome já cadastrado. O cadastro não incorpora registros
 existentes por WhatsApp ou e-mail: a conversão de uma cliente sem conta fica bloqueada até
-haver comprovação de identidade. Enquanto isso, ela usa o link do comprovante ou procura o
-studio para ajuda com o cadastro.
+haver comprovação de identidade. A profissional pode abrir o detalhe do agendamento e usar
+"Copiar convite para criar conta". Esse convite assinado vale por sete dias, exige o mesmo
+WhatsApp e permite definir e-mail e senha mantendo o histórico. Depois de usado, não pode
+ser reutilizado. O link do comprovante continua dando acesso somente àquele agendamento.
 
 ### Variáveis de ambiente
 
