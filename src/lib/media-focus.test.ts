@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 import { backgroundFraming, DEFAULT_FRAME, dragFrame, photoFraming, readFrame } from "./media-focus"
-import { mediaFrameSchema, photoFocusSchema } from "./media-framing-schema"
+import { cropWindow, FULL_CROP, moveCrop } from "./media-focus"
+import { mediaCropSchema, mediaFrameSchema, photoFocusSchema } from "./media-framing-schema"
 
 describe("enquadramento por mídia", () => {
   it("mantém os enquadramentos antigos sem alterar os arquivos", () => {
@@ -64,7 +65,7 @@ describe("enquadramento por mídia", () => {
   it("rejeita valores inválidos no servidor e aceita as fotos antigas", () => {
     expect(photoFocusSchema.parse({ x: 30, y: 40 })).toEqual({ ...DEFAULT_FRAME, x: 30, y: 40 })
     for (const invalid of [
-      { zoom: 0.9 },
+      { zoom: 0.24 },
       { zoom: 3.1 },
       { zoom: NaN },
       { fit: "stretch" },
@@ -74,5 +75,42 @@ describe("enquadramento por mídia", () => {
       expect(mediaFrameSchema.safeParse({ ...DEFAULT_FRAME, ...invalid }).success).toBe(false)
     }
     expect(readFrame({ fit: "contain", zoom: 2 }).zoom).toBe(1)
+  })
+
+  it("permite reduzir a imagem e movê-la nos espaços livres", () => {
+    for (const fit of ["cover", "contain"] as const) {
+      const frame = { ...DEFAULT_FRAME, zoom: 0.5, fit }
+      expect(mediaFrameSchema.parse(frame)).toEqual(frame)
+      expect(readFrame(frame)).toEqual(frame)
+      expect(
+        dragFrame(frame, { width: 100, height: 100 }, { width: 100, height: 100 }, 10, -10),
+      ).toEqual({ ...frame, x: 70, y: 30 })
+    }
+  })
+
+  it("recorta dentro dos limites, preserva um tamanho mínimo e move a seleção", () => {
+    expect(moveCrop(FULL_CROP, "nw", 20, 30)).toEqual({ x: 20, y: 30, width: 80, height: 70 })
+    const crop = { x: 20, y: 30, width: 40, height: 40 }
+    expect(moveCrop(crop, "move", 900, -900)).toEqual({ ...crop, x: 60, y: 0 })
+    expect(moveCrop(crop, "se", -900, -900)).toEqual({ ...crop, width: 10, height: 10 })
+    expect(moveCrop(crop, "se", 900, 900)).toEqual({ ...crop, width: 80, height: 70 })
+    expect(mediaCropSchema.safeParse({ ...crop, width: 99 }).success).toBe(false)
+    expect(mediaCropSchema.safeParse({ ...crop, height: 0 }).success).toBe(false)
+  })
+
+  it("encaixa a área recortada e calcula o arraste pela nova proporção", () => {
+    const frame = { ...DEFAULT_FRAME, crop: { x: 25, y: 0, width: 50, height: 100 } }
+    expect(cropWindow(frame, { width: 200, height: 100 }, { width: 400, height: 100 })).toEqual({
+      width: 100,
+      height: 100,
+      left: 0,
+      top: 0,
+    })
+    expect(
+      dragFrame(frame, { width: 100, height: 100 }, { width: 400, height: 100 }, 20, 30),
+    ).toEqual({ ...frame, x: 30 })
+    const focus = { a: { ...frame, desktop: { ...DEFAULT_FRAME } } }
+    expect(photoFraming(focus, "a").mobile.crop).toEqual(frame.crop)
+    expect(photoFraming(focus, "a").desktop.crop).toBeUndefined()
   })
 })

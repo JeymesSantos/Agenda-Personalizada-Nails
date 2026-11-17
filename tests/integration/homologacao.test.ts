@@ -116,8 +116,14 @@ describe.skipIf(!process.env.DATABASE_URL)("regressões da homologação", () =>
       data: { businessId, name: "Outra", kind: "IMAGE", url: "/uploads/outra.jpg" },
     })
     const frames = {
-      mobile: { x: 20, y: 30, zoom: 1, fit: "contain" as const },
-      desktop: { x: 80, y: 60, zoom: 1.5, fit: "cover" as const },
+      mobile: { x: 20, y: 30, zoom: 0.5, fit: "contain" as const },
+      desktop: {
+        x: 80,
+        y: 60,
+        zoom: 1.5,
+        fit: "cover" as const,
+        crop: { x: 10, y: 20, width: 60, height: 70 },
+      },
     }
     const before = await prisma.backgroundMedia.findUniqueOrThrow({ where: { id: mediaId } })
     expect(await setMediaFocusAction(mediaId, 20, 30, 80, 60, frames)).toHaveProperty("success")

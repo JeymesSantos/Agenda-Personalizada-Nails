@@ -3,7 +3,14 @@
 import { useRef, useState } from "react"
 import { Button } from "./button"
 import { FramedMedia, type FrameMedia } from "./framed-media"
-import { DEFAULT_FRAME, dragFrame, type MediaFrame, type ResponsiveFrames } from "@/lib/media-focus"
+import { MediaCropSelection } from "./media-crop-selection"
+import {
+  DEFAULT_FRAME,
+  FULL_CROP,
+  dragFrame,
+  type MediaFrame,
+  type ResponsiveFrames,
+} from "@/lib/media-focus"
 
 export function MediaFrameEditor({
   media,
@@ -19,6 +26,7 @@ export function MediaFrameEditor({
   variant?: "background" | "service"
 }) {
   const [target, setTarget] = useState<"desktop" | "mobile">("desktop")
+  const [cropping, setCropping] = useState(false)
   const [desktopRatio, setDesktopRatio] = useState("16:9")
   const [mobileRatio, setMobileRatio] = useState("9:16")
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 })
@@ -29,7 +37,8 @@ export function MediaFrameEditor({
   const ratioKey =
     variant === "service" ? "16:9" : target === "desktop" ? desktopRatio : mobileRatio
   const [w, h] = ratioKey.split(":").map(Number)
-  const ratio = w / h
+  const ratio =
+    cropping && dimensions.width && dimensions.height ? dimensions.width / dimensions.height : w / h
   const move = (dx: number, dy: number, initial = frame) => {
     if (!stage.current || disabled) return
     update(
@@ -53,6 +62,7 @@ export function MediaFrameEditor({
             disabled={disabled}
             onClick={() => {
               drag.current = null
+              setCropping(false)
               setTarget("desktop")
             }}
           >
@@ -65,6 +75,7 @@ export function MediaFrameEditor({
             disabled={disabled}
             onClick={() => {
               drag.current = null
+              setCropping(false)
               setTarget("mobile")
             }}
           >
@@ -118,7 +129,7 @@ export function MediaFrameEditor({
               cursor: disabled ? "default" : "grab",
             }}
             onPointerDown={(event) => {
-              if (disabled || event.button !== 0) return
+              if (disabled || cropping || event.button !== 0) return
               event.preventDefault()
               event.currentTarget.focus()
               event.currentTarget.setPointerCapture(event.pointerId)
@@ -149,7 +160,7 @@ export function MediaFrameEditor({
                 ArrowDown: [0, 10],
               }
               const delta = directions[event.key]
-              if (delta && !disabled) {
+              if (delta && !disabled && !cropping) {
                 event.preventDefault()
                 move(delta[0], delta[1])
               }
@@ -157,78 +168,135 @@ export function MediaFrameEditor({
           >
             <FramedMedia
               media={media}
-              frames={{ mobile: frame, desktop: frame }}
+              frames={
+                cropping
+                  ? { mobile: DEFAULT_FRAME, desktop: DEFAULT_FRAME }
+                  : { mobile: frame, desktop: frame }
+              }
               quality={variant === "background" ? 70 : 75}
               sizes="900px"
               onDimensions={setDimensions}
               className="pointer-events-none"
             />
+            {cropping ? (
+              <MediaCropSelection
+                value={frame.crop ?? FULL_CROP}
+                onChange={(crop) => update({ ...frame, crop })}
+                disabled={disabled}
+              />
+            ) : null}
           </div>
           <p className="type-caption text-secondary-txt text-center">
-            Arraste a imagem para posicionar. Use as setas do teclado para ajustes finos.
+            {cropping
+              ? "Arraste os cantos para cortar ou o centro para mover a seleção. As setas também ajustam o recorte."
+              : "Arraste a imagem para posicionar. Use as setas do teclado para ajustes finos."}
           </p>
         </div>
         <fieldset disabled={disabled} className="flex min-w-0 flex-col gap-4">
           <legend className="sr-only">Ajustes do enquadramento</legend>
-          <div className="flex flex-col gap-2" aria-label="Como encaixar a imagem">
+          <Button
+            type="button"
+            variant={cropping ? "primary" : "secondary"}
+            size="sm"
+            aria-pressed={cropping}
+            onClick={() => {
+              drag.current = null
+              setCropping(!cropping)
+            }}
+          >
+            {cropping ? "Ver resultado do recorte" : "Recortar mídia"}
+          </Button>
+          {frame.crop ? (
             <Button
               type="button"
+              variant="ghost"
               size="sm"
-              variant={frame.fit === "cover" ? "soft" : "secondary"}
-              aria-pressed={frame.fit === "cover"}
-              onClick={() => update({ ...frame, fit: "cover" })}
+              onClick={() => {
+                const withoutCrop = { ...frame }
+                delete withoutCrop.crop
+                update(withoutCrop)
+                setCropping(false)
+              }}
             >
-              Preencher área
+              Remover recorte
             </Button>
-            <Button
-              type="button"
-              size="sm"
-              variant={frame.fit === "contain" ? "soft" : "secondary"}
-              aria-pressed={frame.fit === "contain"}
-              onClick={() => update({ ...frame, fit: "contain", zoom: 1 })}
-            >
-              Mostrar imagem inteira
-            </Button>
-          </div>
-          <p className="type-body text-secondary-txt">
-            {frame.fit === "cover"
-              ? "Preenche a área e corta o que sobra nas bordas."
-              : "Preserva a foto inteira; podem aparecer espaços ao redor."}
-          </p>
-          {(["x", "y"] as const).map((axis) => (
-            <label key={axis} className="type-body flex flex-col gap-2">
-              {axis === "x" ? "Horizontal" : "Vertical"}: {frame[axis]}%
-              <input
-                type="range"
-                min="0"
-                max="100"
-                value={frame[axis]}
-                onChange={(event) => update({ ...frame, [axis]: Number(event.target.value) })}
-              />
-            </label>
-          ))}
-          <label className="type-body flex flex-col gap-2">
-            Zoom: {Math.round(frame.zoom * 100)}%
-            <input
-              type="range"
-              min="100"
-              max="300"
-              step="5"
-              value={Math.round(frame.zoom * 100)}
-              disabled={disabled || frame.fit === "contain"}
-              onChange={(event) => update({ ...frame, zoom: Number(event.target.value) / 100 })}
-            />
-          </label>
-          {frame.zoom > 2 ? (
-            <p className="type-caption text-warning">
-              Zoom alto pode reduzir a nitidez. Confira a prévia antes de salvar.
+          ) : null}
+          {cropping ? (
+            <p className="type-body text-secondary-txt">
+              A área clara será usada no layout. Clique em “Ver resultado do recorte” para conferir.
             </p>
+          ) : null}
+          {!cropping ? (
+            <>
+              <div className="flex flex-col gap-2" aria-label="Como encaixar a imagem">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={frame.fit === "cover" ? "soft" : "secondary"}
+                  aria-pressed={frame.fit === "cover"}
+                  onClick={() => update({ ...frame, fit: "cover" })}
+                >
+                  Preencher área
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={frame.fit === "contain" ? "soft" : "secondary"}
+                  aria-pressed={frame.fit === "contain"}
+                  onClick={() => update({ ...frame, fit: "contain", zoom: 1 })}
+                >
+                  Mostrar imagem inteira
+                </Button>
+              </div>
+              <p className="type-body text-secondary-txt">
+                {frame.fit === "cover"
+                  ? "Preenche a área e corta o que sobra nas bordas."
+                  : "Preserva a foto inteira; podem aparecer espaços ao redor."}
+              </p>
+              {(["x", "y"] as const).map((axis) => (
+                <label key={axis} className="type-body flex flex-col gap-2">
+                  {axis === "x" ? "Horizontal" : "Vertical"}: {frame[axis]}%
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={frame[axis]}
+                    onChange={(event) => update({ ...frame, [axis]: Number(event.target.value) })}
+                  />
+                </label>
+              ))}
+              <label className="type-body flex flex-col gap-2">
+                Zoom: {Math.round(frame.zoom * 100)}%
+                <input
+                  type="range"
+                  min="25"
+                  max={frame.fit === "contain" ? "100" : "300"}
+                  step="5"
+                  value={Math.round(frame.zoom * 100)}
+                  disabled={disabled}
+                  onChange={(event) => update({ ...frame, zoom: Number(event.target.value) / 100 })}
+                />
+              </label>
+              {frame.zoom < 1 ? (
+                <p className="type-caption text-secondary-txt">
+                  A imagem reduzida pode deixar espaços livres ao redor.
+                </p>
+              ) : null}
+              {frame.zoom > 2 ? (
+                <p className="type-caption text-warning">
+                  Zoom alto pode reduzir a nitidez. Confira a prévia antes de salvar.
+                </p>
+              ) : null}
+            </>
           ) : null}
           <Button
             type="button"
             variant="secondary"
             size="sm"
-            onClick={() => update({ ...DEFAULT_FRAME })}
+            onClick={() => {
+              update({ ...DEFAULT_FRAME })
+              setCropping(false)
+            }}
           >
             Restaurar enquadramento
           </Button>
