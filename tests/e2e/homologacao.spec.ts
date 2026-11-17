@@ -1,5 +1,30 @@
 import { expect, test } from "@playwright/test"
+import { randomUUID } from "node:crypto"
 import { loginAdmin, TestDb, workdayAhead } from "./helpers"
+
+// These tests share the seeded studio: restore their background fixture on retries too.
+async function resetBackgroundFixture() {
+  const db = new TestDb()
+  try {
+    const business = await db.one<{ id: string }>(
+      'select id from "Business" order by "createdAt" limit 1',
+    )
+    await db.one(
+      'delete from "BackgroundAssignment" where "businessId" = $1 and page = \'PUBLIC_HOME\'',
+      [business!.id],
+    )
+    await db.one(
+      'update "BackgroundPageSetting" set "inheritMedia" = true where "businessId" = $1 and page = \'PUBLIC_HOME\'',
+      [business!.id],
+    )
+    await db.one(
+      'update "BackgroundMedia" set "focusX" = 50, "focusY" = 28, "desktopFocusX" = null, "desktopFocusY" = null where "businessId" = $1 and name = \'Studio 1\'',
+      [business!.id],
+    )
+  } finally {
+    await db.close()
+  }
+}
 
 for (const viewport of [
   { width: 390, height: 844 },
@@ -7,6 +32,8 @@ for (const viewport of [
 ]) {
   test.describe(`ajustes ${viewport.width}px`, () => {
     test.use({ viewport })
+    test.beforeEach(resetBackgroundFixture)
+    test.afterEach(resetBackgroundFixture)
     test("almoço, fechar disponibilidade, enquadramento e telefone", async ({ page }, testInfo) => {
       await loginAdmin(page)
       await page.goto("/admin/disponibilidade")
@@ -67,6 +94,7 @@ for (const viewport of [
       page,
     }, testInfo) => {
       const db = new TestDb()
+      const releaseId = `release-${randomUUID()}`
       try {
         const business = await db.one<{ id: string }>(
           'select id from "Business" order by "createdAt" limit 1',
@@ -74,12 +102,7 @@ for (const viewport of [
         const date = workdayAhead(35)
         await db.one(
           `insert into "ScheduleException" (id, "businessId", type, "startsAt", "endsAt", "allDay", reason, "createdAt") values ($1, $2, 'RELEASE', ($3::timestamptz at time zone 'UTC'), ($4::timestamptz at time zone 'UTC'), false, 'Sem almoço neste horário', now()) returning id`,
-          [
-            `release-${viewport.width}`,
-            business!.id,
-            `${date}T13:00:00-03:00`,
-            `${date}T19:00:00-03:00`,
-          ],
+          [releaseId, business!.id, `${date}T13:00:00-03:00`, `${date}T19:00:00-03:00`],
         )
         await loginAdmin(page)
         await page.goto(`/admin/agenda?visao=dia&data=${date}`)
@@ -102,7 +125,27 @@ for (const viewport of [
           await expect(
             page.getByRole("button", { name: `Remover Studio ${i} de Início`, exact: true }),
           ).toHaveCount(0)
+          // The tile disappears optimistically; wait for the server transaction before navigating.
+          await expect
+            .poll(() =>
+              db.count(
+                'select count(*) from "BackgroundAssignment" where "businessId" = $1 and page = \'PUBLIC_HOME\'',
+                [business!.id],
+              ),
+            )
+            .toBe(5 - i)
         }
+        await expect
+          .poll(
+            async () =>
+              (
+                await db.one<{ inheritMedia: boolean }>(
+                  'select "inheritMedia" from "BackgroundPageSetting" where "businessId" = $1 and page = \'PUBLIC_HOME\'',
+                  [business!.id],
+                )
+              )?.inheritMedia,
+          )
+          .toBe(false)
         await page.goto("/")
         await expect(page.locator(".bg-slideshow")).toHaveCount(0)
         await page.goto("/servicos")
@@ -114,7 +157,19 @@ for (const viewport of [
           .last()
         await home.getByRole("button", { name: "Voltar ao padrão", exact: true }).click()
         await expect(home.getByText("Usa o padrão", { exact: true })).toBeVisible()
+        await expect
+          .poll(
+            async () =>
+              (
+                await db.one<{ inheritMedia: boolean }>(
+                  'select "inheritMedia" from "BackgroundPageSetting" where "businessId" = $1 and page = \'PUBLIC_HOME\'',
+                  [business!.id],
+                )
+              )?.inheritMedia,
+          )
+          .toBe(true)
       } finally {
+        await db.one('delete from "ScheduleException" where id = $1', [releaseId])
         await db.close()
       }
     })
