@@ -40,5 +40,12 @@ precedência das faixas da agenda, persistência do enquadramento e dos avisos,
 remoção/restauração do fundo por página e conflito ao reabrir um horário ocupado.
 Os testes de navegador verificam os fluxos em larguras de 390 e 1440 px.
 
+Na correção do CI, os testes antigos passaram a verificar separadamente os
+enquadramentos de computador/celular e a escolher dias disponíveis no calendário,
+respeitando inclusive as férias de fim de ano. A rota `/uploads/[...path]` serve
+arquivos locais enviados após o build, com validação de caminho e tipo de arquivo,
+suporte a HEAD e leitura parcial para vídeos. O armazenamento em Blob continua
+sendo necessário para persistência dos arquivos na Vercel.
+
 Antes da publicação, validar os ajustes com o usuário e escolher se haverá também
 envio dos avisos por e-mail. A configuração da Vercel continua sendo uma etapa posterior.
