@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useTransition } from "react"
-import Image from "next/image"
+import { PortfolioMedia } from "./portfolio-media"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { ImageIcon, Trash2Icon } from "lucide-react"
 import { toast } from "sonner"
@@ -66,12 +66,11 @@ export function PhotoPanel({
       action={(fd) => run(() => updatePhotoAction(photo.id, fd))}
       className="flex flex-col gap-4"
     >
-      <h2 className="type-h3">Foto selecionada</h2>
+      <h2 className="type-h3">Mídia selecionada</h2>
       <div className="bg-surface-2 relative aspect-[4/3] w-full overflow-hidden rounded-md">
-        <Image
+        <PortfolioMedia
           src={photo.url}
           alt={photo.caption ?? ""}
-          fill
           sizes="340px"
           className="object-cover"
         />
@@ -152,7 +151,7 @@ export function PhotoPanel({
           variant="danger"
           disabled={pending}
           onClick={() => {
-            if (!confirm("Excluir esta foto?")) return
+            if (!confirm("Excluir esta mídia?")) return
             run(() => deletePhotoAction(photo.id), close)
           }}
         >

@@ -10,6 +10,7 @@ import { countPhotos, getPhoto, listAlbums, listPhotos } from "@/features/portfo
 import { listVisibleServices } from "@/features/agenda/queries"
 import { prisma } from "@/lib/prisma"
 import { requireAdmin } from "@/lib/session"
+import { isBlobStorage } from "@/lib/storage"
 
 export const metadata = { title: "Portfólio" }
 
@@ -36,7 +37,7 @@ export default async function PortfolioPage({ searchParams }: PageProps<"/admin/
   return (
     <main className="mx-auto flex w-full max-w-[1200px] flex-col gap-6 px-5 py-6 lg:px-10 lg:py-8">
       <PageHeader
-        eyebrow={`Portfólio · ${total} foto${total === 1 ? "" : "s"}`}
+        eyebrow={`Portfólio · ${total} mídia${total === 1 ? "" : "s"}`}
         variant="heading"
         title="Portfólio"
         actions={
@@ -44,7 +45,7 @@ export default async function PortfolioPage({ searchParams }: PageProps<"/admin/
             <NewAlbumDialog />
             <Button asChild>
               <label htmlFor="portfolio-upload-proxy" className="cursor-pointer">
-                Enviar fotos
+                Enviar fotos ou vídeos
               </label>
             </Button>
           </>
@@ -72,6 +73,8 @@ export default async function PortfolioPage({ searchParams }: PageProps<"/admin/
       <div className="flex items-start gap-4">
         <div className="min-w-0 flex-1">
           <PortfolioGrid
+            uploadMode={isBlobStorage() ? "blob" : "local"}
+            pathPrefix={`portfolio/${business.id}`}
             photos={photos.map((p) => ({
               id: p.id,
               url: p.url,

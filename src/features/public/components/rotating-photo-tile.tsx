@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import Image from "next/image"
+import { PortfolioMedia } from "@/features/portfolio/components/portfolio-media"
 import Link from "next/link"
 import { cn } from "cn"
 
@@ -79,11 +79,10 @@ export function RotatingPhotoTile({
         const isPrevious = i === previous
         if (!isCurrent && !isPrevious) return null
         return (
-          <Image
+          <PortfolioMedia
             key={p.id}
             src={p.url}
             alt=""
-            fill
             sizes={sizes}
             className={cn(
               "object-cover transition-opacity duration-[900ms] ease-in-out",

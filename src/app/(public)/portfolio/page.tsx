@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import Image from "next/image"
+import { PortfolioMedia } from "@/features/portfolio/components/portfolio-media"
 import Link from "next/link"
 import { cn } from "cn"
 import { CalendarIcon, XIcon } from "lucide-react"
@@ -33,7 +33,7 @@ export default async function PortfolioPublicPage({ searchParams }: PageProps<"/
       <PageHeader
         eyebrow="Trabalhos recentes"
         title="Portfólio"
-        description="Toque em uma foto para ver detalhes e agendar o mesmo serviço."
+        description="Explore fotos e vídeos, veja os detalhes e agende o seu próximo favorito."
       />
 
       <div className="flex [scrollbar-width:none] gap-2 overflow-x-auto [&::-webkit-scrollbar]:hidden">
@@ -63,10 +63,9 @@ export default async function PortfolioPublicPage({ searchParams }: PageProps<"/
       {selected ? (
         <section className="bg-surface border-subtle flex flex-col gap-4 rounded-lg border p-4 lg:flex-row lg:items-center lg:gap-8 lg:p-6">
           <div className="bg-surface-2 relative aspect-square w-full overflow-hidden rounded-md lg:w-[360px] lg:shrink-0">
-            <Image
+            <PortfolioMedia
               src={selected.url}
               alt={selected.caption ?? ""}
-              fill
               sizes="(min-width: 1024px) 360px, 100vw"
               className="object-cover"
               priority
@@ -105,7 +104,10 @@ export default async function PortfolioPublicPage({ searchParams }: PageProps<"/
       ) : null}
 
       {photos.length === 0 ? (
-        <EmptyState title="Nenhuma foto por aqui ainda" description="Em breve novos trabalhos." />
+        <EmptyState
+          title="Nenhum trabalho por aqui ainda"
+          description="Em breve novas fotos e vídeos."
+        />
       ) : (
         <ul className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
           {photos.map((p, i) => (
@@ -118,10 +120,9 @@ export default async function PortfolioPublicPage({ searchParams }: PageProps<"/
                   selected?.id === p.id && "ring-2 ring-pink-300",
                 )}
               >
-                <Image
+                <PortfolioMedia
                   src={p.url}
                   alt={p.caption ?? ""}
-                  fill
                   sizes="(min-width: 1024px) 260px, 50vw"
                   className="object-cover transition-transform group-hover:scale-[1.03]"
                 />
