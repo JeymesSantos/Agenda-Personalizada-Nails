@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useActionState, useState, useTransition } from "react"
-import Image from "next/image"
+import { FramedMedia } from "@/components/ui/framed-media"
 import Link from "next/link"
 import { MinusIcon, PlusIcon, UploadIcon, XIcon } from "lucide-react"
 import { toast } from "sonner"
@@ -15,7 +15,7 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 import { PhotoFramingDialog } from "@/components/ui/photo-framing-dialog"
-import { photoPosition, type PhotoFocus } from "@/lib/media-focus"
+import { photoFraming, type PhotoFocus } from "@/lib/media-focus"
 import { fmtDuration } from "@/lib/dates"
 import { formatCentsExact, parseCents } from "@/lib/money"
 import { createCategoryAction, uploadServicePhotoAction } from "../actions"
@@ -266,13 +266,10 @@ export function ServiceForm({
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {values.photoUrls.map((url) => (
               <div key={url} className="group relative aspect-square overflow-hidden rounded-sm">
-                <Image
-                  src={url}
-                  alt=""
-                  fill
+                <FramedMedia
+                  media={{ kind: "IMAGE", url }}
+                  frames={photoFraming(values.photoFocus, url)}
                   sizes="160px"
-                  className="object-cover"
-                  style={{ objectPosition: photoPosition(values.photoFocus, url) }}
                 />
                 <PhotoFramingDialog
                   url={url}
@@ -418,7 +415,7 @@ export function ServiceForm({
             priceCents: values.priceCents,
             priceFrom: values.priceFrom,
             photoUrl: values.photoUrls[0] ?? null,
-            photoPosition: photoPosition(values.photoFocus, values.photoUrls[0]),
+            photoFrames: photoFraming(values.photoFocus, values.photoUrls[0]),
           }}
         />
         <InfoBox tone="magenta">

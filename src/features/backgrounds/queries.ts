@@ -15,6 +15,7 @@ export type BackgroundItem = {
   focusY: number
   desktopFocusX: number | null
   desktopFocusY: number | null
+  framing?: unknown
 }
 
 export type BackgroundPageData = { items: BackgroundItem[]; veil: BackgroundVeil }
@@ -45,6 +46,7 @@ export async function getAreaBackgrounds(
             focusY: true,
             desktopFocusX: true,
             desktopFocusY: true,
+            framing: true,
           },
         },
       },

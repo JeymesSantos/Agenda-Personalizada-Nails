@@ -1,6 +1,7 @@
 import { z } from "zod"
 
 import { parseCents } from "@/lib/money"
+import { photoFocusSchema } from "@/lib/media-framing-schema"
 
 export const serviceSchema = z.object({
   title: z.string().trim().min(2, "Informe o título do serviço").max(80, "Título muito longo"),
@@ -26,15 +27,7 @@ export const serviceSchema = z.object({
   priceFrom: z.coerce.boolean().default(false),
   visible: z.coerce.boolean().default(true),
   photoUrls: z.array(z.string().min(1)).max(6, "No máximo 6 fotos").default([]),
-  photoFocus: z
-    .record(
-      z.string(),
-      z.object({
-        x: z.number().int().min(0).max(100),
-        y: z.number().int().min(0).max(100),
-      }),
-    )
-    .default({}),
+  photoFocus: z.record(z.string(), photoFocusSchema).default({}),
 })
 
 export type ServiceInput = z.input<typeof serviceSchema>

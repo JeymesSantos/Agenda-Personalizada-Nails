@@ -111,6 +111,33 @@ describe.skipIf(!process.env.DATABASE_URL)("regressões da homologação", () =>
     expect(data.pages.PUBLIC_HOME?.items[0]?.id).toBe(mediaId)
   })
 
+  it("persiste zoom e encaixe por mídia sem copiar arquivos nem alterar outra mídia", async () => {
+    const other = await prisma.backgroundMedia.create({
+      data: { businessId, name: "Outra", kind: "IMAGE", url: "/uploads/outra.jpg" },
+    })
+    const frames = {
+      mobile: { x: 20, y: 30, zoom: 1, fit: "contain" as const },
+      desktop: { x: 80, y: 60, zoom: 1.5, fit: "cover" as const },
+    }
+    const before = await prisma.backgroundMedia.findUniqueOrThrow({ where: { id: mediaId } })
+    expect(await setMediaFocusAction(mediaId, 20, 30, 80, 60, frames)).toHaveProperty("success")
+    const data = await getAreaBackgrounds(businessId, "PUBLIC")
+    expect(data.pages.PUBLIC_DEFAULT?.items[0]).toMatchObject({ framing: frames, url: before.url })
+    expect(await prisma.backgroundMedia.count({ where: { businessId } })).toBe(2)
+    expect(
+      (await prisma.backgroundMedia.findUniqueOrThrow({ where: { id: other.id } })).framing,
+    ).toBeNull()
+    expect(
+      await setMediaFocusAction(mediaId, 20, 30, 80, 60, {
+        ...frames,
+        desktop: { ...frames.desktop, zoom: 9 },
+      }),
+    ).toHaveProperty("error")
+    expect(
+      (await prisma.backgroundMedia.findUniqueOrThrow({ where: { id: mediaId } })).framing,
+    ).toEqual(frames)
+  })
+
   it("persiste o almoço editado e permite removê-lo", async () => {
     const form = new FormData()
     for (let weekday = 0; weekday < 7; weekday++) {

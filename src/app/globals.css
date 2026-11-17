@@ -355,13 +355,22 @@
 
 .bg-slide > img,
 .bg-slide > video {
-  object-position: var(--media-position, 50% 28%);
   filter: saturate(0.9);
 }
 
+.framed-media {
+  object-position: var(--media-position, 50% 50%);
+  object-fit: var(--media-fit, cover);
+  transform: scale(var(--media-zoom, 1));
+  transform-origin: var(--media-position, 50% 50%);
+}
+
 @media (min-width: 1024px) {
-  .bg-slide > .bg-media {
-    object-position: var(--desktop-media-position, 50% 28%);
+  .framed-media {
+    object-position: var(--desktop-media-position, 50% 50%);
+    object-fit: var(--desktop-media-fit, cover);
+    transform: scale(var(--desktop-media-zoom, 1));
+    transform-origin: var(--desktop-media-position, 50% 50%);
   }
 }
 

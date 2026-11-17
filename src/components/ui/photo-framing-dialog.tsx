@@ -1,18 +1,19 @@
 "use client"
 
 import { useState } from "react"
-import Image from "next/image"
 import { CropIcon } from "lucide-react"
 import { Button } from "./button"
 import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "./dialog"
-import type { MediaFocus } from "@/lib/media-focus"
+import { MediaFrameEditor } from "./media-frame-editor"
+import { readFrame, type MediaFocus } from "@/lib/media-focus"
 
 export function PhotoFramingDialog({
   url,
@@ -23,14 +24,18 @@ export function PhotoFramingDialog({
   value?: MediaFocus
   onChange: (focus: MediaFocus) => void
 }) {
+  const initial = () => {
+    const mobile = readFrame(value)
+    return { mobile, desktop: readFrame(value?.desktop, mobile) }
+  }
   const [open, setOpen] = useState(false)
-  const [focus, setFocus] = useState(value ?? { x: 50, y: 50 })
+  const [frames, setFrames] = useState(initial)
   return (
     <Dialog
       open={open}
       onOpenChange={(next) => {
         setOpen(next)
-        if (next) setFocus(value ?? { x: 50, y: 50 })
+        if (next) setFrames(initial())
       }}
     >
       <DialogTrigger asChild>
@@ -44,49 +49,34 @@ export function PhotoFramingDialog({
           <CropIcon />
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="sm:max-w-[1000px]">
         <DialogHeader>
           <DialogTitle>Enquadrar foto</DialogTitle>
           <DialogDescription>
-            Ajuste a posição da foto no catálogo. Depois, salve o serviço para guardar a alteração.
+            Ajuste a foto no formato do catálogo. Depois, salve o serviço para guardar a alteração.
           </DialogDescription>
         </DialogHeader>
-        <div className="bg-base relative aspect-video overflow-hidden rounded-md">
-          <Image
-            src={url}
-            alt="Prévia do enquadramento"
-            fill
-            sizes="500px"
-            className="object-cover"
-            style={{ objectPosition: `${focus.x}% ${focus.y}%` }}
-          />
-        </div>
-        {(["x", "y"] as const).map((axis) => (
-          <label key={axis} className="type-body flex flex-col gap-2">
-            {axis === "x" ? "Horizontal" : "Vertical"}: {focus[axis]}%
-            <input
-              type="range"
-              min="0"
-              max="100"
-              value={focus[axis]}
-              onChange={(e) => setFocus({ ...focus, [axis]: Number(e.target.value) })}
-            />
-          </label>
-        ))}
-        <div className="flex justify-end gap-2">
-          <Button type="button" variant="secondary" onClick={() => setFocus({ x: 50, y: 50 })}>
-            Centralizar
+        <MediaFrameEditor
+          key={open ? "open" : "closed"}
+          media={{ kind: "IMAGE", url }}
+          value={frames}
+          onChange={setFrames}
+          variant="service"
+        />
+        <DialogFooter>
+          <Button type="button" variant="secondary" onClick={() => setOpen(false)}>
+            Cancelar
           </Button>
           <Button
             type="button"
             onClick={() => {
-              onChange(focus)
+              onChange({ ...frames.mobile, desktop: frames.desktop })
               setOpen(false)
             }}
           >
             Aplicar enquadramento
           </Button>
-        </div>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   )

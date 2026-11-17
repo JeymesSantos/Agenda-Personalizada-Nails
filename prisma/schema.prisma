@@ -367,6 +367,7 @@ model BackgroundMedia {
   focusY        Int            @default(28)
   desktopFocusX Int?
   desktopFocusY Int?
+  framing       Json?
   order         Int            @default(0)
   createdAt     DateTime       @default(now())
 

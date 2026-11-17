@@ -7,6 +7,8 @@ import { BackgroundPage, BackgroundVeil } from "@/generated/prisma/enums"
 import { prisma } from "@/lib/prisma"
 import { requireAdmin } from "@/lib/session"
 import { deleteUpload, isOwnUploadUrl } from "@/lib/storage"
+import { responsiveFramesSchema } from "@/lib/media-framing-schema"
+import { DEFAULT_FRAME, type ResponsiveFrames } from "@/lib/media-focus"
 
 async function ownerBusiness() {
   const user = await requireAdmin()
@@ -85,6 +87,7 @@ export async function setMediaFocusAction(
   y: number,
   desktopX: number = x,
   desktopY: number = y,
+  frames?: ResponsiveFrames,
 ): Promise<BackgroundResult> {
   const business = await ownerBusiness()
   const parsed = z
@@ -96,13 +99,21 @@ export async function setMediaFocusAction(
     })
     .safeParse({ x, y, desktopX, desktopY })
   if (!parsed.success) return { error: "Enquadramento inválido." }
+  const framing = responsiveFramesSchema.safeParse(
+    frames ?? {
+      mobile: { ...DEFAULT_FRAME, x, y },
+      desktop: { ...DEFAULT_FRAME, x: desktopX, y: desktopY },
+    },
+  )
+  if (!framing.success) return { error: "Enquadramento inválido." }
   const r = await prisma.backgroundMedia.updateMany({
     where: { id, businessId: business.id },
     data: {
-      focusX: parsed.data.x,
-      focusY: parsed.data.y,
-      desktopFocusX: parsed.data.desktopX,
-      desktopFocusY: parsed.data.desktopY,
+      focusX: framing.data.mobile.x,
+      focusY: framing.data.mobile.y,
+      desktopFocusX: framing.data.desktop.x,
+      desktopFocusY: framing.data.desktop.y,
+      framing: framing.data,
     },
   })
   if (r.count === 0) return { error: "Mídia não encontrada." }

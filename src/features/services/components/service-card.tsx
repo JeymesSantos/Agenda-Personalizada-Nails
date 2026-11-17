@@ -1,4 +1,5 @@
-import Image from "next/image"
+import { FramedMedia } from "@/components/ui/framed-media"
+import { photoFraming, type ResponsiveFrames } from "@/lib/media-focus"
 import Link from "next/link"
 import { cn } from "cn"
 import { ClockIcon, SparklesIcon } from "lucide-react"
@@ -15,7 +16,7 @@ export type ServiceCardData = {
   priceCents: number
   priceFrom?: boolean
   photoUrl?: string | null
-  photoPosition?: string
+  photoFrames?: ResponsiveFrames
 }
 
 /*
@@ -51,15 +52,12 @@ export function ServiceCard({
         className,
       )}
     >
-      <div className="bg-gradient-hero bg-surface-2 relative aspect-[16/9] w-full">
+      <div className="bg-gradient-hero bg-surface-2 relative aspect-[16/9] w-full overflow-hidden">
         {service.photoUrl ? (
-          <Image
-            src={service.photoUrl}
-            alt=""
-            fill
+          <FramedMedia
+            media={{ kind: "IMAGE", url: service.photoUrl }}
+            frames={service.photoFrames ?? photoFraming(undefined, service.photoUrl)}
             sizes="(min-width: 1024px) 320px, 100vw"
-            className="object-cover"
-            style={{ objectPosition: service.photoPosition }}
           />
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-pink-300/70">

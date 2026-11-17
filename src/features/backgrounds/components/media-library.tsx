@@ -1,7 +1,8 @@
 "use client"
 
 import { useRef, useState, useTransition } from "react"
-import Image from "next/image"
+import { FramedMedia } from "@/components/ui/framed-media"
+import { backgroundFraming } from "@/lib/media-focus"
 import { FilmIcon, Trash2Icon, UploadIcon } from "lucide-react"
 import { toast } from "sonner"
 
@@ -40,6 +41,7 @@ export type MediaTile = {
   focusY: number
   desktopFocusX: number | null
   desktopFocusY: number | null
+  framing?: unknown
 }
 
 const IMAGE_ACCEPT = "image/jpeg,image/png,image/webp"
@@ -231,22 +233,20 @@ export function MediaThumb({
   media,
   sizes,
 }: {
-  media: Pick<MediaTile, "kind" | "url" | "posterUrl" | "focusX" | "focusY">
+  media: Pick<MediaTile, "kind" | "url" | "posterUrl" | "focusX" | "focusY"> &
+    Partial<Pick<MediaTile, "desktopFocusX" | "desktopFocusY" | "framing">>
   sizes: string
 }) {
-  const src = media.kind === "VIDEO" ? media.posterUrl : media.url
-  const style = { objectPosition: `${media.focusX}% ${media.focusY}%` }
-  if (src) {
-    return <Image src={src} alt="" fill sizes={sizes} className="object-cover" style={style} />
-  }
   return (
-    <video
-      src={media.url}
-      muted
-      playsInline
-      preload="metadata"
-      className="absolute inset-0 size-full object-cover"
-      style={style}
+    <FramedMedia
+      media={media}
+      frames={backgroundFraming({
+        ...media,
+        desktopFocusX: media.desktopFocusX ?? null,
+        desktopFocusY: media.desktopFocusY ?? null,
+      })}
+      sizes={sizes}
+      posterOnly={Boolean(media.posterUrl)}
     />
   )
 }

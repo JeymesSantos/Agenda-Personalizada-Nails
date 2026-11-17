@@ -18,7 +18,7 @@ async function resetBackgroundFixture() {
       [business!.id],
     )
     await db.one(
-      'update "BackgroundMedia" set "focusX" = 50, "focusY" = 28, "desktopFocusX" = null, "desktopFocusY" = null where "businessId" = $1 and name = \'Studio 1\'',
+      'update "BackgroundMedia" set "focusX" = 50, "focusY" = 28, "desktopFocusX" = null, "desktopFocusY" = null, framing = null where "businessId" = $1 and name = \'Studio 1\'',
       [business!.id],
     )
   } finally {

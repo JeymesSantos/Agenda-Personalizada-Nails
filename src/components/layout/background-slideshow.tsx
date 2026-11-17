@@ -1,7 +1,8 @@
 "use client"
 
 import * as React from "react"
-import Image from "next/image"
+import { FramedMedia } from "@/components/ui/framed-media"
+import { backgroundFraming } from "@/lib/media-focus"
 import { usePathname } from "next/navigation"
 import { cn } from "cn"
 
@@ -142,40 +143,17 @@ function Slide({
   onEnded?: () => void
   priority: boolean
 }) {
-  /* enquadramento definido em /admin/fundos; `object-cover` mantém a proporção em qualquer janela */
-  const style = {
-    "--media-position": `${item.focusX}% ${item.focusY}%`,
-    "--desktop-media-position": `${item.desktopFocusX ?? item.focusX}% ${item.desktopFocusY ?? item.focusY}%`,
-  } as React.CSSProperties
-  const media = "bg-media absolute inset-0 size-full object-cover"
-  if (item.kind === "VIDEO" && !still) {
-    return (
-      <video
-        src={item.url}
-        poster={item.posterUrl ?? undefined}
-        autoPlay
-        muted
-        playsInline
-        loop={loop}
-        preload={active ? "auto" : "metadata"}
-        onEnded={onEnded}
-        className={media}
-        style={style}
-      />
-    )
-  }
-  const src = item.kind === "VIDEO" ? item.posterUrl : item.url
-  if (!src) return null
   return (
-    <Image
-      src={src}
-      alt=""
-      fill
-      sizes="100vw"
-      priority={priority}
+    <FramedMedia
+      media={item}
+      frames={backgroundFraming(item)}
       quality={70}
-      className={media}
-      style={style}
+      playback={active && !still}
+      loop={loop}
+      posterOnly={still}
+      onEnded={onEnded}
+      priority={priority}
+      className="bg-media"
     />
   )
 }

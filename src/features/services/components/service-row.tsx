@@ -1,7 +1,8 @@
 "use client"
 
 import { useTransition } from "react"
-import Image from "next/image"
+import { FramedMedia } from "@/components/ui/framed-media"
+import { photoFraming, type ResponsiveFrames } from "@/lib/media-focus"
 import Link from "next/link"
 import { ChevronDownIcon, ChevronUpIcon, PencilIcon, SparklesIcon } from "lucide-react"
 import { toast } from "sonner"
@@ -23,7 +24,7 @@ export type ServiceRowData = {
   priceFrom: boolean
   visible: boolean
   photoUrl: string | null
-  photoPosition?: string
+  photoFrames?: ResponsiveFrames
   appointmentsCount: number
 }
 
@@ -45,13 +46,10 @@ export function ServiceRow({
     >
       <div className="bg-surface-2 relative size-16 shrink-0 overflow-hidden rounded-sm">
         {service.photoUrl ? (
-          <Image
-            src={service.photoUrl}
-            alt=""
-            fill
+          <FramedMedia
+            media={{ kind: "IMAGE", url: service.photoUrl }}
+            frames={service.photoFrames ?? photoFraming(undefined, service.photoUrl)}
             sizes="64px"
-            className="object-cover"
-            style={{ objectPosition: service.photoPosition }}
           />
         ) : (
           <SparklesIcon className="absolute inset-0 m-auto size-6 text-pink-300/70" aria-hidden />

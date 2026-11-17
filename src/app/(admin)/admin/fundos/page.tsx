@@ -32,6 +32,7 @@ export default async function FundosPage() {
     focusY: m.focusY,
     desktopFocusX: m.desktopFocusX,
     desktopFocusY: m.desktopFocusY,
+    framing: m.framing,
   }))
   const pages = BACKGROUND_PAGES.map((p) => ({
     key: p.key,
