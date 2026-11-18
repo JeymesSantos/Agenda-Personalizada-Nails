@@ -34,6 +34,16 @@ export const registerSchema = z
   })
 
 export type LoginInput = z.infer<typeof loginSchema>
+export const resetPasswordSchema = z
+  .object({
+    password: z.string().min(6, "A senha precisa ter pelo menos 6 caracteres"),
+    confirm: z.string(),
+  })
+  .refine((v) => v.password === v.confirm, {
+    path: ["confirm"],
+    message: "As senhas não conferem",
+  })
+
 export type RegisterInput = z.infer<typeof registerSchema>
 
 /* Estado devolvido pelas server actions para o useActionState. */
