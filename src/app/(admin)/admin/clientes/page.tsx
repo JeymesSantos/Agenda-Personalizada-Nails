@@ -32,9 +32,9 @@ export default async function ClientesPage({ searchParams }: PageProps<"/admin/c
   const tz = business.timezone
 
   return (
-    <main className="mx-auto flex w-full max-w-[1200px] flex-col gap-6 px-5 py-6 lg:px-10 lg:py-8">
+    <main className="mx-auto flex w-full max-w-[1200px] min-w-0 flex-col gap-5 px-4 py-6 sm:gap-6 sm:px-6 lg:px-10 lg:py-8">
       <PageHeader eyebrow={`Clientes · ${clients.length}`} variant="heading" title="Clientes" />
-      <div className="max-w-md">
+      <div className="w-full sm:max-w-md">
         <ClientSearch initial={term} />
       </div>
 
@@ -48,31 +48,49 @@ export default async function ClientesPage({ searchParams }: PageProps<"/admin/c
       ) : (
         <ul className="flex flex-col gap-2.5">
           {clients.map((c) => (
-            <li key={c.id}>
+            <li key={c.id} className="min-w-0">
               <Link
                 href={`/admin/clientes/${c.id}`}
-                className="bg-surface border-subtle hover:bg-surface-2 flex items-center gap-4 rounded-md border p-4 transition-colors"
+                className="bg-surface border-subtle hover:bg-surface-2 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-md border p-3 transition-colors sm:grid-cols-[auto_minmax(0,1fr)_auto_auto] sm:gap-4 sm:p-4"
               >
-                <Avatar className="size-11">
+                <Avatar className="size-10 sm:size-11">
                   <AvatarFallback className="bg-surface-2 type-body-medium text-pink-300">
                     {initials(c.name)}
                   </AvatarFallback>
                 </Avatar>
-                <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="type-h3 truncate">{c.name}</span>
+                <div className="flex min-w-0 flex-col gap-1.5">
+                  <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+                    <span className="type-h3 min-w-0 [overflow-wrap:anywhere]">{c.name}</span>
                     {!c.registered ? <Badge variant="neutral">Sem cadastro</Badge> : null}
                   </div>
-                  <p className="type-body text-secondary-txt truncate">
-                    {c.whatsapp ?? "sem WhatsApp"} · {c.visits} visita{c.visits === 1 ? "" : "s"}
-                    {c.lastVisitAt ? ` · última ${fmtShortDate(c.lastVisitAt, tz)}` : ""}
-                    {c.nextAt ? ` · próxima ${fmtShortDate(c.nextAt, tz)}` : ""}
-                  </p>
+                  <div className="type-body text-secondary-txt flex flex-wrap gap-x-3 gap-y-1">
+                    <span className="whitespace-nowrap">{c.whatsapp ?? "Sem WhatsApp"}</span>
+                    <span className="whitespace-nowrap">
+                      {c.visits} visita{c.visits === 1 ? "" : "s"}
+                    </span>
+                    {c.lastVisitAt ? (
+                      <span className="whitespace-nowrap">
+                        Última {fmtShortDate(c.lastVisitAt, tz)}
+                      </span>
+                    ) : null}
+                    {c.nextAt ? (
+                      <span className="whitespace-nowrap">
+                        Próxima {fmtShortDate(c.nextAt, tz)}
+                      </span>
+                    ) : null}
+                  </div>
+                  <span className="type-body-medium text-pink-300 sm:hidden">
+                    Total gasto: {formatCents(c.spentCents)}
+                  </span>
                 </div>
-                <span className="type-body-medium hidden text-pink-300 sm:block">
+                <span className="type-body-medium hidden whitespace-nowrap text-pink-300 sm:block">
+                  <span className="sr-only">Total gasto: </span>
                   {formatCents(c.spentCents)}
                 </span>
-                <ChevronRightIcon className="text-muted-txt size-5" />
+                <ChevronRightIcon
+                  className="text-muted-txt size-4 shrink-0 sm:size-5"
+                  aria-hidden="true"
+                />
               </Link>
             </li>
           ))}

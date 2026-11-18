@@ -10,6 +10,7 @@ import { KpiCard } from "@/components/ui/kpi-card"
 import { StatusBadge } from "@/components/ui/status-badge"
 import { ClientContactForm } from "@/features/clients/components/client-contact-form"
 import { ClientNotes } from "@/features/clients/components/client-notes"
+import { ClientAccessLink } from "@/features/clients/components/client-access-link"
 import { getClientProfile } from "@/features/clients/queries"
 import { fmt, fmtRange, fmtShortDate } from "@/lib/dates"
 import { formatCents } from "@/lib/money"
@@ -134,6 +135,19 @@ export default async function ClientePage({ params }: PageProps<"/admin/clientes
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1fr_380px]">
         <div className="flex flex-col gap-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Acesso à conta</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ClientAccessLink
+                key={`${c.whatsapp}-${Boolean(c.passwordHash)}`}
+                clientId={c.id}
+                registered={Boolean(c.passwordHash)}
+                hasWhatsapp={Boolean(c.whatsapp)}
+              />
+            </CardContent>
+          </Card>
           <Card>
             <CardHeader>
               <CardTitle>Próximos ({profile.upcoming.length})</CardTitle>

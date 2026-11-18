@@ -95,10 +95,21 @@ com token de gerenciamento (`/meus-horarios?t=<token>`), o mesmo que vai na conf
 
 Cada link com token permite consultar, remarcar ou cancelar **somente o agendamento que o
 originou**. O histórico completo exige login na conta da cliente. Informar um WhatsApp no
-agendamento público não altera o nome já cadastrado. O cadastro não incorpora registros
-existentes por WhatsApp ou e-mail: a conversão de uma cliente sem conta fica bloqueada até
-haver comprovação de identidade. Enquanto isso, ela usa o link do comprovante ou procura o
-studio para ajuda com o cadastro.
+agendamento público não altera o nome já cadastrado. Quem já agendou sem conta pode se
+cadastrar diretamente com o mesmo WhatsApp, definindo e-mail e senha no registro existente
+e mantendo seus agendamentos e histórico. Contas que já possuem senha não são sobrescritas;
+informar apenas o e-mail de outro registro também não permite incorporá-lo.
+
+O convite do admin continua disponível como opção: no detalhe do agendamento é possível
+copiar um convite, e no perfil da cliente é possível preparar a mensagem para envio manual
+pelo WhatsApp. O convite assinado vale por sete dias, exige o mesmo WhatsApp e só pode ser
+usado uma vez.
+
+Em "Esqueci minha senha", a cliente solicita a recuperação pelo WhatsApp do studio. No
+perfil da cliente, a profissional gera um link para redefinir a senha e abre o WhatsApp com
+a mensagem pronta ou copia o texto para envio manual. O link vale por uma hora e deixa de
+funcionar após a troca da senha ou a alteração do e-mail ou WhatsApp da conta. Não há envio
+automático de WhatsApp.
 
 ### Variáveis de ambiente
 
