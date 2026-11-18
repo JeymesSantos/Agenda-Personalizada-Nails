@@ -16,8 +16,8 @@ export type ClientSummary = {
 }
 
 /**
- * Clientes do estúdio: quem já tem agendamento aqui. Com `q`, também inclui
- * contas de cliente que batem com a busca (nome ou WhatsApp) mesmo sem histórico.
+ * Inclui contas cadastradas mesmo antes do primeiro agendamento.
+ * O histórico e os indicadores continuam restritos ao estúdio consultado.
  */
 export async function listClients(
   businessId: string,
@@ -27,7 +27,7 @@ export async function listClients(
   const term = q.trim()
   const digits = term.replace(/\D/g, "")
 
-  const [grouped, nextRows, searchUsers] = await Promise.all([
+  const [grouped, nextRows] = await Promise.all([
     prisma.appointment.groupBy({
       by: ["clientId"],
       where: { businessId, status: "DONE" },
@@ -40,33 +40,13 @@ export async function listClients(
       select: { clientId: true, startsAt: true },
       orderBy: { startsAt: "asc" },
     }),
-    term.length >= 2
-      ? prisma.user.findMany({
-          where: {
-            role: "CLIENT",
-            OR: [
-              { name: { contains: term, mode: "insensitive" } },
-              ...(digits.length >= 3 ? [{ whatsapp: { contains: digits } }] : []),
-            ],
-          },
-          select: { id: true },
-          take: 50,
-        })
-      : Promise.resolve([] as { id: string }[]),
   ])
-
-  const anyAppt = await prisma.appointment.findMany({
-    where: { businessId },
-    select: { clientId: true },
-    distinct: ["clientId"],
-  })
-  const ids = new Set<string>([...anyAppt.map((a) => a.clientId), ...searchUsers.map((u) => u.id)])
-  if (ids.size === 0) return []
 
   const users = await prisma.user.findMany({
     where: {
-      id: { in: [...ids] },
-      ...(term.length >= 2
+      role: "CLIENT",
+      AND: [{ OR: [{ passwordHash: { not: null } }, { appointments: { some: { businessId } } }] }],
+      ...(term.length > 0
         ? {
             OR: [
               { name: { contains: term, mode: "insensitive" } },
