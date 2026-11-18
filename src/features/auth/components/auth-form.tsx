@@ -87,7 +87,15 @@ export function LoginForm({
   )
 }
 
-export function RegisterForm({ action, next }: { action: Action; next?: string }) {
+export function RegisterForm({
+  action,
+  next,
+  invitation,
+}: {
+  action: Action
+  next?: string
+  invitation?: string
+}) {
   const [state, formAction, pending] = useActionState(action, {})
   const fe = state.fieldErrors ?? {}
 
@@ -95,6 +103,12 @@ export function RegisterForm({ action, next }: { action: Action; next?: string }
     <form action={formAction} className="flex flex-col gap-5" noValidate>
       {next ? <input type="hidden" name="next" value={next} /> : null}
       {state.error ? <InfoBox tone="error">{state.error}</InfoBox> : null}
+      {invitation ? <input type="hidden" name="invitation" value={invitation} /> : null}
+      {invitation ? (
+        <InfoBox>
+          Use o mesmo WhatsApp informado ao studio para vincular seus agendamentos à conta.
+        </InfoBox>
+      ) : null}
       <Field id="name" label="Nome" errors={fe.name}>
         <Input
           id="name"

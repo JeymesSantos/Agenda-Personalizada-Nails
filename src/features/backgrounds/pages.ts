@@ -39,7 +39,7 @@ export const BACKGROUND_PAGES: BackgroundPageDef[] = [
     key: "PUBLIC_LOGIN",
     area: "PUBLIC",
     label: "Login e cadastro",
-    prefixes: ["/entrar", "/cadastro", "/admin/entrar"],
+    prefixes: ["/entrar", "/cadastro", "/admin/entrar", "/recuperar-senha", "/redefinir-senha"],
   },
   { key: "ADMIN_DEFAULT", area: "ADMIN", label: "Padrão do painel", isDefault: true },
   { key: "ADMIN_DASHBOARD", area: "ADMIN", label: "Dashboard", exact: ["/admin"] },

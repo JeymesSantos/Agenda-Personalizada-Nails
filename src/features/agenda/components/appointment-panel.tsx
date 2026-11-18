@@ -7,6 +7,7 @@ import {
 } from "lucide-react"
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { InviteClientButton } from "@/features/clients/components/invite-client-button"
 import { AppointmentNotices } from "@/components/ui/appointment-notices"
 import { StatusBadge } from "@/components/ui/status-badge"
 import { SummaryRow } from "@/components/ui/summary-list"
@@ -105,6 +106,7 @@ export function AppointmentPanel({
         </div>
       </div>
       <StatusBadge status={a.status} className="w-fit" />
+      {!a.client.passwordHash ? <InviteClientButton clientId={a.clientId} /> : null}
 
       <dl className="flex flex-col gap-3.5">
         <SummaryRow icon={<SparklesIcon />} label="Serviço">

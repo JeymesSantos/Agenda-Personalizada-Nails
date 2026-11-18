@@ -1,6 +1,6 @@
 "use client"
 
-import { useTransition } from "react"
+import { useRef, useTransition } from "react"
 import Image from "next/image"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { cn } from "cn"
@@ -8,7 +8,9 @@ import { UploadIcon } from "lucide-react"
 import { toast } from "sonner"
 
 import { Badge } from "@/components/ui/badge"
-import { uploadPhotosAction } from "../actions"
+import { registerPortfolioPhotoAction } from "../actions"
+import { uploadPortfolioFile } from "../upload"
+import { validatePortfolioFiles } from "../upload-validation"
 
 export type PhotoTile = {
   id: string
@@ -23,15 +25,20 @@ export function PortfolioGrid({
   photos,
   albumId,
   selectedId,
+  uploadMode,
+  pathPrefix,
 }: {
   photos: PhotoTile[]
   albumId: string | null
   selectedId: string | null
+  uploadMode: "local" | "blob"
+  pathPrefix: string
 }) {
   const router = useRouter()
   const pathname = usePathname()
   const params = useSearchParams()
   const [uploading, startUpload] = useTransition()
+  const uploadInProgress = useRef(false)
 
   const select = (id: string) => {
     const sp = new URLSearchParams(params.toString())
@@ -40,18 +47,34 @@ export function PortfolioGrid({
   }
 
   function onFiles(files: FileList | null) {
-    if (!files?.length) return
-    const fd = new FormData()
-    for (const f of Array.from(files)) fd.append("files", f)
-    if (albumId) fd.set("albumId", albumId)
+    if (!files?.length || uploadInProgress.current) return
+    const batch = Array.from(files)
+    const error = validatePortfolioFiles(batch)
+    if (error) {
+      toast.error(error)
+      return
+    }
+    uploadInProgress.current = true
     startUpload(async () => {
-      const r = await uploadPhotosAction(fd)
-      if (r.error) {
-        toast.error(r.error)
-        return
+      let saved = 0
+      let firstId: string | undefined
+      try {
+        for (const file of batch) {
+          const url = await uploadPortfolioFile(file, uploadMode, pathPrefix)
+          const result = await registerPortfolioPhotoAction({ url, albumId })
+          if (result.error) throw new Error(result.error)
+          saved++
+          firstId ??= result.id
+        }
+        toast.success(`${saved} foto${saved > 1 ? "s" : ""} enviada${saved > 1 ? "s" : ""}.`)
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Não foi possível enviar as fotos."
+        toast.error(saved ? `${saved} foto(s) salva(s). ${message}` : message)
+      } finally {
+        uploadInProgress.current = false
+        if (firstId) select(firstId)
+        router.refresh()
       }
-      toast.success(r.success)
-      if (r.ids?.[0]) select(r.ids[0])
     })
   }
 
@@ -70,12 +93,18 @@ export function PortfolioGrid({
           {uploading ? "Enviando…" : "Enviar fotos"}
         </span>
         <span className="type-body text-secondary-txt">ou arraste aqui</span>
+        <span className="type-caption text-secondary-txt">
+          Até 20 fotos · JPG, PNG ou WebP · 5 MB por foto
+        </span>
         <input
           type="file"
           accept="image/jpeg,image/png,image/webp"
           multiple
           className="sr-only"
-          onChange={(e) => onFiles(e.target.files)}
+          onChange={(e) => {
+            onFiles(e.target.files)
+            e.target.value = ""
+          }}
           disabled={uploading}
           id="portfolio-upload-proxy"
           data-testid="portfolio-upload"

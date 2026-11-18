@@ -9,6 +9,7 @@ vi.mock("@/lib/session", () => ({ getCurrentUser: vi.fn() }))
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }))
 
 import { registerAction } from "../../src/features/auth/actions"
+import { createInvitation } from "../../src/features/auth/invitation"
 import {
   cancelMyAppointmentAction,
   rescheduleMyAppointmentAction,
@@ -98,20 +99,98 @@ describe.skipIf(!process.env.DATABASE_URL)("identidade e acesso aos agendamentos
     await prisma.$disconnect()
   })
 
-  it("não assume uma cliente sem senha ao informar o WhatsApp dela", async () => {
+  it("não sobrescreve uma cliente que já possui senha", async () => {
+    const passwordHash = await bcrypt.hash("senha-original", 10)
+    const registered = await prisma.user.create({
+      data: {
+        name: "Cliente cadastrada",
+        email: email("registered"),
+        whatsapp: phone(2),
+        passwordHash,
+        role: "CLIENT",
+      },
+    })
     const result = await registerAction(
       {},
-      registration({ whatsapp: originalPhone, email: email("attack") }),
+      registration({ whatsapp: registered.whatsapp!, email: email("attack") }),
     )
     expect(result.fieldErrors?.whatsapp).toBeDefined()
-    expect(await prisma.user.findUnique({ where: { id: guestId } })).toMatchObject({
-      name: "Cliente original",
-      email: guestEmail,
-      whatsapp: originalPhone,
-      passwordHash: null,
+    expect(await prisma.user.findUnique({ where: { id: registered.id } })).toMatchObject({
+      name: "Cliente cadastrada",
+      email: registered.email,
+      whatsapp: registered.whatsapp,
+      passwordHash,
     })
     expect(await prisma.user.findUnique({ where: { email: email("attack") } })).toBeNull()
     expect(signIn).not.toHaveBeenCalled()
+  })
+
+  it("ativa sem convite pelo mesmo WhatsApp, mantém histórico e aceita apenas um cadastro simultâneo", async () => {
+    const business = await prisma.business.findFirstOrThrow()
+    const guest = await prisma.user.create({
+      data: {
+        name: "Cliente sem conta",
+        email: email("direct-original"),
+        whatsapp: phone(3),
+        role: "CLIENT",
+      },
+    })
+    const appointment = await prisma.appointment.create({
+      data: {
+        businessId: business.id,
+        clientId: guest.id,
+        serviceId,
+        code: `DIRECT-${stamp}`,
+        startsAt: new Date(Date.now() + 90 * 86400000),
+        serviceEndsAt: new Date(Date.now() + 90 * 86400000 + 3600000),
+        endsAt: new Date(Date.now() + 90 * 86400000 + 3600000),
+        priceCents: 1000,
+        status: "CONFIRMED",
+        origin: "ADMIN",
+      },
+    })
+    try {
+      const results = await Promise.all([
+        registerAction(
+          {},
+          registration({ whatsapp: `+55 ${guest.whatsapp}`, email: guest.email! }),
+        ),
+        registerAction(
+          {},
+          registration({ whatsapp: guest.whatsapp!, email: email("direct-other") }),
+        ),
+      ])
+      expect(results.filter((r) => !r.error && !r.fieldErrors)).toHaveLength(1)
+      expect(results.filter((r) => r.error || r.fieldErrors)).toHaveLength(1)
+      expect(signIn).toHaveBeenCalledTimes(1)
+      const account = await prisma.user.findUniqueOrThrow({ where: { whatsapp: guest.whatsapp! } })
+      expect(account.id).toBe(guest.id)
+      expect(await bcrypt.compare("senha-teste-123", account.passwordHash!)).toBe(true)
+      expect(await prisma.appointment.findUnique({ where: { id: appointment.id } })).toMatchObject({
+        clientId: guest.id,
+      })
+      expect(await prisma.user.count({ where: { whatsapp: guest.whatsapp } })).toBe(1)
+    } finally {
+      await prisma.appointment.delete({ where: { id: appointment.id } })
+      await prisma.user.delete({ where: { id: guest.id } })
+    }
+  })
+
+  it("não incorpora uma conta de admin sem senha pelo WhatsApp", async () => {
+    const admin = await prisma.user.create({
+      data: { name: "Admin", email: email("admin"), whatsapp: phone(4), role: "ADMIN" },
+    })
+    const result = await registerAction(
+      {},
+      registration({ whatsapp: admin.whatsapp!, email: email("admin-attempt") }),
+    )
+    expect(result.fieldErrors?.whatsapp).toBeDefined()
+    expect(signIn).not.toHaveBeenCalled()
+    expect(await prisma.user.findUnique({ where: { id: admin.id } })).toMatchObject({
+      role: "ADMIN",
+      passwordHash: null,
+      email: admin.email,
+    })
   })
 
   it("não incorpora um registro sem senha pelo e-mail", async () => {
@@ -186,5 +265,32 @@ describe.skipIf(!process.env.DATABASE_URL)("identidade e acesso aos agendamentos
     })
     expect(await resolveClientAccess("invalido")).toBeNull()
     expect(await getMyAppointment(first.id, null)).toBeNull()
+  })
+
+  it("um convite do admin vincula a conta ao histórico e só pode ser usado uma vez", async () => {
+    const invitation = createInvitation(guestId)
+    const result = await registerAction(
+      {},
+      registration({
+        whatsapp: originalPhone,
+        email: email("invited"),
+        invitation,
+      }),
+    )
+    expect(result).toEqual({})
+    const account = await prisma.user.findUniqueOrThrow({ where: { id: guestId } })
+    expect(account.email).toBe(email("invited"))
+    expect(await bcrypt.compare("senha-teste-123", account.passwordHash!)).toBe(true)
+    expect(await prisma.appointment.count({ where: { clientId: guestId } })).toBe(2)
+    expect(
+      await registerAction(
+        {},
+        registration({
+          whatsapp: originalPhone,
+          email: email("replay"),
+          invitation,
+        }),
+      ),
+    ).toHaveProperty("error")
   })
 })

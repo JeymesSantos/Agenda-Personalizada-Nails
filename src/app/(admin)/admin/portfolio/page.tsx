@@ -10,6 +10,7 @@ import { countPhotos, getPhoto, listAlbums, listPhotos } from "@/features/portfo
 import { listVisibleServices } from "@/features/agenda/queries"
 import { prisma } from "@/lib/prisma"
 import { requireAdmin } from "@/lib/session"
+import { isBlobStorage } from "@/lib/storage"
 
 export const metadata = { title: "Portfólio" }
 
@@ -72,6 +73,8 @@ export default async function PortfolioPage({ searchParams }: PageProps<"/admin/
       <div className="flex items-start gap-4">
         <div className="min-w-0 flex-1">
           <PortfolioGrid
+            uploadMode={isBlobStorage() ? "blob" : "local"}
+            pathPrefix={`portfolio/${business.id}`}
             photos={photos.map((p) => ({
               id: p.id,
               url: p.url,

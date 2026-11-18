@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test"
 
-import { TestDb, workdayAhead } from "./helpers"
+import { loginAdmin, TestDb, workdayAhead } from "./helpers"
 
 const db = new TestDb()
 test.afterAll(() => db.close())
@@ -16,24 +16,46 @@ async function existingGuest() {
   return guest!
 }
 
-test("cadastro não assume o histórico de quem já agendou sem conta", async ({ page }) => {
+test("cadastro sem convite ativa a cliente que já agendou e mantém o histórico", async ({
+  page,
+  browser,
+}) => {
   const guest = await existingGuest()
-  const email = `tentativa-${Date.now()}@example.test`
+  const email = `direto-${Date.now()}@example.test`
+  const appointments = await db.count('select count(*) from "Appointment" where "clientId" = $1', [
+    guest.id,
+  ])
   await page.goto("/cadastro")
-  await page.getByLabel("Nome", { exact: true }).fill("Tentativa de vínculo")
+  await page.getByLabel("Nome", { exact: true }).fill(guest.name)
   await page.getByLabel("WhatsApp", { exact: true }).fill(guest.whatsapp)
   await page.getByLabel("E-mail", { exact: true }).fill(email)
   await page.getByLabel("Senha", { exact: true }).fill("senha-teste-123")
   await page.getByLabel("Confirmar senha", { exact: true }).fill("senha-teste-123")
   await page.getByRole("button", { name: "Criar conta", exact: true }).click()
-  await expect(page.getByText(/Não foi possível usar este WhatsApp/)).toBeVisible()
-  await expect(page).toHaveURL(/\/cadastro$/)
+  await expect(page).toHaveURL(/\/meus-horarios$/)
   expect(
-    await db.one('select name, email, "passwordHash" from "User" where id = $1', [guest.id]),
-  ).toEqual({ name: guest.name, email: guest.email, passwordHash: null })
-  expect(await db.count('select count(*) from "User" where email = $1', [email])).toBe(0)
-  await page.goto("/meus-horarios")
-  await expect(page).toHaveURL(/\/entrar/)
+    await db.one(
+      'select name, email, "passwordHash" is not null as registered from "User" where id = $1',
+      [guest.id],
+    ),
+  ).toEqual({ name: guest.name, email, registered: true })
+  expect(await db.count('select count(*) from "User" where whatsapp = $1', [guest.whatsapp])).toBe(
+    1,
+  )
+  expect(
+    await db.count('select count(*) from "Appointment" where "clientId" = $1', [guest.id]),
+  ).toBe(appointments)
+  const loginContext = await browser.newContext()
+  try {
+    const loginPage = await loginContext.newPage()
+    await loginPage.goto("/entrar")
+    await loginPage.getByLabel("E-mail").fill(email)
+    await loginPage.getByLabel("Senha", { exact: true }).fill("senha-teste-123")
+    await loginPage.getByRole("button", { name: "Entrar", exact: true }).click()
+    await expect(loginPage).toHaveURL(/\/meus-horarios$/)
+  } finally {
+    await loginContext.close()
+  }
 })
 
 test("novo agendamento não altera a cliente e seu link não abre o histórico anterior", async ({
@@ -78,6 +100,48 @@ test("novo agendamento não altera a cliente e seu link não abre o histórico a
   const allowed = await page.goto(`/meus-horarios/${appointment!.id}/remarcar?t=${token}`)
   expect(allowed?.status()).toBe(200)
   await expect(page.getByRole("heading", { name: "Trocar dia ou horário" })).toBeVisible()
+})
+
+test("convite do admin cria conta mantendo o histórico do agendamento", async ({
+  page,
+  context,
+  browser,
+}) => {
+  const guest = await existingGuest()
+  const appointment = await db.one<{ id: string }>(
+    'select id from "Appointment" where "clientId" = $1 limit 1',
+    [guest.id],
+  )
+  await context.grantPermissions(["clipboard-read", "clipboard-write"])
+  await loginAdmin(page)
+  await page.goto(`/admin/agenda?agendamento=${appointment!.id}`)
+  await page.getByRole("button", { name: "Copiar convite para criar conta", exact: true }).click()
+  await expect(page.getByText(/Convite copiado/)).toBeVisible()
+  const invitation = await page.evaluate(() => navigator.clipboard.readText())
+  const clientContext = await browser.newContext()
+  const clientPage = await clientContext.newPage()
+  try {
+    await clientPage.goto(invitation)
+    await clientPage.getByLabel("Nome", { exact: true }).fill(guest.name)
+    await clientPage.getByLabel("WhatsApp", { exact: true }).fill(guest.whatsapp)
+    await clientPage
+      .getByLabel("E-mail", { exact: true })
+      .fill(`convite-${Date.now()}@example.test`)
+    await clientPage.getByLabel("Senha", { exact: true }).fill("senha-teste-123")
+    await clientPage.getByLabel("Confirmar senha", { exact: true }).fill("senha-teste-123")
+    await clientPage.getByRole("button", { name: "Criar conta", exact: true }).click()
+    await expect(clientPage).toHaveURL(/\/meus-horarios$/)
+    expect(
+      await db.one('select "passwordHash" is not null as registered from "User" where id = $1', [
+        guest.id,
+      ]),
+    ).toEqual({ registered: true })
+    expect(
+      await db.count('select count(*) from "Appointment" where "clientId" = $1', [guest.id]),
+    ).toBeGreaterThan(0)
+  } finally {
+    await clientContext.close()
+  }
 })
 
 test("conta nova é criada e login existente preserva acesso ao próprio histórico", async ({
