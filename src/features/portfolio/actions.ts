@@ -5,7 +5,7 @@ import { z } from "zod"
 
 import { prisma } from "@/lib/prisma"
 import { requireAdmin } from "@/lib/session"
-import { deleteUpload, saveUpload, validateImage } from "@/lib/storage"
+import { deleteUpload, isOwnUploadUrl } from "@/lib/storage"
 
 async function ownerBusiness() {
   const user = await requireAdmin()
@@ -20,17 +20,23 @@ function revalidatePortfolio() {
 
 export type PortfolioResult = { error?: string; success?: string }
 
-export async function uploadPhotosAction(
-  formData: FormData,
-): Promise<PortfolioResult & { ids?: string[] }> {
+export async function registerPortfolioPhotoAction(input: {
+  url: string
+  albumId: string | null
+}): Promise<PortfolioResult & { id?: string }> {
   const business = await ownerBusiness()
-  const albumId = String(formData.get("albumId") ?? "") || null
-  const files = formData.getAll("files").filter((f): f is File => f instanceof File && f.size > 0)
-  if (files.length === 0) return { error: "Nenhuma foto selecionada." }
-  if (files.length > 20) return { error: "Envie até 20 fotos por vez." }
-  for (const f of files) {
-    const invalid = validateImage(f)
-    if (invalid) return { error: `${f.name}: ${invalid}` }
+  const parsed = z
+    .object({ url: z.string().max(2048), albumId: z.string().nullable() })
+    .safeParse(input)
+  if (!parsed.success) return { error: "Dados inválidos." }
+  const { url, albumId } = parsed.data
+  if (!isOwnUploadUrl(url) || url.includes("..") || url.includes("\\")) {
+    return { error: "URL de foto inválida." }
+  }
+  const pathname = new URL(url, "http://localhost").pathname
+  const prefix = url.startsWith("/uploads/") ? "/uploads/" : "/"
+  if (!pathname.startsWith(`${prefix}portfolio/${business.id}/`)) {
+    return { error: "URL de foto inválida." }
   }
   if (albumId) {
     const album = await prisma.album.findFirst({ where: { id: albumId, businessId: business.id } })
@@ -41,20 +47,11 @@ export async function uploadPhotosAction(
     orderBy: { order: "desc" },
     select: { order: true },
   })
-  let order = (last?.order ?? -1) + 1
-  const ids: string[] = []
-  for (const f of files) {
-    const { url } = await saveUpload(f, `portfolio/${business.id}`)
-    const photo = await prisma.photo.create({
-      data: { businessId: business.id, albumId, url, order: order++ },
-    })
-    ids.push(photo.id)
-  }
+  const photo = await prisma.photo.create({
+    data: { businessId: business.id, albumId, url, order: (last?.order ?? -1) + 1 },
+  })
   revalidatePortfolio()
-  return {
-    success: `${files.length} foto${files.length > 1 ? "s" : ""} enviada${files.length > 1 ? "s" : ""}.`,
-    ids,
-  }
+  return { success: "Foto enviada.", id: photo.id }
 }
 
 const photoSchema = z.object({
