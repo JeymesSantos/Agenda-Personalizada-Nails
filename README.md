@@ -16,6 +16,8 @@ antes de mostrar os horários livres. Tudo calculado em tempo real no fuso `Amer
 
 Documentos de apoio:
 
+- [docs/AGENTES.md](docs/AGENTES.md) — instruções dos agentes, catálogo de skills locais e
+  adaptações das referências para este projeto.
 - [docs/PLANO.md](docs/PLANO.md) — plano de execução por fases, telas do Figma → rotas,
   decisões e registro do que já foi entregue.
 - [docs/design-tokens.md](docs/design-tokens.md) — cores, tipografia e componentes do brand board.
