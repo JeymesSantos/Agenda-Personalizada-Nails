@@ -31,6 +31,14 @@ export default async function CadastroPage({ searchParams }: PageProps<"/cadastr
         next={nextPath}
         invitation={typeof convite === "string" ? convite : undefined}
       />
+      {!convite ? (
+        <div className="mt-5 flex flex-col gap-2">
+          <p className="type-body text-secondary-txt">
+            Já agendou sem cadastro? Use o mesmo WhatsApp do agendamento para criar sua conta e
+            manter seus horários e histórico. Não precisa de convite.
+          </p>
+        </div>
+      ) : null}
     </AuthShell>
   )
 }

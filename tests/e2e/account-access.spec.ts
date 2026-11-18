@@ -16,24 +16,46 @@ async function existingGuest() {
   return guest!
 }
 
-test("cadastro não assume o histórico de quem já agendou sem conta", async ({ page }) => {
+test("cadastro sem convite ativa a cliente que já agendou e mantém o histórico", async ({
+  page,
+  browser,
+}) => {
   const guest = await existingGuest()
-  const email = `tentativa-${Date.now()}@example.test`
+  const email = `direto-${Date.now()}@example.test`
+  const appointments = await db.count('select count(*) from "Appointment" where "clientId" = $1', [
+    guest.id,
+  ])
   await page.goto("/cadastro")
-  await page.getByLabel("Nome", { exact: true }).fill("Tentativa de vínculo")
+  await page.getByLabel("Nome", { exact: true }).fill(guest.name)
   await page.getByLabel("WhatsApp", { exact: true }).fill(guest.whatsapp)
   await page.getByLabel("E-mail", { exact: true }).fill(email)
   await page.getByLabel("Senha", { exact: true }).fill("senha-teste-123")
   await page.getByLabel("Confirmar senha", { exact: true }).fill("senha-teste-123")
   await page.getByRole("button", { name: "Criar conta", exact: true }).click()
-  await expect(page.getByText(/Este WhatsApp já está cadastrado/)).toBeVisible()
-  await expect(page).toHaveURL(/\/cadastro$/)
+  await expect(page).toHaveURL(/\/meus-horarios$/)
   expect(
-    await db.one('select name, email, "passwordHash" from "User" where id = $1', [guest.id]),
-  ).toEqual({ name: guest.name, email: guest.email, passwordHash: null })
-  expect(await db.count('select count(*) from "User" where email = $1', [email])).toBe(0)
-  await page.goto("/meus-horarios")
-  await expect(page).toHaveURL(/\/entrar/)
+    await db.one(
+      'select name, email, "passwordHash" is not null as registered from "User" where id = $1',
+      [guest.id],
+    ),
+  ).toEqual({ name: guest.name, email, registered: true })
+  expect(await db.count('select count(*) from "User" where whatsapp = $1', [guest.whatsapp])).toBe(
+    1,
+  )
+  expect(
+    await db.count('select count(*) from "Appointment" where "clientId" = $1', [guest.id]),
+  ).toBe(appointments)
+  const loginContext = await browser.newContext()
+  try {
+    const loginPage = await loginContext.newPage()
+    await loginPage.goto("/entrar")
+    await loginPage.getByLabel("E-mail").fill(email)
+    await loginPage.getByLabel("Senha", { exact: true }).fill("senha-teste-123")
+    await loginPage.getByRole("button", { name: "Entrar", exact: true }).click()
+    await expect(loginPage).toHaveURL(/\/meus-horarios$/)
+  } finally {
+    await loginContext.close()
+  }
 })
 
 test("novo agendamento não altera a cliente e seu link não abre o histórico anterior", async ({

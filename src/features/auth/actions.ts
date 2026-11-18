@@ -85,36 +85,49 @@ export async function registerAction(_prev: FormState, formData: FormData): Prom
       values,
     }
 
-  const existingEmail = await prisma.user.findUnique({ where: { email } })
-  if (existingEmail && existingEmail.id !== invited?.id) {
-    return {
-      fieldErrors: { email: ["Já existe uma conta com esse e-mail. Entre para continuar."] },
-      values,
-    }
-  }
-
   const existingByWhatsapp = await prisma.user.findUnique({ where: { whatsapp } })
-
-  if (existingByWhatsapp && existingByWhatsapp.id !== invited?.id) {
+  if (
+    existingByWhatsapp &&
+    (existingByWhatsapp.role !== "CLIENT" || existingByWhatsapp.passwordHash !== null)
+  ) {
     return {
       fieldErrors: {
         whatsapp: [
-          "Este WhatsApp já está cadastrado. Se agendou pelo studio, peça um convite para criar sua conta. Se já tem conta, entre para continuar.",
+          "Este WhatsApp já possui uma conta. Entre ou recupere sua senha para continuar.",
         ],
       },
       values,
     }
   }
 
-  /* Apenas um convite emitido pelo admin permite incorporar o cadastro existente. */
+  const existingClient = invited ?? existingByWhatsapp
+  const existingEmail = await prisma.user.findUnique({ where: { email } })
+  if (existingEmail && existingEmail.id !== existingClient?.id) {
+    return {
+      fieldErrors: { email: ["Já existe uma conta com esse e-mail. Entre para continuar."] },
+      values,
+    }
+  }
+
+  /* Quem agendou sem conta pode definir sua senha no mesmo registro, sem convite. */
   const passwordHash = await bcrypt.hash(password, 10)
   try {
-    if (invited) {
+    if (existingClient) {
       const updated = await prisma.user.updateMany({
-        where: { id: invited.id, role: "CLIENT", passwordHash: null, whatsapp },
+        where: {
+          id: existingClient.id,
+          role: "CLIENT",
+          passwordHash: null,
+          whatsapp,
+          email: existingClient.email,
+        },
         data: { name, email, passwordHash },
       })
-      if (updated.count !== 1) return { error: "Convite já utilizado. Entre na sua conta.", values }
+      if (updated.count !== 1)
+        return {
+          error: "O cadastro foi atualizado. Entre na sua conta ou tente novamente.",
+          values,
+        }
     } else {
       await prisma.user.create({ data: { name, whatsapp, email, passwordHash, role: "CLIENT" } })
     }
