@@ -9,7 +9,10 @@ export async function uploadPortfolioFile(
 ): Promise<string> {
   const endpoint = "/api/uploads/portfolio"
   if (mode === "blob") {
-    const safe = file.name.replace(/[^\w.-]+/g, "-").slice(-80)
+    const safe =
+      file.type === "video/mp4"
+        ? `${crypto.randomUUID()}.mp4`
+        : file.name.replace(/[^\w.-]+/g, "-").slice(-80)
     const blob = await upload(`${pathPrefix}/${safe}`, file, {
       access: "public",
       handleUploadUrl: endpoint,

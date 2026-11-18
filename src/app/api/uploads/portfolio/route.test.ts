@@ -7,11 +7,12 @@ vi.mock("@/lib/prisma", () => ({
 vi.mock("@/lib/storage", () => ({
   isBlobStorage: vi.fn(() => false),
   saveUpload: vi.fn(async () => ({ url: "/uploads/portfolio/business/photo.jpg" })),
+  saveVideoUpload: vi.fn(async () => ({ url: "/uploads/portfolio/business/clip.mp4" })),
 }))
 
 import { getCurrentUser } from "@/lib/session"
 import { prisma } from "@/lib/prisma"
-import { saveUpload } from "@/lib/storage"
+import { saveUpload, saveVideoUpload } from "@/lib/storage"
 import { POST } from "./route"
 
 function request(size: number, type = "image/jpeg") {
@@ -47,6 +48,30 @@ describe("upload de fotos do portfólio", () => {
   it("exige autenticação administrativa", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue(null)
     expect((await POST(request(10))).status).toBe(401)
+    expect(saveUpload).not.toHaveBeenCalled()
+  })
+
+  it("aceita MP4 curto e rejeita vídeos acima de 15 segundos", async () => {
+    for (const seconds of [15, 16]) {
+      const bytes = new Uint8Array(36)
+      const view = new DataView(bytes.buffer)
+      view.setUint32(0, 36)
+      bytes.set(new TextEncoder().encode("moov"), 4)
+      view.setUint32(8, 28)
+      bytes.set(new TextEncoder().encode("mvhd"), 12)
+      view.setUint32(28, 1000)
+      view.setUint32(32, seconds * 1000)
+      const form = new FormData()
+      form.set("file", new File([bytes], "clip.mp4", { type: "video/mp4" }))
+      const response = await POST(
+        new Request("http://localhost/api/uploads/portfolio", {
+          method: "POST",
+          body: form,
+        }),
+      )
+      expect(response.status).toBe(seconds === 15 ? 200 : 400)
+    }
+    expect(saveVideoUpload).toHaveBeenCalledTimes(1)
     expect(saveUpload).not.toHaveBeenCalled()
   })
 })

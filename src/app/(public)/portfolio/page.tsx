@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import Image from "next/image"
+import { PortfolioMedia } from "@/features/portfolio/components/portfolio-media"
 import Link from "next/link"
 import { cn } from "cn"
 import { ArrowUpRightIcon, CalendarIcon, SparklesIcon, XIcon } from "lucide-react"
@@ -34,7 +34,7 @@ export default async function PortfolioPublicPage({ searchParams }: PageProps<"/
       <PageHeader
         eyebrow="Trabalhos recentes"
         title="Portfólio"
-        description="Inspirações para a sua próxima visita. Escolha o detalhe que combina com você."
+        description="Explore fotos e vídeos, veja os detalhes e agende o seu próximo favorito."
       />
 
       {cover && !selected ? (
@@ -47,10 +47,9 @@ export default async function PortfolioPublicPage({ searchParams }: PageProps<"/
             className="group relative block aspect-[4/3] overflow-hidden md:aspect-square"
             aria-label={`Ver destaque: ${cover.caption ?? "Trabalho do studio"}`}
           >
-            <Image
+            <PortfolioMedia
               src={cover.url}
               alt={cover.caption ?? "Trabalho em destaque"}
-              fill
               sizes="(min-width: 768px) 50vw, 100vw"
               className="object-cover transition-transform duration-500 motion-safe:group-hover:scale-105"
               priority
@@ -117,10 +116,9 @@ export default async function PortfolioPublicPage({ searchParams }: PageProps<"/
           className="bg-surface border-subtle flex scroll-mt-6 flex-col gap-4 rounded-lg border p-4 lg:flex-row lg:items-center lg:gap-8 lg:p-6"
         >
           <div className="bg-surface-2 relative aspect-square w-full overflow-hidden rounded-md lg:w-[360px] lg:shrink-0">
-            <Image
+            <PortfolioMedia
               src={selected.url}
               alt={selected.caption ?? ""}
-              fill
               sizes="(min-width: 1024px) 360px, 100vw"
               className="object-cover"
               priority
@@ -159,7 +157,10 @@ export default async function PortfolioPublicPage({ searchParams }: PageProps<"/
       ) : null}
 
       {photos.length === 0 ? (
-        <EmptyState title="Nenhuma foto por aqui ainda" description="Em breve novos trabalhos." />
+        <EmptyState
+          title="Nenhum trabalho por aqui ainda"
+          description="Em breve novas fotos e vídeos."
+        />
       ) : (
         <ul
           aria-label="Trabalhos do portfólio"
@@ -176,10 +177,9 @@ export default async function PortfolioPublicPage({ searchParams }: PageProps<"/
                 )}
                 aria-label={`Ver trabalho: ${p.caption ?? p.service?.title ?? "Inspiração do studio"}`}
               >
-                <Image
+                <PortfolioMedia
                   src={p.url}
                   alt={p.caption ?? ""}
-                  fill
                   sizes="(min-width: 1024px) 260px, 50vw"
                   className="object-cover transition-transform duration-500 motion-safe:group-hover:scale-105"
                 />

@@ -130,6 +130,17 @@ automático de WhatsApp.
 
 ## Scripts
 
+### Vídeos no portfólio
+
+O editor em `/admin/portfolio` aceita fotos e clipes MP4 de até **15 segundos e 20 MB**.
+Exporte vídeos com duração definida no contêiner MP4 (preferencialmente H.264).
+Os clipes tocam sem som, em loop, apenas quando estão visíveis. Com movimento reduzido,
+ficam pausados e mostram controles para reprodução manual. É possível vincular vídeos
+a álbuns e serviços e destacá-los na bio, assim como as fotos. O loop repete o arquivo
+enviado; para o efeito de ida e volta, envie um clipe já exportado como bumerangue.
+Em produção, o upload vai direto ao Vercel Blob usando `BLOB_READ_WRITE_TOKEN`.
+Não é necessária migração: as URLs MP4 são armazenadas na biblioteca de portfólio existente.
+
 | Comando             | O que faz                                                                         |
 | ------------------- | --------------------------------------------------------------------------------- |
 | `pnpm dev`          | Next.js em modo desenvolvimento (Turbopack)                                       |
