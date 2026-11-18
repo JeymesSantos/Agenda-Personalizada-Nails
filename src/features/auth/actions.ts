@@ -4,6 +4,8 @@ import bcrypt from "bcryptjs"
 import { AuthError } from "next-auth"
 import { isRedirectError } from "next/dist/client/components/redirect-error"
 import { redirect } from "next/navigation"
+import { revalidatePath } from "next/cache"
+import { readInvitation } from "./invitation"
 
 import { Prisma } from "@/generated/prisma/client"
 import { signIn, signOut } from "@/lib/auth"
@@ -68,32 +70,67 @@ export async function registerAction(_prev: FormState, formData: FormData): Prom
     return { fieldErrors: parsed.error.flatten().fieldErrors, values }
   }
   const { name, whatsapp, email, password, next } = parsed.data
-
-  const existingEmail = await prisma.user.findUnique({ where: { email } })
-  if (existingEmail) {
+  const invitation = String(formData.get("invitation") ?? "")
+  const invitedId = invitation ? readInvitation(invitation) : null
+  if (invitation && !invitedId)
+    return { error: "Convite inválido ou expirado. Peça um novo ao studio.", values }
+  const invited = invitedId
+    ? await prisma.user.findFirst({
+        where: { id: invitedId, role: "CLIENT", passwordHash: null, whatsapp },
+      })
+    : null
+  if (invitedId && !invited)
     return {
-      fieldErrors: { email: ["Já existe uma conta com esse e-mail. Entre para continuar."] },
+      error: "O convite já foi usado ou o WhatsApp não corresponde ao cadastro do studio.",
       values,
     }
-  }
 
   const existingByWhatsapp = await prisma.user.findUnique({ where: { whatsapp } })
-
-  if (existingByWhatsapp) {
+  if (
+    existingByWhatsapp &&
+    (existingByWhatsapp.role !== "CLIENT" || existingByWhatsapp.passwordHash !== null)
+  ) {
     return {
       fieldErrors: {
         whatsapp: [
-          "Não foi possível usar este WhatsApp. Se já agendou, use o link do comprovante ou fale com o studio. Se tem conta, entre para continuar.",
+          "Este WhatsApp já possui uma conta. Entre ou recupere sua senha para continuar.",
         ],
       },
       values,
     }
   }
 
-  /* Sem comprovação de identidade, o cadastro nunca incorpora um registro existente. */
+  const existingClient = invited ?? existingByWhatsapp
+  const existingEmail = await prisma.user.findUnique({ where: { email } })
+  if (existingEmail && existingEmail.id !== existingClient?.id) {
+    return {
+      fieldErrors: { email: ["Já existe uma conta com esse e-mail. Entre para continuar."] },
+      values,
+    }
+  }
+
+  /* Quem agendou sem conta pode definir sua senha no mesmo registro, sem convite. */
   const passwordHash = await bcrypt.hash(password, 10)
   try {
-    await prisma.user.create({ data: { name, whatsapp, email, passwordHash, role: "CLIENT" } })
+    if (existingClient) {
+      const updated = await prisma.user.updateMany({
+        where: {
+          id: existingClient.id,
+          role: "CLIENT",
+          passwordHash: null,
+          whatsapp,
+          email: existingClient.email,
+        },
+        data: { name, email, passwordHash },
+      })
+      if (updated.count !== 1)
+        return {
+          error: "O cadastro foi atualizado. Entre na sua conta ou tente novamente.",
+          values,
+        }
+    } else {
+      await prisma.user.create({ data: { name, whatsapp, email, passwordHash, role: "CLIENT" } })
+    }
   } catch (error) {
     /* Outra solicitação pode ter usado o e-mail/WhatsApp após as consultas acima. */
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
@@ -105,6 +142,7 @@ export async function registerAction(_prev: FormState, formData: FormData): Prom
     throw error
   }
 
+  revalidatePath("/admin/clientes")
   try {
     await signIn("credentials", {
       email,

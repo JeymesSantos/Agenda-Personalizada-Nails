@@ -1,7 +1,6 @@
 "use client"
 
-import { useTransition } from "react"
-import { upload } from "@vercel/blob/client"
+import { useRef, useTransition } from "react"
 import { PortfolioMedia } from "./portfolio-media"
 import { registerVideoAction } from "../video-actions"
 import { MAX_CLIP_BYTES } from "../video"
@@ -11,7 +10,9 @@ import { UploadIcon } from "lucide-react"
 import { toast } from "sonner"
 
 import { Badge } from "@/components/ui/badge"
-import { uploadPhotosAction } from "../actions"
+import { registerPortfolioPhotoAction } from "../actions"
+import { uploadPortfolioFile } from "../upload"
+import { validatePortfolioFiles } from "../upload-validation"
 
 export type PhotoTile = {
   id: string
@@ -39,6 +40,7 @@ export function PortfolioGrid({
   const pathname = usePathname()
   const params = useSearchParams()
   const [uploading, startUpload] = useTransition()
+  const uploadInProgress = useRef(false)
 
   const select = (id: string) => {
     const sp = new URLSearchParams(params.toString())
@@ -47,49 +49,48 @@ export function PortfolioGrid({
   }
 
   function onFiles(files: FileList | null) {
-    if (!files?.length) return
-    const fd = new FormData()
-    const picked = Array.from(files)
-    if (uploading) return
-    if (picked.length > 20) return void toast.error("Envie até 20 arquivos por vez.")
-    for (const f of picked.filter((f) => !f.type.startsWith("video/"))) fd.append("files", f)
-    if (albumId) fd.set("albumId", albumId)
+    if (!files?.length || uploadInProgress.current) return
+    const batch = Array.from(files)
+    if (batch.length > 20) return void toast.error("Envie até 20 arquivos por vez.")
+    const photos = batch.filter((file) => !file.type.startsWith("video/"))
+    const error = photos.length ? validatePortfolioFiles(photos) : null
+    if (error) {
+      toast.error(error)
+      return
+    }
+    if (
+      batch.some(
+        (file) =>
+          file.type.startsWith("video/") &&
+          (file.type !== "video/mp4" || !file.size || file.size > MAX_CLIP_BYTES),
+      )
+    ) {
+      toast.error("Envie vídeos MP4 de até 15 segundos e 20 MB.")
+      return
+    }
+    uploadInProgress.current = true
     startUpload(async () => {
+      let saved = 0
+      let firstId: string | undefined
       try {
-        let firstId: string | undefined
-        for (const file of picked.filter((f) => f.type.startsWith("video/"))) {
-          if (file.type !== "video/mp4" || file.size > MAX_CLIP_BYTES)
-            throw new Error("Envie vídeos MP4 de até 15 segundos e 20 MB.")
-          let url: string
-          if (uploadMode === "blob") {
-            const blob = await upload(`${pathPrefix}/${crypto.randomUUID()}.mp4`, file, {
-              access: "public",
-              contentType: "video/mp4",
-              handleUploadUrl: "/api/uploads/portfolio",
-            })
-            url = blob.url
-          } else {
-            const body = new FormData()
-            body.set("file", file)
-            const res = await fetch("/api/uploads/portfolio", { method: "POST", body })
-            const data = await res.json()
-            if (!res.ok || !data.url) throw new Error(data.error ?? "Falha ao enviar vídeo.")
-            url = data.url
-          }
-          const result = await registerVideoAction(url, albumId)
+        for (const file of batch) {
+          const url = await uploadPortfolioFile(file, uploadMode, pathPrefix)
+          const result =
+            file.type === "video/mp4"
+              ? await registerVideoAction(url, albumId)
+              : await registerPortfolioPhotoAction({ url, albumId })
           if (result.error) throw new Error(result.error)
+          saved++
           firstId ??= result.id
         }
-        if (fd.getAll("files").length) {
-          const r = await uploadPhotosAction(fd)
-          if (r.error) throw new Error(r.error)
-          firstId ??= r.ids?.[0]
-        }
-        toast.success("Envio concluído.")
-        if (firstId) select(firstId)
-        router.refresh()
+        toast.success(`${saved} arquivo${saved > 1 ? "s" : ""} enviado${saved > 1 ? "s" : ""}.`)
       } catch (error) {
-        toast.error(error instanceof Error ? error.message : "Falha no envio.")
+        const message =
+          error instanceof Error ? error.message : "Não foi possível enviar os arquivos."
+        toast.error(saved ? `${saved} arquivo(s) salvo(s). ${message}` : message)
+      } finally {
+        uploadInProgress.current = false
+        if (firstId) select(firstId)
         router.refresh()
       }
     })
@@ -109,13 +110,19 @@ export function PortfolioGrid({
         <span className="type-body-medium text-pink-300">
           {uploading ? "Enviando…" : "Enviar fotos ou vídeos"}
         </span>
-        <span className="type-body text-secondary-txt">MP4 · até 15 s e 20 MB</span>
+        <span className="type-body text-secondary-txt">ou arraste aqui</span>
+        <span className="type-caption text-secondary-txt">
+          Até 20 arquivos · JPG, PNG ou WebP · 5 MB por foto · MP4 até 15 s e 20 MB
+        </span>
         <input
           type="file"
           accept="image/jpeg,image/png,image/webp,video/mp4"
           multiple
           className="sr-only"
-          onChange={(e) => onFiles(e.target.files)}
+          onChange={(e) => {
+            onFiles(e.target.files)
+            e.target.value = ""
+          }}
           disabled={uploading}
           id="portfolio-upload-proxy"
           data-testid="portfolio-upload"
