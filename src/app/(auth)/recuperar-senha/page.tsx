@@ -1,3 +1,4 @@
+import { connection } from "next/server"
 import { AuthShell } from "@/features/auth/components/auth-shell"
 import { accessRequestMessage, accessWhatsappLink } from "@/features/auth/access-messages"
 import { getPublicBusinessOrThrow } from "@/features/public/queries"
@@ -6,6 +7,8 @@ import { Button } from "@/components/ui/button"
 export const metadata = { title: "Recuperar senha" }
 
 export default async function RecuperarSenhaPage() {
+  // O banco e os dados do studio só são necessários ao acessar a página.
+  await connection()
   const business = await getPublicBusinessOrThrow()
   return (
     <AuthShell
