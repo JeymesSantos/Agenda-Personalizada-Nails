@@ -1,7 +1,7 @@
 "use client"
 
 import { useTransition } from "react"
-import { CheckIcon, MailIcon, MessageCircleIcon } from "lucide-react"
+import { CheckIcon, MessageCircleIcon } from "lucide-react"
 import { toast } from "sonner"
 
 import { Badge } from "@/components/ui/badge"
@@ -34,10 +34,7 @@ const STATUS: Record<
   CANCELLED: { label: "Cancelado", variant: "warning" },
 }
 
-/*
- * Lembretes do agendamento no painel de detalhe (A2). E-mail sai sozinho
- * pelo cron; WhatsApp a profissional manda pelo link e marca como enviado.
- */
+/* A profissional abre a conversa no WhatsApp e confirma o envio manualmente. */
 export function ReminderList({
   reminders,
   timezone,
@@ -49,7 +46,7 @@ export function ReminderList({
   if (reminders.length === 0) {
     return (
       <p className="type-body text-secondary-txt">
-        Sem lembretes: a cliente não tem e-mail nem WhatsApp cadastrados.
+        Nenhum lembrete de WhatsApp para este agendamento.
       </p>
     )
   }
@@ -74,16 +71,12 @@ export function ReminderList({
           >
             <div className="flex items-center gap-2">
               <span className="shrink-0 text-pink-300 [&_svg]:size-4">
-                {r.channel === "EMAIL" ? (
-                  <MailIcon aria-label="E-mail" />
-                ) : (
-                  <MessageCircleIcon aria-label="WhatsApp" />
-                )}
+                <MessageCircleIcon aria-label="WhatsApp" />
               </span>
               <div className="min-w-0 flex-1">
                 <p className="type-body-medium truncate">{REMINDER_KIND_LABELS[r.kind]}</p>
                 <p className="type-caption text-secondary-txt">
-                  {r.status === "SENT" ? "Enviado " : "Sai "}
+                  {r.status === "SENT" ? "Enviado " : "Previsto para "}
                   {fmtShortDate(when, timezone)} {fmtTime(when, timezone)}
                 </p>
               </div>
@@ -95,7 +88,7 @@ export function ReminderList({
               <div className="flex flex-wrap gap-2 pl-6">
                 <Button asChild variant="secondary" size="xs">
                   <a href={r.whatsappUrl!} target="_blank" rel="noreferrer">
-                    <MessageCircleIcon /> Enviar no WhatsApp
+                    <MessageCircleIcon /> Abrir WhatsApp
                   </a>
                 </Button>
                 <Button
