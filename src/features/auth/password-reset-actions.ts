@@ -31,7 +31,6 @@ export async function resetPasswordAction(_prev: FormState, data: FormData): Pro
       role: "CLIENT",
       passwordHash: client.passwordHash,
       whatsapp: client.whatsapp,
-      email: client.email,
     },
     data: { passwordHash },
   })

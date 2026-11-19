@@ -21,14 +21,12 @@ test("cadastro sem convite ativa a cliente que já agendou e mantém o históric
   browser,
 }) => {
   const guest = await existingGuest()
-  const email = `direto-${Date.now()}@example.test`
   const appointments = await db.count('select count(*) from "Appointment" where "clientId" = $1', [
     guest.id,
   ])
   await page.goto("/cadastro")
   await page.getByLabel("Nome", { exact: true }).fill(guest.name)
   await page.getByLabel("WhatsApp", { exact: true }).fill(guest.whatsapp)
-  await page.getByLabel("E-mail", { exact: true }).fill(email)
   await page.getByLabel("Senha", { exact: true }).fill("senha-teste-123")
   await page.getByLabel("Confirmar senha", { exact: true }).fill("senha-teste-123")
   await page.getByRole("button", { name: "Criar conta", exact: true }).click()
@@ -38,7 +36,7 @@ test("cadastro sem convite ativa a cliente que já agendou e mantém o históric
       'select name, email, "passwordHash" is not null as registered from "User" where id = $1',
       [guest.id],
     ),
-  ).toEqual({ name: guest.name, email, registered: true })
+  ).toEqual({ name: guest.name, email: guest.email, registered: true })
   expect(await db.count('select count(*) from "User" where whatsapp = $1', [guest.whatsapp])).toBe(
     1,
   )
@@ -49,7 +47,7 @@ test("cadastro sem convite ativa a cliente que já agendou e mantém o históric
   try {
     const loginPage = await loginContext.newPage()
     await loginPage.goto("/entrar")
-    await loginPage.getByLabel("E-mail").fill(email)
+    await loginPage.getByLabel("WhatsApp").fill(guest.whatsapp)
     await loginPage.getByLabel("Senha", { exact: true }).fill("senha-teste-123")
     await loginPage.getByRole("button", { name: "Entrar", exact: true }).click()
     await expect(loginPage).toHaveURL(/\/meus-horarios$/)
@@ -124,9 +122,6 @@ test("convite do admin cria conta mantendo o histórico do agendamento", async (
     await clientPage.goto(invitation)
     await clientPage.getByLabel("Nome", { exact: true }).fill(guest.name)
     await clientPage.getByLabel("WhatsApp", { exact: true }).fill(guest.whatsapp)
-    await clientPage
-      .getByLabel("E-mail", { exact: true })
-      .fill(`convite-${Date.now()}@example.test`)
     await clientPage.getByLabel("Senha", { exact: true }).fill("senha-teste-123")
     await clientPage.getByLabel("Confirmar senha", { exact: true }).fill("senha-teste-123")
     await clientPage.getByRole("button", { name: "Criar conta", exact: true }).click()
@@ -151,7 +146,6 @@ test("conta nova é criada e login existente preserva acesso ao próprio histór
   await page.goto("/cadastro")
   await page.getByLabel("Nome", { exact: true }).fill("Nova cliente de teste")
   await page.getByLabel("WhatsApp", { exact: true }).fill(`117${String(stamp).slice(-8)}`)
-  await page.getByLabel("E-mail", { exact: true }).fill(`nova-${stamp}@example.test`)
   await page.getByLabel("Senha", { exact: true }).fill("senha-teste-123")
   await page.getByLabel("Confirmar senha", { exact: true }).fill("senha-teste-123")
   await page.getByRole("button", { name: "Criar conta", exact: true }).click()
@@ -159,7 +153,7 @@ test("conta nova é criada e login existente preserva acesso ao próprio histór
   await expect(page.getByText("Nenhum horário agendado")).toBeVisible()
   await page.goto("/api/auth/sair")
   await page.goto("/entrar")
-  await page.getByLabel("E-mail").fill("mariana@example.com")
+  await page.getByLabel("WhatsApp").fill("+55 (11) 99876-5432")
   await page.getByLabel("Senha", { exact: true }).fill("cliente123")
   await page.getByRole("button", { name: "Entrar", exact: true }).click()
   await expect(page).toHaveURL(/\/meus-horarios$/)

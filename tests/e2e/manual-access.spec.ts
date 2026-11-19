@@ -9,7 +9,7 @@ test("login oferece recuperação manual e cadastro informa que convite é opcio
 }) => {
   await page.goto("/entrar")
   await page.getByRole("link", { name: "Esqueci minha senha" }).click()
-  const request = page.getByRole("link", { name: "Pedir recuperação pelo WhatsApp" })
+  const request = page.getByRole("link", { name: "Recuperar senha", exact: true })
   await expect(request).toHaveAttribute("href", /https:\/\/wa.me\/55/)
   const message = new URL((await request.getAttribute("href"))!).searchParams.get("text")
   expect(message).toContain("Esqueci minha senha")
@@ -48,7 +48,6 @@ test("admin prepara convite manual e cliente ativa a conta preservando o histór
     await client.goto(url)
     await client.getByLabel("Nome", { exact: true }).fill(guest!.name)
     await client.getByLabel("WhatsApp", { exact: true }).fill(guest!.whatsapp)
-    await client.getByLabel("E-mail", { exact: true }).fill(`manual-${Date.now()}@example.test`)
     await client.getByLabel("Senha", { exact: true }).fill("senha-manual-123")
     await client.getByLabel("Confirmar senha", { exact: true }).fill("senha-manual-123")
     await client.getByRole("button", { name: "Criar conta", exact: true }).click()
@@ -60,7 +59,6 @@ test("admin prepara convite manual e cliente ativa a conta preservando o histór
     await client.goto(url)
     await client.getByLabel("Nome", { exact: true }).fill(guest!.name)
     await client.getByLabel("WhatsApp", { exact: true }).fill(guest!.whatsapp)
-    await client.getByLabel("E-mail", { exact: true }).fill(`replay-${Date.now()}@example.test`)
     await client.getByLabel("Senha", { exact: true }).fill("senha-manual-123")
     await client.getByLabel("Confirmar senha", { exact: true }).fill("senha-manual-123")
     await client.getByRole("button", { name: "Criar conta", exact: true }).click()
@@ -75,8 +73,8 @@ test("recuperação manual troca a senha e o mesmo link não pode ser reutilizad
   browser,
 }) => {
   const account = await db.one<{ id: string; whatsapp: string }>(
-    'select id, whatsapp from "User" where email = $1',
-    ["mariana@example.com"],
+    'select id, whatsapp from "User" where whatsapp = $1',
+    ["11998765432"],
   )
   await loginAdmin(page)
   await page.goto(`/admin/clientes/${account!.id}`)
@@ -100,10 +98,10 @@ test("recuperação manual troca a senha e o mesmo link não pode ser reutilizad
     await client.getByLabel("Confirmar nova senha", { exact: true }).fill("nova-senha-456")
     await client.getByRole("button", { name: "Salvar nova senha" }).click()
     await expect(client).toHaveURL(/\/entrar\?senha=alterada$/)
-    await client.getByLabel("E-mail").fill("mariana@example.com")
+    await client.getByLabel("WhatsApp").fill("+55 (11) 99876-5432")
     await client.getByLabel("Senha", { exact: true }).fill("cliente123")
     await client.getByRole("button", { name: "Entrar", exact: true }).click()
-    await expect(client.getByText("E-mail ou senha incorretos.")).toBeVisible()
+    await expect(client.getByText("WhatsApp ou senha incorretos.")).toBeVisible()
     await client.getByLabel("Senha", { exact: true }).fill("nova-senha-456")
     await client.getByRole("button", { name: "Entrar", exact: true }).click()
     await expect(client).toHaveURL(/\/meus-horarios$/)

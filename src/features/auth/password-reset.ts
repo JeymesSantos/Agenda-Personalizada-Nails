@@ -5,7 +5,6 @@ type ResetAccount = {
   id: string
   passwordHash: string
   whatsapp: string | null
-  email: string | null
 }
 
 export const RESET_VALIDITY_MINUTES = 60
@@ -20,7 +19,6 @@ function signature(payload: string, account: ResetAccount) {
         account.id,
         account.passwordHash,
         account.whatsapp,
-        account.email,
       ]),
     )
     .digest("base64url")

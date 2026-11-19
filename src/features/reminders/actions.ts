@@ -11,7 +11,7 @@ export type ReminderActionResult = { error?: string; success?: string }
 export async function markReminderSentAction(id: string): Promise<ReminderActionResult> {
   const user = await requireAdmin()
   const r = await prisma.reminder.findFirst({
-    where: { id, appointment: { business: { ownerId: user.id } } },
+    where: { id, channel: "WHATSAPP", appointment: { business: { ownerId: user.id } } },
     select: { id: true, status: true },
   })
   if (!r) return { error: "Lembrete não encontrado." }

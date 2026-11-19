@@ -10,16 +10,17 @@ test("cliente aparece na lista do admin logo após se cadastrar, sem agendamento
 }) => {
   const stamp = Date.now()
   const name = `Cadastro sem agendamento ${stamp}`
-  const email = `directory-${stamp}@example.test`
+  const whatsapp = `116${String(stamp).slice(-8)}`
   await page.goto("/cadastro")
   await page.getByLabel("Nome", { exact: true }).fill(name)
-  await page.getByLabel("WhatsApp", { exact: true }).fill(`116${String(stamp).slice(-8)}`)
-  await page.getByLabel("E-mail", { exact: true }).fill(email)
+  await page.getByLabel("WhatsApp", { exact: true }).fill(whatsapp)
   await page.getByLabel("Senha", { exact: true }).fill("senha-teste-123")
   await page.getByLabel("Confirmar senha", { exact: true }).fill("senha-teste-123")
   await page.getByRole("button", { name: "Criar conta", exact: true }).click()
   await expect(page).toHaveURL(/\/meus-horarios$/)
-  const client = await db.one<{ id: string }>('select id from "User" where email = $1', [email])
+  const client = await db.one<{ id: string }>('select id from "User" where whatsapp = $1', [
+    whatsapp,
+  ])
   expect(
     await db.count('select count(*) from "Appointment" where "clientId" = $1', [client!.id]),
   ).toBe(0)

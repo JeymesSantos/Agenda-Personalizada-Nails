@@ -6,11 +6,10 @@ vi.mock("server-only", () => ({}))
 
 import { PrismaPg } from "@prisma/adapter-pg"
 import { PrismaClient } from "../../src/generated/prisma/client"
-import type { EmailMessage, EmailNotifier } from "../../src/lib/notifications"
 
 /*
- * Integração com o Postgres local: um agendamento gera os lembretes nos
- * canais da cliente, o cron envia os de e-mail vencidos e o cancelamento
+ * Integração com o Postgres local: um agendamento gera lembretes de
+ * WhatsApp da cliente, o cron cancela e-mails antigos e o cancelamento
  * cancela os pendentes.
  */
 const hasDb = Boolean(process.env.DATABASE_URL)
@@ -24,13 +23,6 @@ describe.skipIf(!hasDb)("lembretes", () => {
   let clientId: string
   let clientEmail = ""
   let appointmentId: string
-  const sent: EmailMessage[] = []
-  const fakeNotifier: EmailNotifier = {
-    name: "fake",
-    async send(m) {
-      sent.push(m)
-    },
-  }
 
   beforeAll(async () => {
     const business = await prisma.business.findFirstOrThrow()
@@ -72,30 +64,45 @@ describe.skipIf(!hasDb)("lembretes", () => {
     })
     appointmentId = a.id
     const reminders = await prisma.reminder.findMany({ where: { appointmentId } })
-    expect(reminders).toHaveLength(6)
-    expect(reminders.filter((r) => r.channel === "EMAIL")).toHaveLength(3)
+    expect(reminders).toHaveLength(3)
+    expect(reminders.filter((r) => r.channel === "EMAIL")).toHaveLength(0)
     expect(reminders.every((r) => r.status === "SCHEDULED")).toBe(true)
   })
 
-  it("o cron envia só os e-mails vencidos e marca como enviados", async () => {
+  it("o cron cancela e-mails antigos sem enviar e preserva WhatsApp manual", async () => {
     const { dispatchDueReminders } = await import("../../src/features/reminders/core")
-    const result = await dispatchDueReminders(new Date(), fakeNotifier)
-    /* a confirmação deste agendamento venceu; os de 24 h / 2 h ainda não */
-    const mine = await prisma.reminder.findMany({ where: { appointmentId, channel: "EMAIL" } })
-    const confirmation = mine.find((r) => r.kind === "CONFIRMATION")!
-    expect(confirmation.status).toBe("SENT")
-    expect(mine.filter((r) => r.status === "SCHEDULED")).toHaveLength(2)
-    expect(result.sent).toBeGreaterThanOrEqual(1)
-    /* o cron também envia as confirmações do seed: procurar pelo e-mail desta cliente */
-    const msg = sent.find((m) => m.to === clientEmail)!
-    expect(msg).toBeDefined()
-    expect(msg.subject).toContain("Horário confirmado")
-    expect(msg.text).toContain(
-      `/agendamento/${(await prisma.appointment.findUniqueOrThrow({ where: { id: appointmentId } })).code}?t=`,
-    )
-    /* WhatsApp não é enviado pelo cron */
+    await prisma.reminder.createMany({
+      data: [
+        {
+          appointmentId,
+          channel: "EMAIL",
+          kind: "CONFIRMATION",
+          sendAt: new Date(),
+          status: "SCHEDULED",
+        },
+        {
+          appointmentId,
+          channel: "EMAIL",
+          kind: "BEFORE_24H",
+          sendAt: addDays(new Date(), 10),
+          status: "FAILED",
+        },
+      ],
+    })
+    const result = await dispatchDueReminders()
+    expect(result.sent).toBe(0)
+    expect(result.failed).toBe(0)
+    expect(result.skipped).toBeGreaterThanOrEqual(2)
+    const email = await prisma.reminder.findMany({ where: { appointmentId, channel: "EMAIL" } })
+    expect(email.every((r) => r.status === "CANCELLED")).toBe(true)
     const wa = await prisma.reminder.findMany({ where: { appointmentId, channel: "WHATSAPP" } })
+    expect(wa).toHaveLength(3)
     expect(wa.every((r) => r.status === "SCHEDULED")).toBe(true)
+    // O histórico de envios manuais continua preservado ao cancelar.
+    await prisma.reminder.update({
+      where: { id: wa[0].id },
+      data: { status: "SENT", sentAt: new Date() },
+    })
   })
 
   it("cancelar o agendamento cancela os pendentes e preserva os enviados", async () => {
@@ -104,6 +111,6 @@ describe.skipIf(!hasDb)("lembretes", () => {
     await cancelReminders(appointmentId)
     const reminders = await prisma.reminder.findMany({ where: { appointmentId } })
     expect(reminders.filter((r) => r.status === "SENT")).toHaveLength(1)
-    expect(reminders.filter((r) => r.status === "CANCELLED")).toHaveLength(5)
+    expect(reminders.filter((r) => r.status === "CANCELLED")).toHaveLength(4)
   })
 })

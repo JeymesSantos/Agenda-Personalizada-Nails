@@ -6,13 +6,12 @@ import { z } from "zod"
 
 import { authConfig } from "@/lib/auth.config"
 import { prisma } from "@/lib/prisma"
+import { clientLoginSchema, loginSchema } from "@/features/auth/schemas"
 
-const credentialsSchema = z.object({
-  email: z.string().trim().toLowerCase().email(),
-  password: z.string().min(1),
-  /* Restringe o login a um papel: a tela da profissional não aceita conta de cliente e vice-versa. */
-  role: z.enum(["ADMIN", "CLIENT"]).optional(),
-})
+const credentialsSchema = z.discriminatedUnion("role", [
+  loginSchema.extend({ role: z.literal("ADMIN") }),
+  clientLoginSchema.extend({ role: z.literal("CLIENT") }),
+])
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
@@ -20,22 +19,33 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     Credentials({
       credentials: {
         email: {},
+        whatsapp: {},
         password: {},
         role: {},
       },
       async authorize(raw) {
         const parsed = credentialsSchema.safeParse(raw)
         if (!parsed.success) return null
-        const { email, password, role } = parsed.data
+        const credentials = parsed.data
 
-        const user = await prisma.user.findUnique({ where: { email } })
+        const user = await prisma.user.findUnique({
+          where:
+            credentials.role === "ADMIN"
+              ? { email: credentials.email }
+              : { whatsapp: credentials.whatsapp },
+        })
         if (!user?.passwordHash) return null
-        if (role && user.role !== role) return null
+        if (user.role !== credentials.role) return null
 
-        const ok = await bcrypt.compare(password, user.passwordHash)
+        const ok = await bcrypt.compare(credentials.password, user.passwordHash)
         if (!ok) return null
 
-        return { id: user.id, name: user.name, email: user.email, role: user.role }
+        return {
+          id: user.id,
+          name: user.name,
+          email: user.role === "ADMIN" ? user.email : null,
+          role: user.role,
+        }
       },
     }),
   ],

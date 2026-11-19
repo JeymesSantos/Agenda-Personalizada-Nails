@@ -257,7 +257,7 @@ export async function getAppointmentDetail(businessId: string, id: string) {
     include: {
       client: true,
       service: true,
-      reminders: { orderBy: { sendAt: "asc" } },
+      reminders: { where: { channel: "WHATSAPP" }, orderBy: { sendAt: "asc" } },
       notices: { orderBy: { createdAt: "desc" }, take: 5 },
     },
   })

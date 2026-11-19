@@ -19,11 +19,14 @@ export const loginSchema = z.object({
   next: z.string().optional(),
 })
 
+export const clientLoginSchema = loginSchema.omit({ email: true }).extend({
+  whatsapp: whatsappSchema,
+})
+
 export const registerSchema = z
   .object({
     name: z.string().trim().min(2, "Como podemos te chamar?"),
     whatsapp: whatsappSchema,
-    email: z.string().trim().toLowerCase().email("Informe um e-mail válido"),
     password: z.string().min(6, "A senha precisa ter pelo menos 6 caracteres"),
     confirm: z.string(),
     next: z.string().optional(),

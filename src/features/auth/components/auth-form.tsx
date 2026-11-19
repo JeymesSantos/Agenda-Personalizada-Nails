@@ -42,10 +42,12 @@ export function LoginForm({
   action,
   next,
   submitLabel = "Entrar",
+  role = "CLIENT",
 }: {
   action: Action
   next?: string
   submitLabel?: string
+  role?: "ADMIN" | "CLIENT"
 }) {
   const [state, formAction, pending] = useActionState(action, {})
   const fe = state.fieldErrors ?? {}
@@ -54,20 +56,37 @@ export function LoginForm({
     <form action={formAction} className="flex flex-col gap-5" noValidate>
       {next ? <input type="hidden" name="next" value={next} /> : null}
       {state.error ? <InfoBox tone="error">{state.error}</InfoBox> : null}
-      <Field id="email" label="E-mail" errors={fe.email}>
-        <Input
-          id="email"
-          name="email"
-          type="email"
-          autoComplete="email"
-          inputMode="email"
-          placeholder="seu@email.com"
-          defaultValue={state.values?.email}
-          aria-invalid={fe.email ? true : undefined}
-          startIcon={<MailIcon />}
-          required
-        />
-      </Field>
+      {role === "ADMIN" ? (
+        <Field id="email" label="E-mail" errors={fe.email}>
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            autoComplete="email"
+            inputMode="email"
+            placeholder="seu@email.com"
+            defaultValue={state.values?.email}
+            aria-invalid={fe.email ? true : undefined}
+            startIcon={<MailIcon />}
+            required
+          />
+        </Field>
+      ) : (
+        <Field id="whatsapp" label="WhatsApp" errors={fe.whatsapp}>
+          <PhoneInput
+            id="whatsapp"
+            name="whatsapp"
+            type="tel"
+            autoComplete="username"
+            inputMode="tel"
+            placeholder="(11) 9 9999-9999"
+            defaultValue={state.values?.whatsapp}
+            aria-invalid={fe.whatsapp ? true : undefined}
+            startIcon={<MessageCircleIcon />}
+            required
+          />
+        </Field>
+      )}
       <Field id="password" label="Senha" errors={fe.password}>
         <Input
           id="password"
@@ -132,20 +151,6 @@ export function RegisterForm({
           defaultValue={state.values?.whatsapp}
           aria-invalid={fe.whatsapp ? true : undefined}
           startIcon={<MessageCircleIcon />}
-          required
-        />
-      </Field>
-      <Field id="email" label="E-mail" errors={fe.email}>
-        <Input
-          id="email"
-          name="email"
-          type="email"
-          autoComplete="email"
-          inputMode="email"
-          placeholder="seu@email.com"
-          defaultValue={state.values?.email}
-          aria-invalid={fe.email ? true : undefined}
-          startIcon={<MailIcon />}
           required
         />
       </Field>
