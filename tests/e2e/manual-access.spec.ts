@@ -9,7 +9,7 @@ test("login oferece recuperação manual e cadastro informa que convite é opcio
 }) => {
   await page.goto("/entrar")
   await page.getByRole("link", { name: "Esqueci minha senha" }).click()
-  const request = page.getByRole("link", { name: "Pedir recuperação pelo WhatsApp" })
+  const request = page.getByRole("link", { name: "Recuperar senha", exact: true })
   await expect(request).toHaveAttribute("href", /https:\/\/wa.me\/55/)
   const message = new URL((await request.getAttribute("href"))!).searchParams.get("text")
   expect(message).toContain("Esqueci minha senha")
