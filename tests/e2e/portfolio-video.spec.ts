@@ -42,7 +42,7 @@ test("envia um clipe, reproduz no portfólio e permite excluir", async ({ page }
   await page
     .getByTestId("portfolio-upload")
     .setInputFiles({ name: "loop.mp4", mimeType: "video/mp4", buffer })
-  await expect(page.getByText("Envio concluído.", { exact: true })).toBeVisible()
+  await expect(page.getByText("1 arquivo enviado.", { exact: true })).toBeVisible()
   await expect(page).toHaveURL(/foto=/)
   const id = new URL(page.url()).searchParams.get("foto")!
   const saved = await db.one<{ url: string }>('select url from "Photo" where id = $1', [id])
@@ -55,6 +55,9 @@ test("envia um clipe, reproduz no portfólio e permite excluir", async ({ page }
     .toBeGreaterThanOrEqual(2)
   await expect(video).toHaveJSProperty("loop", true)
   await expect(video).toHaveJSProperty("muted", true)
+  await expect
+    .poll(() => video.evaluate((element: HTMLVideoElement) => element.currentTime))
+    .toBeGreaterThan(0)
   await page.emulateMedia({ reducedMotion: "reduce" })
   await expect(video).toHaveJSProperty("controls", true)
   await expect(video).toHaveJSProperty("paused", true)

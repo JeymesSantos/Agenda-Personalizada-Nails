@@ -47,7 +47,12 @@ for (const viewport of [
       )
       await page.screenshot({ path: testInfo.outputPath("disponibilidade.png"), fullPage: true })
       await page.getByRole("link", { name: "Fechar", exact: true }).click()
-      await expect(page).toHaveURL(/\/admin\/agenda$/)
+      await expect(page).toHaveURL(
+        viewport.width < 1024 ? /\/admin\/agenda\?visao=dia$/ : /\/admin\/agenda$/,
+      )
+      await expect(
+        page.getByRole("tab", { name: viewport.width < 1024 ? "Dia" : "Semana", exact: true }),
+      ).toHaveAttribute("aria-selected", "true")
 
       await page.goto("/admin/fundos")
       await page.getByRole("button", { name: "Enquadrar Studio 1", exact: true }).click()
@@ -99,7 +104,24 @@ for (const viewport of [
         const business = await db.one<{ id: string }>(
           'select id from "Business" order by "createdAt" limit 1',
         )
-        const date = workdayAhead(35)
+        // Escolhe um dia com almoço e sem bloqueios, inclusive feriados e férias do seed.
+        const day = await db.one<{ date: string }>(
+          `select to_char(d.day, 'YYYY-MM-DD') as date
+           from generate_series($2::date::timestamp, ($2::date + 60)::timestamp, interval '1 day') d(day)
+           join "Business" b on b.id = $1
+           join "WorkingHours" w on w."businessId" = b.id and w.weekday = extract(dow from d.day)
+           where w.enabled and w."breakStartMin" is not null and w."breakEndMin" > w."breakStartMin"
+             and not exists (
+               select 1 from "ScheduleException" e
+               where e."businessId" = b.id and e.type = 'BLOCK'
+                 and e."startsAt" < ((d.day + interval '1 day') at time zone b.timezone)
+                 and e."endsAt" > (d.day at time zone b.timezone)
+             )
+           order by d.day limit 1`,
+          [business!.id, workdayAhead(35)],
+        )
+        expect(day, "Nenhum dia com almoço e sem bloqueios encontrado para o teste").not.toBeNull()
+        const date = day!.date
         await db.one(
           `insert into "ScheduleException" (id, "businessId", type, "startsAt", "endsAt", "allDay", reason, "createdAt") values ($1, $2, 'RELEASE', ($3::timestamptz at time zone 'UTC'), ($4::timestamptz at time zone 'UTC'), false, 'Sem almoço neste horário', now()) returning id`,
           [releaseId, business!.id, `${date}T13:00:00-03:00`, `${date}T19:00:00-03:00`],
