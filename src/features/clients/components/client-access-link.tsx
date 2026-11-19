@@ -58,7 +58,7 @@ export function ClientAccessLink({
       ) : null}
       {link ? (
         <div className="flex flex-col gap-3" aria-live="polite">
-          <p className="type-body break-words whitespace-pre-line">{link.message}</p>
+          <p className="type-body wrap-anywhere whitespace-pre-line">{link.message}</p>
           <Button asChild>
             <a href={link.whatsappUrl} target="_blank" rel="noreferrer">
               Abrir WhatsApp para enviar
