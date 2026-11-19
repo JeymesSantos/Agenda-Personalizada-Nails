@@ -15,7 +15,12 @@ export default async function AdminEntrarPage({ searchParams }: PageProps<"/admi
       description="Acesso protegido por e-mail e senha."
       footer="Esqueceu a senha? Fale com o suporte do MinhaAgenda."
     >
-      <LoginForm action={loginAdminAction} next={nextPath} submitLabel="Entrar no painel" />
+      <LoginForm
+        role="ADMIN"
+        action={loginAdminAction}
+        next={nextPath}
+        submitLabel="Entrar no painel"
+      />
     </AuthShell>
   )
 }

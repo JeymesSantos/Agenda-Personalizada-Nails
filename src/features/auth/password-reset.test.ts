@@ -6,7 +6,6 @@ const account = {
   id: "cliente",
   passwordHash: "hash-anterior",
   whatsapp: "11987654321",
-  email: "cliente@example.com",
 }
 
 beforeEach(() => vi.stubEnv("AUTH_SECRET", "test-reset-secret"))
@@ -27,7 +26,6 @@ describe("link de recuperação", () => {
     for (const changed of [
       { passwordHash: "nova-senha" },
       { whatsapp: "21987654321" },
-      { email: "outra@example.com" },
       { id: "outra-cliente" },
     ])
       expect(validPasswordReset(token, { ...account, ...changed }, 2000)).toBe(false)
@@ -39,7 +37,6 @@ describe("link de recuperação", () => {
       validPasswordReset(
         token,
         {
-          email: account.email,
           whatsapp: account.whatsapp,
           passwordHash: account.passwordHash,
           id: account.id,

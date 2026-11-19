@@ -283,7 +283,7 @@ async function main() {
         data: {
           id: c.email ? `usr_${c.email.split("@")[0]}` : undefined,
           name: c.name,
-          email: c.email,
+
           whatsapp: c.whatsapp,
           passwordHash: c.registered ? clientPassword : null,
           role: "CLIENT",
@@ -435,14 +435,13 @@ async function main() {
       startsAt: { gt: now },
       status: { in: ["CONFIRMED", "PENDING"] },
     },
-    select: { id: true, startsAt: true, client: { select: { email: true, whatsapp: true } } },
+    select: { id: true, startsAt: true, client: { select: { whatsapp: true } } },
   })
   let reminders = 0
   for (const a of upcoming) {
-    const channels = [
-      a.client.email ? "EMAIL" : null,
-      a.client.whatsapp ? "WHATSAPP" : null,
-    ].filter((c): c is "EMAIL" | "WHATSAPP" => c !== null)
+    const channels = [a.client.whatsapp ? "WHATSAPP" : null].filter(
+      (c): c is "WHATSAPP" => c !== null,
+    )
     for (const channel of channels) {
       for (const { kind, sendAt } of planReminders(a.startsAt, now)) {
         await prisma.reminder.create({ data: { appointmentId: a.id, channel, kind, sendAt } })
@@ -573,7 +572,7 @@ async function main() {
 
   console.log("✓ seed concluído")
   console.log("   admin:   leticia@minhaagenda.app / leticia123")
-  console.log("   cliente: mariana@example.com / cliente123")
+  console.log("   cliente: 11998765432 / cliente123")
 }
 
 main()

@@ -85,12 +85,12 @@ seed). Para inspecionar os dados: `pnpm db:studio`.
 
 ### Contas do seed
 
-| Perfil            | E-mail                    | Senha        | Onde entrar     |
+| Perfil            | E-mail ou WhatsApp        | Senha        | Onde entrar     |
 | ----------------- | ------------------------- | ------------ | --------------- |
 | Profissional      | `leticia@minhaagenda.app` | `leticia123` | `/admin/entrar` |
-| Cliente com conta | `mariana@example.com`     | `cliente123` | `/entrar`       |
-| Cliente com conta | `juliana@example.com`     | `cliente123` | `/entrar`       |
-| Cliente com conta | `anabeatriz@example.com`  | `cliente123` | `/entrar`       |
+| Cliente com conta | `11998765432`             | `cliente123` | `/entrar`       |
+| Cliente com conta | `11997654321`             | `cliente123` | `/entrar`       |
+| Cliente com conta | `11995432109`             | `cliente123` | `/entrar`       |
 
 Clientes sem cadastro (Camila, Rita, Paula, Nanda, Carla…) acessam seus agendamentos pelo link
 com token de gerenciamento (`/meus-horarios?t=<token>`), o mesmo que vai na confirmação.
@@ -98,7 +98,7 @@ com token de gerenciamento (`/meus-horarios?t=<token>`), o mesmo que vai na conf
 Cada link com token permite consultar, remarcar ou cancelar **somente o agendamento que o
 originou**. O histórico completo exige login na conta da cliente. Informar um WhatsApp no
 agendamento público não altera o nome já cadastrado. Quem já agendou sem conta pode se
-cadastrar diretamente com o mesmo WhatsApp, definindo e-mail e senha no registro existente
+cadastrar diretamente com o mesmo WhatsApp, definindo a senha no registro existente
 e mantendo seus agendamentos e histórico. Contas que já possuem senha não são sobrescritas;
 informar apenas o e-mail de outro registro também não permite incorporá-lo.
 
@@ -110,7 +110,7 @@ usado uma vez.
 Em "Esqueci minha senha", a cliente solicita a recuperação pelo WhatsApp do studio. No
 perfil da cliente, a profissional gera um link para redefinir a senha e abre o WhatsApp com
 a mensagem pronta ou copia o texto para envio manual. O link vale por uma hora e deixa de
-funcionar após a troca da senha ou a alteração do e-mail ou WhatsApp da conta. Não há envio
+funcionar após a troca da senha ou a alteração do WhatsApp da conta. Não há envio
 automático de WhatsApp.
 
 ### Variáveis de ambiente
@@ -123,7 +123,7 @@ automático de WhatsApp.
 | `AUTH_TRUST_HOST`               | `true` atrás de proxy (Vercel); pode ficar vazio em desenvolvimento.                     |
 | `TZ`                            | Fuso do processo Node; o fuso do estúdio também fica gravado em `Business.timezone`.     |
 | `BLOB_READ_WRITE_TOKEN`         | Token do Vercel Blob. Sem ele os uploads vão para `public/uploads` (dev).                |
-| `RESEND_API_KEY`, `EMAIL_FROM`  | Envio dos lembretes por e-mail (Resend). Sem chave, o e-mail só aparece no log.          |
+| `RESEND_API_KEY`, `EMAIL_FROM`  | Infraestrutura de e-mail reservada ao admin; não usada nos fluxos da cliente.            |
 | `CRON_SECRET`                   | Protege `GET /api/cron/reminders`; a Vercel envia no header `Authorization`.             |
 | `E2E_DATABASE_URL`, `E2E_PORT`  | Banco e porta dos testes e2e (padrão: `minhaagenda_test` no mesmo Postgres, porta 3100). |
 | `FIGMA_TOKEN`, `FIGMA_FILE_KEY` | Opcionais, só para scripts de extração do design.                                        |
@@ -210,7 +210,7 @@ O `src/proxy.ts` protege `/admin/**` (exige ADMIN) e `/meus-horarios/**` (exige 
 | `/admin/clientes/[id]`   | —             | Ficha: KPIs, histórico, anotações, contato                                                                                                                               |
 | `/admin/bio`             | —             | Editar página pública com prévia ao vivo                                                                                                                                 |
 | `/admin/fundos`          | —             | Fotos e vídeos de fundo: biblioteca (upload) e qual mídia aparece em cada tela, com véu por tela                                                                         |
-| `/api/cron/reminders`    | —             | Envia os lembretes de e-mail vencidos (Vercel Cron diário às 09:00 UTC / 06:00 em São Paulo, `vercel.json`)                                                              |
+| `/api/cron/reminders`    | —             | Cancela lembretes de e-mail antigos, sem enviar mensagens à cliente (Vercel Cron diário, `vercel.json`)                                                                  |
 | `/manifest.webmanifest`  | —             | Manifest do PWA (nome do estúdio lido do banco); `/offline` é a tela sem conexão do service worker                                                                       |
 | `/admin/mais`            | —             | Item "Mais" da barra inferior no celular (portfólio, clientes, bio, fundos, sair)                                                                                        |
 
@@ -238,15 +238,17 @@ O `src/proxy.ts` protege `/admin/**` (exige ADMIN) e `/meus-horarios/**` (exige 
 ## Lembretes (confirmação, 24 h e 2 h)
 
 Ao criar ou remarcar um agendamento, `bookAppointment` chama `scheduleReminders`, que cria um
-`Reminder` por canal da cliente (e-mail e/ou WhatsApp) e por tipo: confirmação (vence na hora),
+`Reminder` de WhatsApp por tipo: confirmação (vence na hora),
 24 h e 2 h antes (só se ainda cabem). Cancelar, concluir ou marcar falta cancela os pendentes;
 reabrir volta a agendá-los (`src/features/reminders`).
 
-- **E-mail**: `GET /api/cron/reminders` envia os vencidos via Resend (`RESEND_API_KEY`); sem chave,
-  um notificador de console registra no log e marca como enviado, para testar em dev. Na Vercel o
-  cron vem de `vercel.json`; fora dela, chame a rota com `Authorization: Bearer $CRON_SECRET`.
-- **WhatsApp**: ainda sem provedor (decisão pendente no plano). O painel de detalhe do agendamento
-  lista os lembretes e, para os de WhatsApp, oferece o link `wa.me` com o texto pronto e o botão
+- **E-mail**: não é solicitado no cadastro nem aceito no login da cliente. O acesso usa WhatsApp
+  com DDD e senha; a recuperação continua por link manual solicitado ao studio. E-mails antigos
+  permanecem no banco para preservar os dados, mas não são usados nesses fluxos. O admin mantém
+  e-mail e senha. `GET /api/cron/reminders` apenas cancela lembretes de e-mail antigos pendentes
+  ou com falha, preservando o histórico de mensagens já enviadas.
+- **WhatsApp**: envio manual. O painel de detalhe do agendamento
+  lista os lembretes e oferece o link `wa.me` com o texto pronto e o botão
   "Marcar enviado".
 - Os textos ficam em `templates.ts` (funções puras, com testes) e os botões apontam para o
   comprovante com o token de gerenciamento, onde a cliente remarca ou cancela sem cadastro.
@@ -266,12 +268,9 @@ reabrir volta a agendá-los (`src/features/reminders`).
 A frequência diária atende ao limite do plano Hobby e substitui a configuração anterior de
 15 minutos, que impedia o deploy. Consulte os [limites oficiais do cron](https://vercel.com/docs/cron-jobs/usage-and-pricing).
 
-Cada execução processa até 50 e-mails vencidos. A confirmação pode aguardar a próxima rodada;
-os lembretes de 24 h e 2 h não têm garantia de envio no horário previsto. Lembretes desses dois
-tipos são cancelados se o atendimento já começou. O cron diário é uma configuração temporária
-para testes; envio pontual depende de um agendador mais frequente antes do uso com clientes reais.
-Sem `RESEND_API_KEY`, o envio é simulado no log e ainda assim marcado como enviado; isso não
-comprova entrega de e-mail.
+O cron cancela lembretes antigos de e-mail com status agendado ou falhou, inclusive os futuros.
+Ele não envia mensagens nem altera lembretes de WhatsApp. O envio de WhatsApp depende da
+profissional abrir a conversa e confirmar manualmente no painel.
 
 ## Fundos das telas (fotos e vídeos)
 
@@ -426,7 +425,7 @@ variáveis de ambiente:
 | `AUTH_TRUST_HOST`       | `true`                                                                                                                        |
 | `TZ`                    | `America/Sao_Paulo`                                                                                                           |
 | `BLOB_READ_WRITE_TOKEN` | Criado ao conectar um **Blob store** ao projeto (Storage → Blob); sem ele os uploads tentam gravar no disco, que não persiste |
-| `RESEND_API_KEY`        | Chave do Resend; sem ela os lembretes por e-mail só aparecem no log                                                           |
+| `RESEND_API_KEY`        | Infraestrutura de e-mail reservada ao admin; não usada nos fluxos da cliente                                                  |
 | `EMAIL_FROM`            | Remetente com domínio verificado no Resend, ex.: `Letícia Fagundes <agenda@seudominio.com.br>`                                |
 | `CRON_SECRET`           | Qualquer segredo longo; a Vercel envia no `Authorization` das chamadas do cron                                                |
 
@@ -458,7 +457,7 @@ Aponte o domínio na Vercel e atualize `AUTH_URL`. O manifest (`/manifest.webman
 - `/` carrega com o fundo e os serviços; `/admin/entrar` aceita a conta criada.
 - Uma foto enviada no portfólio abre a partir de `*.public.blob.vercel-storage.com`.
 - `curl -H "Authorization: Bearer $CRON_SECRET" https://.../api/cron/reminders` responde `{"ok":true,...}`.
-- Com `RESEND_API_KEY`, um agendamento de cliente com e-mail recebe a confirmação.
+- `/entrar` aceita WhatsApp e senha; `/cadastro` não solicita e-mail e os lembretes são manuais pelo WhatsApp.
 
 ### Pendências de produto
 

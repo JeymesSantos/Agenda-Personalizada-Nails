@@ -10,7 +10,7 @@ import { readInvitation } from "./invitation"
 import { Prisma } from "@/generated/prisma/client"
 import { signIn, signOut } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
-import { loginSchema, registerSchema, safeNext, type FormState } from "./schemas"
+import { clientLoginSchema, loginSchema, registerSchema, safeNext, type FormState } from "./schemas"
 
 function formValues(formData: FormData, keys: string[]) {
   return Object.fromEntries(keys.map((k) => [k, String(formData.get(k) ?? "")]))
@@ -21,9 +21,10 @@ async function loginWith(
   fallback: string,
   formData: FormData,
 ): Promise<FormState> {
-  const values = formValues(formData, ["email", "next"])
-  const parsed = loginSchema.safeParse({
+  const values = formValues(formData, [role === "ADMIN" ? "email" : "whatsapp", "next"])
+  const parsed = (role === "ADMIN" ? loginSchema : clientLoginSchema).safeParse({
     email: formData.get("email"),
+    whatsapp: formData.get("whatsapp"),
     password: formData.get("password"),
     next: formData.get("next") || undefined,
   })
@@ -33,15 +34,17 @@ async function loginWith(
 
   try {
     await signIn("credentials", {
-      email: parsed.data.email,
-      password: parsed.data.password,
+      ...parsed.data,
       role,
       redirectTo: safeNext(parsed.data.next, fallback),
     })
   } catch (error) {
     if (isRedirectError(error)) throw error
     if (error instanceof AuthError) {
-      return { error: "E-mail ou senha incorretos.", values }
+      return {
+        error: role === "ADMIN" ? "E-mail ou senha incorretos." : "WhatsApp ou senha incorretos.",
+        values,
+      }
     }
     throw error
   }
@@ -57,11 +60,10 @@ export async function loginAdminAction(_prev: FormState, formData: FormData): Pr
 }
 
 export async function registerAction(_prev: FormState, formData: FormData): Promise<FormState> {
-  const values = formValues(formData, ["name", "whatsapp", "email", "next"])
+  const values = formValues(formData, ["name", "whatsapp", "next"])
   const parsed = registerSchema.safeParse({
     name: formData.get("name"),
     whatsapp: formData.get("whatsapp"),
-    email: formData.get("email"),
     password: formData.get("password"),
     confirm: formData.get("confirm"),
     next: formData.get("next") || undefined,
@@ -69,7 +71,7 @@ export async function registerAction(_prev: FormState, formData: FormData): Prom
   if (!parsed.success) {
     return { fieldErrors: parsed.error.flatten().fieldErrors, values }
   }
-  const { name, whatsapp, email, password, next } = parsed.data
+  const { name, whatsapp, password, next } = parsed.data
   const invitation = String(formData.get("invitation") ?? "")
   const invitedId = invitation ? readInvitation(invitation) : null
   if (invitation && !invitedId)
@@ -101,13 +103,6 @@ export async function registerAction(_prev: FormState, formData: FormData): Prom
   }
 
   const existingClient = invited ?? existingByWhatsapp
-  const existingEmail = await prisma.user.findUnique({ where: { email } })
-  if (existingEmail && existingEmail.id !== existingClient?.id) {
-    return {
-      fieldErrors: { email: ["Já existe uma conta com esse e-mail. Entre para continuar."] },
-      values,
-    }
-  }
 
   /* Quem agendou sem conta pode definir sua senha no mesmo registro, sem convite. */
   const passwordHash = await bcrypt.hash(password, 10)
@@ -119,9 +114,8 @@ export async function registerAction(_prev: FormState, formData: FormData): Prom
           role: "CLIENT",
           passwordHash: null,
           whatsapp,
-          email: existingClient.email,
         },
-        data: { name, email, passwordHash },
+        data: { name, passwordHash },
       })
       if (updated.count !== 1)
         return {
@@ -129,10 +123,10 @@ export async function registerAction(_prev: FormState, formData: FormData): Prom
           values,
         }
     } else {
-      await prisma.user.create({ data: { name, whatsapp, email, passwordHash, role: "CLIENT" } })
+      await prisma.user.create({ data: { name, whatsapp, passwordHash, role: "CLIENT" } })
     }
   } catch (error) {
-    /* Outra solicitação pode ter usado o e-mail/WhatsApp após as consultas acima. */
+    /* Outra solicitação pode ter usado o WhatsApp após as consultas acima. */
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
       return {
         error: "Não foi possível criar a conta com esses dados. Entre ou fale com o studio.",
@@ -145,7 +139,7 @@ export async function registerAction(_prev: FormState, formData: FormData): Prom
   revalidatePath("/admin/clientes")
   try {
     await signIn("credentials", {
-      email,
+      whatsapp,
       password,
       role: "CLIENT",
       redirectTo: safeNext(next, "/meus-horarios"),

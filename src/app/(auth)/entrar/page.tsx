@@ -16,7 +16,7 @@ export default async function EntrarPage({ searchParams }: PageProps<"/entrar">)
     <AuthShell
       eyebrow="Área da cliente"
       title="Entrar"
-      description="Acesse seus horários, remarque com um toque e guarde seu histórico."
+      description="Entre com seu WhatsApp e senha para acessar seus horários e histórico."
       footer={
         <>
           Ainda não tem conta?{" "}

@@ -28,7 +28,7 @@ describe.skipIf(!process.env.DATABASE_URL)("identidade e acesso aos agendamentos
   const guestEmail = `guest-${stamp}@example.test`
   const email = (suffix: string) => `account-${suffix}-${stamp}@example.test`
   const phone = (suffix: number) =>
-    `118${String(Date.now()).slice(-6)}${suffix.toString().padStart(2, "0")}`
+    `118${stamp.split("-")[0].slice(-6)}${suffix.toString().padStart(2, "0")}`
   const originalPhone = phone(0)
   const freePhone = phone(1)
   let guestId: string
@@ -41,7 +41,6 @@ describe.skipIf(!process.env.DATABASE_URL)("identidade e acesso aos agendamentos
     for (const [key, value] of Object.entries({
       name: "Nova cliente",
       whatsapp: freePhone,
-      email: email("new"),
       password: "senha-teste-123",
       confirm: "senha-teste-123",
       ...overrides,
@@ -94,7 +93,13 @@ describe.skipIf(!process.env.DATABASE_URL)("identidade e acesso aos agendamentos
   afterAll(async () => {
     if (guestId) await prisma.appointment.deleteMany({ where: { clientId: guestId } })
     await prisma.user.deleteMany({
-      where: { OR: [{ id: guestId }, { email: { endsWith: `${stamp}@example.test` } }] },
+      where: {
+        OR: [
+          { id: guestId },
+          { whatsapp: { in: [freePhone, phone(5)] } },
+          { email: { endsWith: `${stamp}@example.test` } },
+        ],
+      },
     })
     await prisma.$disconnect()
   })
@@ -194,9 +199,11 @@ describe.skipIf(!process.env.DATABASE_URL)("identidade e acesso aos agendamentos
   })
 
   it("não incorpora um registro sem senha pelo e-mail", async () => {
-    const result = await registerAction({}, registration({ email: guestEmail }))
-    expect(result.fieldErrors?.email).toBeDefined()
-    expect(signIn).not.toHaveBeenCalled()
+    const result = await registerAction({}, registration({ whatsapp: phone(5), email: guestEmail }))
+    expect(result).toEqual({})
+    const account = await prisma.user.findUniqueOrThrow({ where: { whatsapp: phone(5) } })
+    expect(account.id).not.toBe(guestId)
+    expect(account.email).toBeNull()
     expect(
       (await prisma.user.findUniqueOrThrow({ where: { id: guestId } })).passwordHash,
     ).toBeNull()
@@ -211,6 +218,7 @@ describe.skipIf(!process.env.DATABASE_URL)("identidade e acesso aos agendamentos
     expect(results.filter((r) => r.error || r.fieldErrors)).toHaveLength(1)
     expect(signIn).toHaveBeenCalledTimes(1)
     const account = await prisma.user.findUniqueOrThrow({ where: { whatsapp: freePhone } })
+    expect(account.email).toBeNull()
     expect(account.role).toBe("CLIENT")
     expect(account.id).not.toBe(guestId)
     expect(await bcrypt.compare("senha-teste-123", account.passwordHash!)).toBe(true)
@@ -279,7 +287,7 @@ describe.skipIf(!process.env.DATABASE_URL)("identidade e acesso aos agendamentos
     )
     expect(result).toEqual({})
     const account = await prisma.user.findUniqueOrThrow({ where: { id: guestId } })
-    expect(account.email).toBe(email("invited"))
+    expect(account.email).toBe(guestEmail)
     expect(await bcrypt.compare("senha-teste-123", account.passwordHash!)).toBe(true)
     expect(await prisma.appointment.count({ where: { clientId: guestId } })).toBe(2)
     expect(

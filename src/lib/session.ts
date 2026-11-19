@@ -26,7 +26,12 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
     select: { id: true, name: true, email: true, role: true },
   })
   if (!user) return null
-  return { id: user.id, name: user.name, email: user.email, role: user.role }
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.role === "ADMIN" ? user.email : null,
+    role: user.role,
+  }
 }
 
 async function hasStaleSession(): Promise<boolean> {
