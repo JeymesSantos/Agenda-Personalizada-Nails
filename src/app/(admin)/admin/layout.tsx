@@ -1,6 +1,7 @@
 import { BottomNav } from "@/components/layout/bottom-nav"
 import { BackgroundSlideshow } from "@/components/layout/background-slideshow"
 import { Sidebar } from "@/components/layout/sidebar"
+import { InstallApp } from "@/components/pwa/install-app"
 import { adminBottomNavItems, adminSidebarItems } from "@/features/admin/nav"
 import { getAreaBackgrounds } from "@/features/backgrounds/queries"
 import { signOutAdminAction } from "@/features/auth/actions"
@@ -29,7 +30,10 @@ export default async function AdminLayout({ children }: LayoutProps<"/admin">) {
         onSignOut={signOutAdminAction}
         className="sticky top-0 h-dvh"
       />
-      <div className="flex min-w-0 flex-1 flex-col pb-24 lg:pb-0">{children}</div>
+      <div className="flex min-w-0 flex-1 flex-col pb-24 lg:pb-0">
+        {children}
+        <InstallApp />
+      </div>
       <BottomNav items={adminBottomNavItems} />
     </div>
   )
