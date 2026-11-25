@@ -1,11 +1,11 @@
 # CI (Fase D4): lint, formatação, typecheck, testes unitários e de integração
 # (Postgres como service container) e a jornada ponta a ponta com Playwright.
-# Roda em pull requests e em push na main.
+# Roda em pull requests e em push na main e na staging.
 name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, staging]
   pull_request:
 
 concurrency:

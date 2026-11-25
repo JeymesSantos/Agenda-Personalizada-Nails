@@ -373,7 +373,7 @@ agendamento pelo link com token. Cada passo também confere o banco.
 
 ## CI (GitHub Actions)
 
-`.github/workflows/ci.yml` roda em pull requests e em push na `main`: instala com pnpm (cache),
+`.github/workflows/ci.yml` roda em pull requests e em push na `main` e na `staging`: instala com pnpm (cache),
 `lint`, `format:check`, `typecheck`, migra e semeia um Postgres de service container, `test`
 (unitários + integração) e `test:e2e` (Playwright faz build e sobe a app na porta 3100 contra o
 banco de teste). Em falha do e2e, o relatório e os traces sobem como artefato `playwright-report`.
@@ -384,6 +384,33 @@ Execuções em sequência no mesmo branch cancelam a anterior.
 Produção prevista no plano: **Vercel** (app, cron e Blob), **Neon** (Postgres) e **Resend**
 (e-mails). Qualquer Postgres acessível pela internet serve no lugar do Neon (Supabase, por
 exemplo); o resto não muda.
+
+### Fluxo de homologação e produção
+
+O fluxo de entrega é **branch de funcionalidade → PR para `staging` → validação e aprovação →
+PR de `staging` para `main`**. Novas branches de trabalho partem de `staging` atualizada.
+A CI valida pull requests e pushes em `staging` e `main`.
+
+- `staging`: homologação fixa na Vercel, no ambiente Preview, com o banco existente
+  `minhaagenda_preview` da branch `preview-homologacao` do Neon. É separado de produção.
+- `main`: produção, usando exclusivamente as variáveis e o banco de Production.
+- Branches de funcionalidade: desenvolvimento local e CI nas PRs. Os deploys automáticos
+  da Vercel ficam limitados a `staging` e `main` em `vercel.json`.
+
+Configure `DATABASE_URL`, `DATABASE_URL_UNPOOLED`, `AUTH_SECRET`, `AUTH_TRUST_HOST`,
+`AUTH_URL` e `CRON_SECRET` em **Preview, somente para a branch Git `staging`**.
+`AUTH_URL` deve apontar para a URL fixa de homologação atribuída pela Vercel.
+Valores reais e arquivos locais de ambiente não entram no Git.
+
+O merge em `staging` atualiza a homologação. Depois de conferir a CI, o deploy e o
+comportamento nessa URL, obtenha aprovação antes de fazer o merge em `main`, que publica
+em produção. Não execute o seed como parte desse fluxo: ele limpa dados e fica restrito
+a bancos descartáveis explicitamente autorizados.
+
+Uma alteração de schema em homologação deve continuar compatível com o código de produção
+até a promoção: o build aplica migrations, e os dois ambientes usam bancos diferentes.
+Se houver necessidade de Preview exclusivo para uma funcionalidade, configure banco e
+variáveis isolados antes de habilitar o deploy dessa branch.
 
 ### 1. Banco
 
