@@ -395,7 +395,8 @@ A CI valida pull requests e pushes em `staging` e `main`.
   `minhaagenda_preview` da branch `preview-homologacao` do Neon. É separado de produção.
 - `main`: produção, usando exclusivamente as variáveis e o banco de Production.
 - Branches de funcionalidade: desenvolvimento local e CI nas PRs. Os deploys automáticos
-  da Vercel ficam limitados a `staging` e `main` em `vercel.json`.
+  da Vercel ficam limitados a `staging` e `main` em `vercel.json`. O `ignoreCommand` também
+  interrompe builds de outras branches antes da instalação de dependências.
 
 Configure `DATABASE_URL`, `DATABASE_URL_UNPOOLED`, `AUTH_SECRET`, `AUTH_TRUST_HOST`,
 `AUTH_URL` e `CRON_SECRET` em **Preview, somente para a branch Git `staging`**.
