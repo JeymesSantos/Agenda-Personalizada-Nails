@@ -3,6 +3,7 @@ import Link from "next/link"
 import { redirect } from "next/navigation"
 
 import { PageHeader } from "@/components/layout/page-header"
+import { InstallCard } from "@/components/pwa/install-ui"
 import { Button } from "@/components/ui/button"
 import { EmptyState } from "@/components/ui/empty-state"
 import { InfoBox } from "@/components/ui/info-box"
@@ -43,6 +44,8 @@ export default async function MeusHorariosPage({ searchParams }: PageProps<"/meu
           ) : undefined
         }
       />
+
+      <InstallCard />
 
       <Tabs defaultValue="proximos">
         <TabsList className="w-full">

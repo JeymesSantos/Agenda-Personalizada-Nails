@@ -1,12 +1,16 @@
 import { BottomNav } from "@/components/layout/bottom-nav"
 import { BackgroundSlideshow } from "@/components/layout/background-slideshow"
 import { Sidebar } from "@/components/layout/sidebar"
-import { InstallApp } from "@/components/pwa/install-app"
 import { adminBottomNavItems, adminSidebarItems } from "@/features/admin/nav"
 import { getAreaBackgrounds } from "@/features/backgrounds/queries"
 import { signOutAdminAction } from "@/features/auth/actions"
 import { prisma } from "@/lib/prisma"
 import { requireAdmin } from "@/lib/session"
+
+export const metadata = {
+  manifest: "/painel.webmanifest",
+  appleWebApp: { capable: true, title: "Painel da profissional", statusBarStyle: "black" as const },
+}
 
 /*
  * Moldura do painel: mídias de fundo (escolhidas por tela em /admin/fundos),
@@ -30,10 +34,7 @@ export default async function AdminLayout({ children }: LayoutProps<"/admin">) {
         onSignOut={signOutAdminAction}
         className="sticky top-0 h-dvh"
       />
-      <div className="flex min-w-0 flex-1 flex-col pb-24 lg:pb-0">
-        {children}
-        <InstallApp />
-      </div>
+      <div className="flex min-w-0 flex-1 flex-col pb-24 lg:pb-0">{children}</div>
       <BottomNav items={adminBottomNavItems} />
     </div>
   )

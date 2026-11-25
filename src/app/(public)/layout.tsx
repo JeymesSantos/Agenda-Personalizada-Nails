@@ -4,7 +4,6 @@ import { AtSignIcon, MessageCircleIcon } from "lucide-react"
 import { BottomNav } from "@/components/layout/bottom-nav"
 import { BackgroundSlideshow } from "@/components/layout/background-slideshow"
 import { PublicHeader } from "@/components/layout/public-header"
-import { InstallApp } from "@/components/pwa/install-app"
 import { Button } from "@/components/ui/button"
 import { SignOutButton } from "@/features/auth/components/sign-out-button"
 import { getAreaBackgrounds } from "@/features/backgrounds/queries"
@@ -40,10 +39,7 @@ export default async function PublicLayout({ children }: LayoutProps<"/">) {
           )
         }
       />
-      <div className="flex flex-1 flex-col pb-24 lg:pb-0">
-        {children}
-        <InstallApp />
-      </div>
+      <div className="flex flex-1 flex-col pb-24 lg:pb-0">{children}</div>
       <footer className="border-subtle type-body text-secondary-txt hidden items-center justify-between border-t px-10 py-8 lg:flex xl:px-20">
         <p>{[b.addressLine, b.neighborhood, b.hoursSummary].filter(Boolean).join(" · ")}</p>
         <div className="flex items-center gap-8">

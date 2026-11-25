@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next"
 import { DM_Sans, Montserrat } from "next/font/google"
+import { InstallProvider } from "@/components/pwa/install-provider"
 import { ServiceWorkerRegister } from "@/components/pwa/service-worker-register"
 import { Toaster } from "@/components/ui/sonner"
 import { cn } from "@/lib/utils"
@@ -50,7 +51,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="pt-BR" className={cn("dark h-full", dmSans.variable, montserrat.variable)}>
       <body className="flex min-h-full flex-col">
-        {children}
+        <InstallProvider>{children}</InstallProvider>
         <Toaster />
         <ServiceWorkerRegister />
       </body>
