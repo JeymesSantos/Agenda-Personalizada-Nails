@@ -7,6 +7,11 @@ import { signOutAdminAction } from "@/features/auth/actions"
 import { prisma } from "@/lib/prisma"
 import { requireAdmin } from "@/lib/session"
 
+export const metadata = {
+  manifest: "/painel.webmanifest",
+  appleWebApp: { capable: true, title: "Painel da profissional", statusBarStyle: "black" as const },
+}
+
 /*
  * Moldura do painel: mídias de fundo (escolhidas por tela em /admin/fundos),
  * sidebar translúcida no desktop e barra inferior no celular.

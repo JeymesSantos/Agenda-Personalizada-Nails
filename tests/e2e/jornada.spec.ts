@@ -1,4 +1,4 @@
-import { expect, test, type Browser } from "@playwright/test"
+import { expect, test, type Browser, type Page } from "@playwright/test"
 
 import { kpiValue, loginAdmin, parseReais, TestDb, workdayAhead } from "./helpers"
 
@@ -13,17 +13,38 @@ const SERVICE_TITLE = `Spa das mãos ${stamp}`
 const SERVICE_PRICE_CENTS = 15_000
 const CLIENT = { name: `Cliente E2E ${stamp}`, whatsapp: `1198${stamp}1` }
 const BLOCK_REASON = `Tarde bloqueada pelo e2e ${stamp}`
-const DAY = workdayAhead(30)
 
 const db = new TestDb()
 test.afterAll(async () => {
   await db.close()
 })
 
-async function bookAsGuest(browser: Browser, serviceId: string) {
+async function chooseBookingDay(page: Page, serviceId: string, occupiedMin: number) {
+  const checked = new Set<string>()
+  // Consulta os horários reais; dois atendimentos precisam caber antes do bloqueio das 12h.
+  for (let ahead = 2; ahead <= 60; ahead++) {
+    const day = workdayAhead(ahead)
+    if (checked.has(day)) continue
+    checked.add(day)
+    await page.goto(`/agendar/${serviceId}/horario?data=${day}`)
+    await expect(page.getByRole("heading", { name: "Escolha o dia e o horário" })).toBeVisible()
+    const labels = await page.getByRole("button", { name: /^\d{2}:\d{2}$/ }).allTextContents()
+    const starts = labels
+      .map((label) => {
+        const [hour, minute] = label.trim().split(":").map(Number)
+        return hour * 60 + minute
+      })
+      .filter((start) => start + occupiedMin <= 12 * 60)
+      .sort((a, b) => a - b)
+    if (starts.length >= 2 && starts.at(-1)! - starts[0] >= occupiedMin) return day
+  }
+  throw new Error("Nenhum dia nos próximos 60 dias comporta dois atendimentos antes das 12h")
+}
+
+async function bookAsGuest(browser: Browser, serviceId: string, day: string) {
   const context = await browser.newContext()
   const page = await context.newPage()
-  await page.goto(`/agendar/${serviceId}/horario?data=${DAY}`)
+  await page.goto(`/agendar/${serviceId}/horario?data=${day}`)
   /* a tarde foi bloqueada: só horários da manhã */
   /* o passo 2 renderiza a lista duas vezes (celular oculto + desktop): só a visível conta */
   await expect(page.getByText("Manhã").locator("visible=true").first()).toBeVisible()
@@ -52,6 +73,7 @@ test("jornada completa: serviço → bloqueio → agendamento → conclusão →
   let serviceId = ""
   let revenueBefore = 0
   let firstCode = ""
+  let day = ""
 
   await test.step("admin cria um serviço", async () => {
     await loginAdmin(page)
@@ -67,12 +89,30 @@ test("jornada completa: serviço → bloqueio → agendamento → conclusão →
     serviceId = service!.id
   })
 
+  await test.step("escolhe um dia com espaço para dois atendimentos de manhã", async () => {
+    const service = await db.one<{ durationMin: number; bufferMin: number }>(
+      'select "durationMin", "bufferMin" from "Service" where id = $1',
+      [serviceId],
+    )
+    expect(service).not.toBeNull()
+    const context = await browser.newContext()
+    try {
+      day = await chooseBookingDay(
+        await context.newPage(),
+        serviceId,
+        service!.durationMin + service!.bufferMin,
+      )
+    } finally {
+      await context.close()
+    }
+  })
+
   await test.step("admin bloqueia a tarde do dia escolhido", async () => {
     await page.goto("/admin/disponibilidade?bloquear=1")
     const dialog = page.getByRole("dialog", { name: "Bloquear ou liberar horários" })
     await expect(dialog).toBeVisible()
     await dialog.getByRole("button", { name: "Faixa de horário" }).click()
-    await dialog.locator('input[name="startDate"]').fill(DAY)
+    await dialog.locator('input[name="startDate"]').fill(day)
     await dialog.locator('input[name="startTime"]').fill("12:00")
     await dialog.locator('input[name="endTime"]').fill("19:00")
     await dialog.locator('input[name="reason"]').fill(BLOCK_REASON)
@@ -87,7 +127,7 @@ test("jornada completa: serviço → bloqueio → agendamento → conclusão →
   })
 
   await test.step("cliente sem cadastro agenda de manhã", async () => {
-    const booking = await bookAsGuest(browser, serviceId)
+    const booking = await bookAsGuest(browser, serviceId, day)
     firstCode = booking.code
     await booking.context.close()
     const a = await db.appointmentByCode(firstCode)
@@ -100,7 +140,7 @@ test("jornada completa: serviço → bloqueio → agendamento → conclusão →
 
   await test.step("admin conclui o atendimento", async () => {
     const a = await db.appointmentByCode(firstCode)
-    await page.goto(`/admin/agenda?visao=dia&data=${DAY}&agendamento=${a!.id}`)
+    await page.goto(`/admin/agenda?visao=dia&data=${day}&agendamento=${a!.id}`)
     await expect(page.getByRole("heading", { name: "Detalhe do agendamento" })).toBeVisible()
     await expect(page.getByText(CLIENT.name).first()).toBeVisible()
     await page.getByRole("button", { name: "Marcar como concluído" }).click()
@@ -115,7 +155,7 @@ test("jornada completa: serviço → bloqueio → agendamento → conclusão →
   })
 
   await test.step("cliente cancela outro agendamento pelo link com token", async () => {
-    const booking = await bookAsGuest(browser, serviceId)
+    const booking = await bookAsGuest(browser, serviceId, day)
     const { page: client, token, code } = booking
     await client.goto(`/meus-horarios?t=${token}`)
     const card = client

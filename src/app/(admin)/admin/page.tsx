@@ -11,6 +11,7 @@ import {
   WalletIcon,
 } from "lucide-react"
 
+import { InstallCard } from "@/components/pwa/install-ui"
 import { Button } from "@/components/ui/button"
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { KpiCard } from "@/components/ui/kpi-card"
@@ -69,6 +70,8 @@ export default async function DashboardPage({ searchParams }: PageProps<"/admin"
           <BellIcon />
         </Button>
       </header>
+
+      <InstallCard className="lg:hidden" />
 
       {/* Cabeçalho desktop (A1) */}
       <header className="hidden items-start justify-between gap-6 lg:flex">

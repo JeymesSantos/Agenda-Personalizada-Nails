@@ -69,6 +69,18 @@ As skills locais complementam estas regras e não podem dispensá-las.
 - No Windows, prefira PowerShell e caminhos literais. Não presuma Bash, WSL, Python ou CLIs
   adicionais disponíveis; verifique antes de usá-los.
 
+## Fluxo de entrega
+
+- Novas branches de funcionalidade partem de `staging` atualizada; suas PRs têm `staging`
+  como destino. Depois da CI e da validação do usuário na homologação, abra a PR de
+  `staging` para `main`.
+- `staging` usa o ambiente Preview da Vercel e o banco de homologação existente, separado
+  de produção. `main` usa Production. Deploys automáticos ficam limitados a essas branches.
+- Configure variáveis fixas de homologação no escopo Git `staging`; não reutilize segredos
+  ou banco de produção em Preview. Preview de funcionalidade exige configuração isolada.
+- Aprovação para criar ou atualizar homologação não autoriza merge em `main`. A promoção
+  para produção exige autorização na conversa, conforme as regras acima.
+
 ## Arquitetura e limites
 
 - `src/app/`: rotas e composição; grupos `(public)`, `(auth)` e `(admin)`.

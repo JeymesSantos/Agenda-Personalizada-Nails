@@ -20,7 +20,7 @@
     "db:reset": "prisma migrate reset --force",
     "db:studio": "prisma studio",
     "admin:create": "tsx scripts/create-admin.ts",
-    "build:vercel": "prisma migrate deploy && next build",
+    "build:vercel": "prisma generate && prisma migrate deploy && next build",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
