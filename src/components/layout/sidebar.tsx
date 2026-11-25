@@ -7,6 +7,8 @@ import { usePathname } from "next/navigation"
 import { cn } from "cn"
 import { LogOutIcon, SparklesIcon } from "lucide-react"
 
+import { InstallNavItem } from "@/components/pwa/install-ui"
+
 import { isNavItemActive, type NavMatch } from "./nav-match"
 
 export type SidebarItem = NavMatch & {
@@ -83,6 +85,7 @@ function Sidebar({
           <SparklesIcon aria-hidden />
           Ver minha página pública
         </Link>
+        <InstallNavItem />
         <button
           type="button"
           onClick={() => void onSignOut?.()}

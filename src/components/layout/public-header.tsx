@@ -5,6 +5,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "cn"
+import { InstallButton } from "@/components/pwa/install-ui"
 import { Button } from "@/components/ui/button"
 
 export type PublicNavItem = { href: string; label: string }
@@ -40,18 +41,18 @@ function PublicHeader({
     <header
       data-slot="public-header"
       className={cn(
-        "border-subtle bg-background/60 hidden h-[88px] items-center border-b px-10 backdrop-blur-md lg:flex xl:px-20",
+        "border-subtle bg-background/60 hidden h-[88px] items-center gap-4 border-b px-6 backdrop-blur-md lg:flex xl:px-20",
         className,
       )}
       {...props}
     >
-      <Link href="/" className="flex items-center gap-4">
+      <Link href="/" className="flex max-w-[180px] shrink-0 items-center gap-4 xl:max-w-none">
         <Image src="/brand/logo-magenta.svg" alt="" width={40} height={40} className="size-10" />
         <span className="display-label text-foreground text-[13px] tracking-[0.25em]">
           {businessName}
         </span>
       </Link>
-      <nav aria-label="Páginas" className="ml-auto flex items-center gap-6 xl:gap-8">
+      <nav aria-label="Páginas" className="ml-auto flex items-center gap-3 xl:gap-8">
         {items.map((item) => {
           const active = current === item.href
           return (
@@ -68,6 +69,7 @@ function PublicHeader({
             </Link>
           )
         })}
+        <InstallButton className="max-lg:hidden" />
         <Button asChild className="ml-2">
           <Link href={ctaHref}>{ctaLabel}</Link>
         </Button>

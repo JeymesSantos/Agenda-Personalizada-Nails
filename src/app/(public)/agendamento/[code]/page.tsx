@@ -10,6 +10,7 @@ import {
   SparklesIcon,
 } from "lucide-react"
 
+import { InstallCard } from "@/components/pwa/install-ui"
 import { Button } from "@/components/ui/button"
 import { AppointmentNotices } from "@/components/ui/appointment-notices"
 import { SummaryList, SummaryRow } from "@/components/ui/summary-list"
@@ -82,6 +83,7 @@ export default async function AgendamentoPage({
         </SummaryRow>
       </SummaryList>
 
+      <InstallCard className="w-full text-left" />
       <AppointmentNotices items={a.notices} timezone={tz} />
       {active ? (
         <Button asChild variant="secondary" size="lg" className="w-full">
