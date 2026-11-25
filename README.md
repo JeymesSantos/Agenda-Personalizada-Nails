@@ -395,7 +395,8 @@ A CI valida pull requests e pushes em `staging` e `main`.
   `minhaagenda_preview` da branch `preview-homologacao` do Neon. É separado de produção.
 - `main`: produção, usando exclusivamente as variáveis e o banco de Production.
 - Branches de funcionalidade: desenvolvimento local e CI nas PRs. Os deploys automáticos
-  da Vercel ficam limitados a `staging` e `main` em `vercel.json`.
+  da Vercel ficam limitados a `staging` e `main` em `vercel.json`. O `ignoreCommand` também
+  interrompe builds de outras branches antes da instalação de dependências.
 
 Configure `DATABASE_URL`, `DATABASE_URL_UNPOOLED`, `AUTH_SECRET`, `AUTH_TRUST_HOST`,
 `AUTH_URL` e `CRON_SECRET` em **Preview, somente para a branch Git `staging`**.
@@ -433,8 +434,9 @@ Production. Para previews, use uma branch própria. O banco novo recebe somente
 as migrations, sem dados de demonstração; a criação da primeira conta é descrita
 no passo 3 abaixo.
 
-As migrations rodam no build da Vercel (`pnpm run build:vercel` = `prisma migrate deploy` +
-`next build`, definido em `vercel.json`). Se usar **Preview Deployments**, dê a eles um banco
+O build da Vercel gera o cliente Prisma antes de aplicar migrations e compilar o Next.js
+(`pnpm run build:vercel` = `prisma generate` + `prisma migrate deploy` + `next build`, definido
+em `vercel.json`). Se usar **Preview Deployments**, dê a eles um banco
 próprio ou deixe `DATABASE_URL` só no ambiente Production, senão cada preview migra o banco
 de produção.
 
